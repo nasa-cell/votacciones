@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votaciones - Arreglos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../publico/estilos/estilos.css">
+<style>
+body{display:block}
+.hoja{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+.grupo{margin-bottom:40px}
+.grupo > h2{font-size:22px;margin-bottom:4px}
+.grupo > p{color:var(--suave);margin:0 0 16px}
+.opciones{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.opcion{background:#fff;border:1px solid var(--linea);border-radius:10px;overflow:hidden}
+.opcion > h3{font-size:15px;padding:10px 14px;background:#14213d;color:#fff}
+.opcion > h3 span{color:#f2a900;margin-right:6px}
+.opcion .demo{padding:14px}
+.opcion .nota{padding:0 14px 14px;font-size:13px;color:var(--suave)}
+.ahora > h3{background:#8f9bb8}
+
+/* Muestras de menú */
+.mini-panel{display:grid;grid-template-columns:150px 1fr;border:1px solid var(--linea);border-radius:8px;overflow:hidden;min-height:200px}
+.mini-cabeza{grid-column:1 / -1;background:#14213d;color:#fff;font-size:13px;font-weight:700;padding:9px 12px}
+.mini-cont{background:var(--fondo);padding:12px;font-size:13px;color:var(--suave)}
+.mini-cont b{display:block;color:var(--tinta);font-size:16px;margin-bottom:6px}
+.m{padding:10px;display:flex;flex-direction:column;gap:5px}
+.m a{padding:9px 10px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none}
+.m-ahora{background:#14213d}
+.m-ahora a{color:#c9d2ea}
+.m-ahora a.on{background:#fff;color:#1d3a8a;font-weight:800}
+.m1{background:#1d3a8a}
+.m1 a{color:#dbe4ff}
+.m1 a.on{background:#f2a900;color:#14213d;font-weight:800}
+.m2{background:#fff;border-right:2px solid #c6d2ef}
+.m2 a{color:#14213d}
+.m2 a.on{background:var(--marca-claro);color:#1d3a8a;font-weight:800;box-shadow:inset 4px 0 0 #1d3a8a}
+.m3{background:linear-gradient(180deg,#2a4bb0,#1d3a8a 60%,#162d6e)}
+.m3 a{color:#fff;display:flex;align-items:center;gap:8px}
+.m3 a i{font-style:normal;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:rgba(255,255,255,.16)}
+.m3 a.on{background:#fff;color:#1d3a8a;font-weight:800}
+.m3 a.on i{background:#1d3a8a;color:#fff}
+
+/* Muestras de foto */
+.fotos{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.fotos figure{margin:0;text-align:center;font-size:12px;color:var(--suave)}
+.circ{width:76px;height:76px;border-radius:50%;overflow:hidden;margin:0 auto 6px}
+.circ img{width:100%;height:100%}
+.cubre{border:3px solid #8f9bb8}.cubre img{object-fit:cover}
+.entera{background:#fff;border:3px solid #c8102e;display:grid;place-items:center}
+.entera img{object-fit:contain;width:84%;height:84%}
+.cuadro{width:96px;height:76px;border-radius:12px;background:#fff;border:2px solid var(--linea);display:grid;place-items:center;margin:0 auto 6px;padding:6px}
+.cuadro img{width:100%;height:100%;object-fit:contain;min-height:0}
+.ajuste{position:relative;width:150px;height:150px;border-radius:50%;overflow:hidden;margin:0 auto;border:3px solid #1d3a8a;background:#fff}
+.ajuste img{position:absolute;width:230px;left:-30px;top:30px}
+.zoom{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px}
+.zoom input{flex:1}
+
+/* Muestras de errores */
+.pista{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:6px}
+.pista.letras{background:#e3e9f8;color:#1d3a8a}
+.pista.numeros{background:#fff4dc;color:#7a4f10}
+.e1 .msg{display:flex;gap:6px;align-items:flex-start;color:#c8102e;font-size:13px;font-weight:700;margin-top:5px}
+.e2 .globo{position:relative;background:#c8102e;color:#fff;font-size:13px;font-weight:600;padding:8px 10px;border-radius:8px;margin-top:8px}
+.e2 .globo::before{content:"";position:absolute;top:-6px;left:18px;border:6px solid transparent;border-top:0;border-bottom-color:#c8102e}
+.e3 .resumen{border:2px solid #c8102e;background:#fff5f6;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+.e3 .resumen ul{margin:6px 0 0;padding-left:18px}
+.e3 .resumen a{color:#c8102e;font-weight:700}
+.barra-falta{height:6px;border-radius:99px;background:#e1e6f0;margin-top:5px;overflow:hidden}
+.barra-falta i{display:block;height:100%;background:#c8102e}
+.bien{color:#1f8a4c !important}
+</style>
+</head>
+<body>
+<header class="cabeza"><span>Votaciones · arreglos</span><span class="pill">Elija una opción de cada grupo</span></header>
+
+<div class="hoja">
+
+  <!-- ERRORES -->
+  <section class="grupo">
+    <h2>1 · Avisos de error y qué va en cada cuadro</h2>
+    <p>Cada cuadro dice arriba si lleva <b>solo letras</b> o <b>solo números</b>. Si escribe de menos, dice cuántas letras faltan y cuál es el mínimo. Si escribe un número en el nombre, avisa al momento.</p>
+    <div class="opciones">
+
+      <div class="opcion e1">
+        <h3><span>E1</span>Mensaje rojo debajo del cuadro</h3>
+        <div class="demo">
+          <div class="campo"><label>Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10 a 30</small></label>
+            <input class="input mal" value="María">
+            <div class="msg">⚠ Faltan 5 letras. Mínimo 10, ahora tiene 5.</div></div>
+          <div class="campo"><label>Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10 a 30</small></label>
+            <input class="input mal" value="Quispe 2">
+            <div class="msg">⚠ Aquí solo van letras. Quite el número «2».</div></div>
+          <div class="campo"><label>DNI <span class="req">*</span><span class="pista numeros">123 Solo números</span><small>8</small></label>
+            <input class="input mal" value="45879">
+            <div class="msg">⚠ Faltan 3 números. El DNI tiene 8, ahora tiene 5.</div></div>
+        </div>
+        <p class="nota">Simple y claro. El mensaje aparece al salir del cuadro o al apretar «Ingresar».</p>
+      </div>
+
+      <div class="opcion e2">
+        <h3><span>E2</span>Globo rojo + barrita de lo que falta</h3>
+        <div class="demo">
+          <div class="campo"><label>Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10 a 30</small></label>
+            <input class="input mal" value="María">
+            <div class="barra-falta"><i style="width:50%"></i></div>
+            <div class="globo">Faltan 5 letras (mínimo 10).</div></div>
+          <div class="campo"><label>Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10 a 30</small></label>
+            <input class="input mal" value="Quispe 2">
+            <div class="globo">Aquí solo van letras. Quite el «2».</div></div>
+          <div class="campo"><label>DNI <span class="req">*</span><span class="pista numeros">123 Solo números</span><small>8</small></label>
+            <input class="input" value="45879123">
+            <div class="barra-falta"><i style="width:100%;background:#1f8a4c"></i></div>
+            <div class="msg bien" style="font-size:13px;font-weight:700;margin-top:5px">✓ DNI completo</div></div>
+        </div>
+        <p class="nota">La barrita se llena mientras escribe: roja si falta, verde cuando está bien. Más llamativo.</p>
+      </div>
+
+      <div class="opcion e3">
+        <h3><span>E3</span>Lista arriba + mensaje en cada cuadro</h3>
+        <div class="demo">
+          <div class="resumen"><b>Revise 3 datos:</b>
+            <ul><li><a href="#">Nombre</a>: faltan 5 letras (mínimo 10).</li><li><a href="#">Apellido</a>: solo letras, quite el «2».</li><li><a href="#">DNI</a>: faltan 3 números (son 8).</li></ul></div>
+          <div class="campo"><label>Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span></label>
+            <input class="input mal" value="María"><div class="aviso-mal">Faltan 5 letras (mínimo 10).</div></div>
+          <div class="campo"><label>DNI <span class="req">*</span><span class="pista numeros">123 Solo números</span></label>
+            <input class="input mal" value="45879"><div class="aviso-mal">Faltan 3 números (son 8).</div></div>
+        </div>
+        <p class="nota">Arriba, todos los errores juntos; al tocar uno, lleva a ese cuadro. Bueno si hay varios errores a la vez.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOTO -->
+  <section class="grupo">
+    <h2>2 · Que el logo se acomode</h2>
+    <p>Hoy el logo se recorta para llenar el círculo y se pierden partes (mire «Ahora»). Opciones para que se vea entero o se pueda acomodar:</p>
+    <div class="opciones">
+      <div class="opcion ahora">
+        <h3>Ahora</h3>
+        <div class="demo fotos">
+          <figure><div class="circ cubre"><img class="logo-ej" alt=""></div>Se corta el texto</figure>
+        </div>
+      </div>
+      <div class="opcion">
+        <h3><span>F1</span>Entero dentro del círculo</h3>
+        <div class="demo fotos">
+          <figure><div class="circ entera"><img class="logo-ej" alt=""></div>Logo ancho</figure>
+          <figure><div class="circ entera" style="border-color:#1f8a4c"><img class="logo-alto" alt=""></div>Logo alto</figure>
+        </div>
+        <p class="nota">Se achica hasta caber completo, fondo blanco y borde del color del partido.</p>
+      </div>
+      <div class="opcion">
+        <h3><span>F2</span>Cuadro redondeado, logo entero</h3>
+        <div class="demo fotos">
+          <figure><div class="cuadro"><img class="logo-ej" alt=""></div>Logo ancho</figure>
+          <figure><div class="cuadro"><img class="logo-alto" alt=""></div>Logo alto</figure>
+        </div>
+        <p class="nota">Más espacio para logos anchos. Nada se corta.</p>
+      </div>
+      <div class="opcion">
+        <h3><span>F3</span>El admin lo acomoda al subirlo</h3>
+        <div class="demo">
+          <div class="ajuste"><img class="logo-ej" alt=""></div>
+          <div class="zoom">🔍− <input type="range" value="60" aria-label="Acercar"> 🔍+</div>
+          <p style="font-size:12px;color:var(--suave);text-align:center;margin:6px 0 0">Arrastre la foto para moverla · use la barra para acercar o alejar</p>
+        </div>
+        <p class="nota">Al subir el logo sale este cuadro: lo mueve con el dedo o el ratón, lo acerca o aleja, y guarda.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENÚ -->
+  <section class="grupo">
+    <h2>3 · Menú lateral del panel diferente de la cabecera</h2>
+    <p>Hoy el menú y la cabecera son del mismo azul oscuro y se confunden.</p>
+    <div class="opciones">
+      <div class="opcion ahora"><h3>Ahora</h3><div class="demo">
+        <div class="mini-panel"><div class="mini-cabeza">Panel del administrador</div>
+          <nav class="m m-ahora"><a class="on">➕ Inscribir</a><a>📊 Resultados</a><a>📢 Publicar</a></nav>
+          <div class="mini-cont"><b>Inscribir participante</b>…</div></div></div></div>
+
+      <div class="opcion"><h3><span>M1</span>Azul vivo y elegido en amarillo</h3><div class="demo">
+        <div class="mini-panel"><div class="mini-cabeza">Panel del administrador</div>
+          <nav class="m m1"><a class="on">➕ Inscribir</a><a>📊 Resultados</a><a>📢 Publicar</a></nav>
+          <div class="mini-cont"><b>Inscribir participante</b>…</div></div></div>
+        <p class="nota">Cabecera oscura, menú azul vivo. La sección abierta se pinta amarilla.</p></div>
+
+      <div class="opcion"><h3><span>M2</span>Menú claro con raya azul</h3><div class="demo">
+        <div class="mini-panel"><div class="mini-cabeza">Panel del administrador</div>
+          <nav class="m m2"><a class="on">➕ Inscribir</a><a>📊 Resultados</a><a>📢 Publicar</a></nav>
+          <div class="mini-cont"><b>Inscribir participante</b>…</div></div></div>
+        <p class="nota">Menú blanco, la sección abierta en celeste con raya azul a la izquierda. Más liviano.</p></div>
+
+      <div class="opcion"><h3><span>M3</span>Degradado azul con íconos en cuadritos</h3><div class="demo">
+        <div class="mini-panel"><div class="mini-cabeza">Panel del administrador</div>
+          <nav class="m m3"><a class="on"><i>➕</i>Inscribir</a><a><i>📊</i>Resultados</a><a><i>📢</i>Publicar</a></nav>
+          <div class="mini-cont"><b>Inscribir participante</b>…</div></div></div>
+        <p class="nota">Azul con brillo de arriba hacia abajo; cada ícono en su cuadrito.</p></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// Logos de ejemplo dibujados aquí mismo (uno ancho y uno alto) para ver cómo se acomodan.
+const ancho = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="120"><rect width="300" height="120" fill="#fff"/><circle cx="55" cy="60" r="40" fill="#1f8a4c"/><path d="M40 75 Q55 30 75 45 Q60 55 48 78Z" fill="#fff"/><text x="105" y="55" font-family="Arial" font-weight="900" font-size="30" fill="#c8102e">RENOVACIÓN</text><text x="105" y="92" font-family="Arial" font-weight="900" font-size="30" fill="#1f8a4c">VERDE</text></svg>`;
+const alto = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="220"><rect width="120" height="220" fill="#fff"/><polygon points="60,10 110,90 10,90" fill="#e39b00"/><text x="60" y="140" text-anchor="middle" font-family="Arial" font-weight="900" font-size="28" fill="#1d3a8a">SOL</text><text x="60" y="180" text-anchor="middle" font-family="Arial" font-weight="900" font-size="18" fill="#1d3a8a">NACIENTE</text></svg>`;
+const url = s => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+document.querySelectorAll('.logo-ej').forEach(i => i.src = url(ancho));
+document.querySelectorAll('.logo-alto').forEach(i => i.src = url(alto));
+</script>
+</body>
+</html>

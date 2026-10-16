@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elecciones 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos/estilos.css">
+</head>
+<body>
+<header class="cabeza"><span id="cabeza-titulo">Elecciones 2026</span><span class="pill" id="pill-estado">Cargando…</span><button class="btn-cabeza" type="button" id="btn-salir-final" hidden>← Salir</button></header>
+
+<main>
+  <!-- Registro -->
+  <section id="vista-registro" class="cuerpo" hidden>
+    <div class="centro">
+      <h1 class="titulo-pant">Registro</h1>
+      <p class="bajada">Escriba sus datos para poder votar.</p>
+      <div id="registro-error" class="caja-error" hidden role="alert"></div>
+      <form id="form-registro" novalidate>
+        <section class="seccion">
+          <h2 class="sec-tit"><span class="ic">1</span>Sus datos</h2>
+          <div class="sec-cuerpo">
+            <div class="campo">
+              <label for="r-nombre">Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10 a 30</small></label>
+              <input class="input" id="r-nombre" name="nombre" maxlength="30" autocomplete="given-name" required>
+              <span class="contador"></span>
+            </div>
+            <div class="campo">
+              <label for="r-apellido">Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10 a 30</small></label>
+              <input class="input" id="r-apellido" name="apellido" maxlength="30" autocomplete="family-name" required>
+              <span class="contador"></span>
+            </div>
+            <div class="campo">
+              <label for="r-dni">DNI <span class="req">*</span><span class="pista numeros">123 Solo números</span><small>8</small></label>
+              <input class="input" id="r-dni" name="dni" inputmode="numeric" maxlength="8" placeholder="Ej.: 45879123" autocomplete="off" required>
+            </div>
+          </div>
+        </section>
+        <button class="btn btn-pri" type="submit" id="btn-ingresar">Ingresar →</button>
+      </form>
+      <a class="enlace" href="admin.html">Entrar como administrador</a>
+    </div>
+  </section>
+
+  <!-- Votar -->
+  <section id="vista-votar" class="cuerpo" hidden>
+    <div class="ancho">
+      <h1 class="titulo-pant">Elija un partido</h1>
+      <p class="bajada">Toque una tarjeta. Solo puede votar una vez.</p>
+      <div id="votar-error" class="caja-error" hidden role="alert"></div>
+      <form id="form-votar">
+        <section class="seccion">
+          <h2 class="sec-tit"><span class="ic">✓</span>Partidos</h2>
+          <div class="sec-cuerpo">
+            <div class="campo" id="campo-buscar-partido" hidden><input class="input" id="buscar-partido" placeholder="🔍 Buscar partido o candidato" aria-label="Buscar partido"><span class="contador" id="cuenta-partidos"></span></div>
+            <div class="partidos" id="lista-partidos" role="radiogroup" aria-label="Partidos"></div>
+          </div>
+        </section>
+        <div class="votar-fijo"><button class="btn btn-verde" type="submit" id="btn-votar" disabled>Elija un partido para votar</button></div>
+      </form>
+      <button class="enlace" type="button" id="btn-cancelar-voto">Salir sin votar</button>
+    </div>
+  </section>
+
+  <!-- Gracias -->
+  <section id="vista-gracias" class="cuerpo" hidden>
+    <div class="centro" style="text-align:center">
+      <section class="seccion s-res"><div class="sec-cuerpo">
+        <div class="grande" style="color:var(--ok)" aria-hidden="true">✓</div>
+        <h1 style="font-size:26px;margin:8px 0">¡Gracias por votar!</h1>
+        <p style="color:var(--suave);font-size:15px;margin:0">Su voto quedó guardado. Los resultados se verán cuando el administrador los publique.</p>
+      </div></section>
+      <button class="btn btn-sec" type="button" id="btn-salir">Salir</button>
+    </div>
+  </section>
+
+  <!-- Resultados finales -->
+  <section id="vista-final" class="cuerpo fin" hidden>
+    <div class="ancho">
+      <div class="sello">FINALIZÓ</div>
+      <h1 id="final-ganador"></h1>
+      <p id="final-detalle" style="color:var(--suave);margin:6px 0 0;font-size:16px"></p>
+      <div class="podio" id="final-podio"></div>
+      <section class="seccion" style="max-width:640px;margin:0 auto;text-align:left">
+        <h2 class="sec-tit"><span class="ic">▮</span>Todos los partidos</h2>
+        <div class="sec-cuerpo"><div class="barras" id="final-barras"></div><button type="button" class="enlace" id="btn-final-todos" hidden></button></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- Votación cerrada sin resultados -->
+  <section id="vista-cerrada" class="cuerpo" hidden>
+    <div class="centro" style="text-align:center">
+      <section class="seccion s-opc"><div class="sec-cuerpo">
+        <div class="grande" aria-hidden="true">🗳️</div>
+        <h1 style="font-size:24px;margin:8px 0">La votación está cerrada</h1>
+        <p style="color:var(--suave);font-size:15px;margin:0">Ya no se puede votar. Los resultados se verán cuando el administrador los publique.</p>
+      </div></section>
+      <button class="btn btn-sec" type="button" id="btn-revisar">Volver a revisar</button>
+    </div>
+  </section>
+
+  <!-- Despedida -->
+  <section id="vista-despedida" class="cuerpo" hidden>
+    <div class="centro" style="text-align:center">
+      <section class="seccion s-res"><div class="sec-cuerpo">
+        <div class="grande" aria-hidden="true">👋</div>
+        <h1 style="font-size:26px;margin:8px 0">Gracias</h1>
+        <p style="color:var(--suave);font-size:15px;margin:0">La votación terminó. Ya puede cerrar esta página.</p>
+      </div></section>
+      <button class="btn btn-sec" type="button" id="btn-ver-otra-vez">Ver resultados otra vez</button>
+    </div>
+  </section>
+</main>
+
+<script src="scripts/comun.js"></script>
+<script src="scripts/votante.js"></script>
+</body>
+</html>

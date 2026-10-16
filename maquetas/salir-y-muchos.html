@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votaciones - Salir y muchos datos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../publico/estilos/estilos.css">
+<style>
+body{display:block}
+.hoja{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+.grupo{margin-bottom:40px}
+.grupo > h2{font-size:22px;margin-bottom:4px}
+.grupo > p{color:var(--suave);margin:0 0 16px}
+.opciones{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.opcion{background:#fff;border:1px solid var(--linea);border-radius:10px;overflow:hidden}
+.opcion > h3{font-size:15px;padding:10px 14px;background:#14213d;color:#fff}
+.opcion > h3 span{color:#f2a900;margin-right:6px}
+.opcion .demo{padding:14px}
+.opcion .nota{padding:0 14px 14px;font-size:13px;color:var(--suave)}
+.mc{display:flex;align-items:center;gap:8px;background:#14213d;color:#fff;font-weight:700;font-size:13px;padding:10px 12px;border-radius:8px}
+.mc .t{margin-right:auto}
+.quien{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);padding:4px 10px 4px 4px;border-radius:99px;font-size:12px}
+.ini{width:24px;height:24px;border-radius:50%;background:#f2a900;color:#14213d;display:grid;place-items:center;font-size:11px;font-weight:800}
+.b-salir{white-space:nowrap;background:#c8102e;color:#fff;border:none;border-radius:8px;font:inherit;font-size:12px;font-weight:800;padding:7px 10px;box-shadow:0 2px 0 #7d0a1d}
+.desp{position:relative;margin-top:8px;margin-left:auto;width:200px;background:#fff;border:1px solid var(--linea);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:6px;font-size:13px}
+.desp div{padding:8px 10px;border-radius:6px}
+.desp .nom{color:var(--suave);font-size:12px;border-bottom:1px solid var(--linea);border-radius:0;margin-bottom:4px}
+.desp .rojo{color:#c8102e;font-weight:800;background:#fff5f6}
+.lado{display:grid;grid-template-columns:140px 1fr;border-radius:8px;overflow:hidden;border:1px solid var(--linea);min-height:210px}
+.lado nav{background:linear-gradient(180deg,#2a4bb0,#1d3a8a 60%,#162d6e);padding:8px;display:flex;flex-direction:column;gap:4px;font-size:12px;color:#fff;font-weight:600}
+.lado nav span{padding:7px 8px;border-radius:7px}
+.lado nav .on{background:#fff;color:#1d3a8a;font-weight:800}
+.lado nav .abajo{margin-top:auto;border-top:1px solid rgba(255,255,255,.25);padding-top:8px;border-radius:0}
+.lado nav .abajo small{display:block;opacity:.8;font-weight:500}
+.lado nav .sal{background:#c8102e;text-align:center;font-weight:800;box-shadow:0 2px 0 #7d0a1d}
+.lado main{background:var(--fondo);padding:10px;font-size:12px;color:var(--suave)}
+.mini-final{background:var(--fondo);border-radius:8px;padding:12px;text-align:center;font-size:13px}
+.mini-final b{display:block;font-size:18px;color:var(--tinta);margin:4px 0}
+.mini-final .sello{font-size:13px;padding:2px 10px}
+.mini-podio{display:flex;justify-content:center;align-items:flex-end;gap:4px;margin:8px 0}
+.mini-podio i{width:34px;background:#1d3a8a;border-radius:4px 4px 0 0;display:block}
+.sel{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.sel select{font:inherit;font-size:14px;padding:9px 10px;border:2px solid var(--marca);border-radius:8px;background:#fff;color:var(--tinta);flex:1;min-width:180px}
+.pag{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:8px;font-size:12.5px;color:var(--suave)}
+.pag .btn-chico{min-height:30px;padding:3px 10px}
+.caja-scroll{max-height:190px;overflow:auto;border:1px solid var(--linea);border-radius:8px}
+.cuenta{font-size:12.5px;color:var(--suave);margin:6px 0}
+.lista-mini{display:flex;flex-direction:column;gap:4px;font-size:12.5px}
+.lista-mini div{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--linea);border-radius:8px;padding:6px 8px}
+.lista-mini .logo{width:28px;height:28px;font-size:10px;margin:0}
+.part-mini{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.part-mini div{background:#fff;border:2px solid var(--linea);border-radius:8px;padding:6px;font-size:11.5px;text-align:center;font-weight:700}
+.bar{grid-template-columns:minmax(80px,120px) minmax(0,1fr) 46px;font-size:12.5px}
+.bar .riel{height:16px}
+</style>
+</head>
+<body>
+<header class="cabeza"><span>Votaciones · salir y muchos datos</span><span class="pill">Elija una opción de cada grupo</span></header>
+<div class="hoja">
+
+  <section class="grupo">
+    <h2>1 · Cerrar sesión del administrador (donde sale su nombre)</h2>
+    <p>Hoy arriba dice «Administrador General» y un «Salir» chiquito que casi no se ve.</p>
+    <div class="opciones">
+      <div class="opcion"><h3><span>S1</span>Nombre + botón rojo «Cerrar sesión»</h3><div class="demo">
+        <div class="mc"><span class="t">Panel del administrador</span><span class="quien"><span class="ini">AG</span>Administrador General</span><button class="b-salir">🚪 Cerrar sesión</button></div>
+        <p style="font-size:12px;color:var(--suave)">En celular el nombre se achica a sus iniciales y el botón queda «🚪 Salir».</p></div>
+        <p class="nota">Siempre a la vista. Pregunta «¿Cerrar sesión?» antes de salir.</p></div>
+
+      <div class="opcion"><h3><span>S2</span>Tocar el nombre abre un menú</h3><div class="demo">
+        <div class="mc"><span class="t">Panel del administrador</span><span class="quien"><span class="ini">AG</span>Administrador General ▾</span></div>
+        <div class="desp"><div class="nom">Entró como<br><b style="color:var(--tinta)">Administrador General</b></div><div>👁 Ver página de votación</div><div class="rojo">🚪 Cerrar sesión</div></div></div>
+        <p class="nota">La cabecera queda limpia; al tocar el nombre sale el menú con «Cerrar sesión».</p></div>
+
+      <div class="opcion"><h3><span>S3</span>Abajo del menú lateral</h3><div class="demo">
+        <div class="lado"><nav><span class="on">➕ Inscribir</span><span>📊 Resultados</span><span>📢 Publicar</span>
+          <span class="abajo">👤 <b>Administrador General</b><small>Sesión abierta</small></span><span class="sal">🚪 Cerrar sesión</span></nav>
+          <main>Contenido…</main></div></div>
+        <p class="nota">Nombre y botón al pie del menú azul. En celular va al final de la fila de botones.</p></div>
+    </div>
+  </section>
+
+  <section class="grupo">
+    <h2>2 · Botón «Salir» en la pantalla final</h2>
+    <p>Cuando ya se publicó, la persona ve quién ganó y tiene cómo salir.</p>
+    <div class="opciones">
+      <div class="opcion"><h3><span>P1</span>Botón grande abajo de los resultados</h3><div class="demo">
+        <div class="mini-final"><span class="sello">FINALIZÓ</span><b>Ganó Renovación Verde</b>
+          <div class="mini-podio"><i style="height:30px"></i><i style="height:44px;background:#f2a900"></i><i style="height:22px"></i><i style="height:14px"></i></div>
+          <div style="font-size:11px">… barras de todos …</div>
+          <button class="btn btn-sec" style="margin-top:10px">← Salir</button></div></div>
+        <p class="nota">Al final de la página, después de ver todo.</p></div>
+      <div class="opcion"><h3><span>P2</span>Botón arriba, siempre visible</h3><div class="demo">
+        <div class="mc" style="background:#1d3a8a"><span class="t">Elecciones 2026</span><button class="b-salir" style="background:#fff;color:#1d3a8a;box-shadow:none">← Salir</button></div>
+        <div class="mini-final" style="margin-top:8px"><span class="sello">FINALIZÓ</span><b>Ganó Renovación Verde</b><div class="mini-podio"><i style="height:30px"></i><i style="height:44px;background:#f2a900"></i><i style="height:22px"></i><i style="height:14px"></i></div></div></div>
+        <p class="nota">En la cabecera; se puede salir sin bajar.</p></div>
+      <div class="opcion"><h3><span>P3</span>Los dos (arriba y abajo)</h3><div class="demo">
+        <div class="mc" style="background:#1d3a8a"><span class="t">Elecciones 2026</span><button class="b-salir" style="background:#fff;color:#1d3a8a;box-shadow:none">← Salir</button></div>
+        <div class="mini-final" style="margin-top:8px"><b>Ganó Renovación Verde</b><div style="font-size:11px">…</div><button class="btn btn-sec" style="margin-top:8px">← Salir</button></div></div>
+        <p class="nota">Útil si la lista de partidos es larga.</p></div>
+    </div>
+    <p style="color:var(--suave);font-size:14px;margin-top:10px">«Salir» lleva a una pantalla de despedida: «Gracias. La votación terminó.» (no se puede volver a votar).</p>
+  </section>
+
+  <section class="grupo">
+    <h2>3 · Muchos partidos (60 o más) y muchos votantes (200 o más)</h2>
+    <p>Con muchos datos, los botones de cada partido y las tablas largas rompen la página. Dos formas de ordenarlo:</p>
+    <div class="opciones">
+      <div class="opcion"><h3><span>L1</span>Desplegable + buscador + páginas</h3><div class="demo">
+        <div class="sel"><select><option>📊 General (todos los partidos)</option><option>Renovación Verde</option></select></div>
+        <div class="bar"><span class="nom">Renovación V.</span><div class="riel"><div class="lleno" style="width:22%;background:#c8102e"></div></div><span class="num">22%</span></div>
+        <div class="bar" style="margin-top:6px"><span class="nom">Sol Naciente</span><div class="riel"><div class="lleno" style="width:18%;background:#1d3a8a"></div></div><span class="num">18%</span></div>
+        <p class="cuenta">… se ven los 10 primeros · <b style="color:var(--marca)">Ver los 62 partidos ▾</b></p>
+        <div class="campo"><input class="input" placeholder="🔍 Buscar por DNI o nombre" style="padding:8px;font-size:13px"></div>
+        <table><thead><tr><th>Nombre</th><th>Apellido</th><th>DNI</th></tr></thead>
+          <tbody><tr><td>María Fernanda</td><td>Quispe Huamán</td><td>45879123</td></tr><tr><td>José Antonio</td><td>Ramírez Castro</td><td>70214588</td></tr><tr><td>Ana Gabriela</td><td>Flores Vargas</td><td>41236987</td></tr></tbody></table>
+        <div class="pag"><button class="btn btn-sec btn-chico">← Anterior</button><span>Página 1 de 9 · 214 votantes</span><button class="btn btn-sec btn-chico">Siguiente →</button></div></div>
+        <p class="nota">El partido se elige en un desplegable (con 60 no entran botones). Barras: 10 primeros y «Ver todos». Tabla de 25 en 25 con páginas.</p></div>
+
+      <div class="opcion"><h3><span>L2</span>Buscador de partido + listas con su propia barra de desplazamiento</h3><div class="demo">
+        <div class="campo"><input class="input" placeholder="🔍 Buscar partido… (62)" style="padding:8px;font-size:13px"></div>
+        <div class="caja-scroll" style="max-height:110px;padding:6px;background:#fff">
+          <div class="bar"><span class="nom">Renovación V.</span><div class="riel"><div class="lleno" style="width:22%;background:#c8102e"></div></div><span class="num">22%</span></div>
+          <div class="bar" style="margin-top:6px"><span class="nom">Sol Naciente</span><div class="riel"><div class="lleno" style="width:18%;background:#1d3a8a"></div></div><span class="num">18%</span></div>
+          <div class="bar" style="margin-top:6px"><span class="nom">Unidad Pueblo</span><div class="riel"><div class="lleno" style="width:11%;background:#e39b00"></div></div><span class="num">11%</span></div>
+          <div class="bar" style="margin-top:6px"><span class="nom">Fuerza Andina</span><div class="riel"><div class="lleno" style="width:9%;background:#1f8a4c"></div></div><span class="num">9%</span></div></div>
+        <p class="cuenta">214 votantes · cabecera fija al bajar</p>
+        <div class="caja-scroll"><table><thead><tr><th>Nombre</th><th>Apellido</th><th>DNI</th></tr></thead>
+          <tbody><tr><td>María Fernanda</td><td>Quispe Huamán</td><td>45879123</td></tr><tr><td>José Antonio</td><td>Ramírez Castro</td><td>70214588</td></tr><tr><td>Ana Gabriela</td><td>Flores Vargas</td><td>41236987</td></tr><tr><td>Pedro Manuel</td><td>Salazar Ríos</td><td>40001112</td></tr><tr><td>Lucía Valeria</td><td>Campos Medina</td><td>40001113</td></tr><tr><td>…</td><td>…</td><td>…</td></tr></tbody></table></div></div>
+        <p class="nota">Se escribe el nombre del partido para encontrarlo. Barras y tabla dentro de cajas que se desplazan solas; la página no crece.</p></div>
+    </div>
+
+    <h3 style="font-size:17px;margin:22px 0 10px">Y en las otras pantallas (va igual con L1 o L2)</h3>
+    <div class="opciones">
+      <div class="opcion"><h3>Votante: elegir entre 60 partidos</h3><div class="demo">
+        <div class="campo"><input class="input" placeholder="🔍 Buscar partido o candidato" style="padding:8px;font-size:13px"></div>
+        <div class="part-mini"><div>🟢 Renovación Verde</div><div>🔵 Sol Naciente</div><div>🟡 Unidad del Pueblo</div><div>🟢 Fuerza Andina</div></div>
+        <p class="cuenta">62 partidos · el botón «Votar» queda fijo abajo</p></div></div>
+      <div class="opcion"><h3>Admin: lista de 60 inscritos</h3><div class="demo">
+        <div class="campo"><input class="input" placeholder="🔍 Buscar inscrito" style="padding:8px;font-size:13px"></div>
+        <div class="lista-mini"><div><span class="logo" style="background:#c8102e">RV</span>Renovación Verde<span style="margin-left:auto">✎ · Quitar</span></div><div><span class="logo" style="background:#1d3a8a">PS</span>Sol Naciente<span style="margin-left:auto">✎ · Quitar</span></div></div>
+        <p class="cuenta">Inscritos (62) · buscador y caja con desplazamiento</p></div></div>
+      <div class="opcion"><h3>Pantalla final con 60 partidos</h3><div class="demo">
+        <div class="mini-final"><b>Ganó Renovación Verde</b><div class="mini-podio"><i style="height:30px"></i><i style="height:44px;background:#f2a900"></i><i style="height:22px"></i><i style="height:14px"></i></div>
+          <div style="font-size:12px">Podio 1–4 · barras de los 10 primeros<br><b style="font-size:13px;color:var(--marca)">Ver los 62 partidos ▾</b></div></div></div></div>
+    </div>
+    <p style="color:var(--suave);font-size:14px;margin-top:12px">También haré una prueba de carga: 60 partidos y 1000 votantes votando a la vez, midiendo que nada se rompa ni se ponga lento.</p>
+  </section>
+</div>
+</body>
+</html>

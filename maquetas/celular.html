@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votaciones - En el celular</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--fondo:#e6eaf2;--tinta:#14213d;--suave:#56607a;--linea:#cfd6e4;--marca:#1d3a8a;--claro:#e3e9f8;--rojo:#c8102e;--ok:#1f8a4c;--ambar:#b7791f}
+*{box-sizing:border-box}
+body{margin:0;background:#cfd6e4;font-family:'Public Sans',sans-serif;color:var(--tinta)}
+.barra{position:sticky;top:0;z-index:9;background:#14213d;color:#fff;padding:12px 16px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.barra h1{font-size:17px;margin:0}
+.barra button{font:inherit;font-size:14px;font-weight:700;padding:8px 12px;border-radius:8px;border:2px solid #fff;background:transparent;color:#fff;cursor:pointer}
+.barra button.on{background:#f2a900;border-color:#f2a900;color:#14213d}
+.intro{max-width:1200px;margin:16px auto 0;padding:0 16px;font-size:15px}
+.intro b{color:var(--marca)}
+.tels{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-wrap:wrap;gap:22px;justify-content:center}
+.caso{width:300px}
+.caso h3{font-size:14px;margin:0 0 6px}
+.caso p{font-size:12.5px;color:var(--suave);margin:6px 0 0}
+.tel{position:relative;width:300px;height:600px;border:8px solid #14213d;border-radius:28px;overflow:hidden;background:var(--fondo);font-size:12px}
+.caso h3{display:flex;align-items:center;justify-content:space-between;gap:6px}.ok-cabe{font-size:10.5px;font-weight:800;background:var(--ok);color:#fff;padding:2px 8px;border-radius:99px;z-index:3}
+.cab{background:var(--marca);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.cab.osc{background:#14213d}
+.cab .pl{font-size:10px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:99px}
+.cab .sal{background:#fff;color:var(--marca);font-weight:800;font-size:10.5px;padding:3px 9px;border-radius:6px}
+.cu{padding:10px 12px}
+h4{margin:0;font-size:17px;font-weight:800}
+.baj{color:var(--suave);font-size:11px;margin:2px 0 8px}
+.sec{background:var(--claro);border:1px solid #c6d2ef;border-radius:8px;padding:8px;margin-bottom:8px}
+.sec.am{background:#fff4dc;border-color:#f0d9a6}
+.sec.gr{background:#eef0f4;border-color:#d8dce5}
+.sec.ve{background:#e4f4ea;border-color:#bfe3cc}
+.st{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.lb{display:flex;gap:4px;align-items:center;font-size:10.5px;font-weight:700;margin-bottom:3px}
+.lb small{margin-left:auto;color:var(--suave);font-weight:500}
+.pi{font-size:8.5px;font-weight:800;padding:1px 6px;border-radius:99px;background:#d4def6;color:var(--marca)}
+.pi.n{background:#ffe9b8;color:#7a4f10}
+.in{background:#fff;border:1.5px solid #b9c3d8;border-radius:6px;padding:7px 8px;font-size:11.5px;margin-bottom:6px}
+.btn{display:block;text-align:center;font-weight:800;color:#fff;background:var(--marca);border-radius:7px;padding:9px;font-size:12.5px;box-shadow:0 2px 0 #11245a}
+.btn.v{background:var(--ok);box-shadow:0 2px 0 #135c31}
+.btn.r{background:var(--rojo);box-shadow:0 2px 0 #7d0a1d}
+.btn.s{background:#fff;color:var(--marca);border:1.5px solid var(--marca);box-shadow:none}
+.lk{text-align:center;color:var(--marca);font-weight:600;text-decoration:underline;font-size:11px;margin-top:8px}
+.lg{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:9.5px;flex:none}
+.fila{display:flex;align-items:center;gap:7px;background:#fff;border:1.5px solid var(--linea);border-radius:7px;padding:5px 7px;margin-bottom:4px}
+.fila b{font-size:11px;display:block}
+.fila small{font-size:9.5px;color:var(--suave)}
+.fila .rd{margin-left:auto;width:14px;height:14px;border-radius:50%;border:2px solid #8f9bb8;flex:none}
+.fila.el{border-color:var(--marca);background:#f5f8ff}
+.fila.el .rd{border:4px solid var(--marca)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.tj{background:#fff;border:1.5px solid var(--linea);border-radius:7px;padding:6px 4px;text-align:center;font-size:10px;font-weight:700}
+.tj .lg{margin:0 auto 3px}
+.tj.el{border-color:var(--marca);background:#f5f8ff;box-shadow:0 0 0 2px rgba(29,58,138,.25)}
+.fijo{position:absolute;left:0;right:0;bottom:0;padding:8px 12px 12px;background:linear-gradient(to top,var(--fondo) 80%,transparent)}
+.br{display:grid;grid-template-columns:72px 1fr 30px;gap:5px;align-items:center;font-size:10px;font-weight:600;margin-bottom:4px}
+.br .ri{height:10px;background:#d6deee;border-radius:4px;overflow:hidden}
+.br .ri i{display:block;height:100%}
+.br .nu{text-align:right;font-weight:800}
+.ps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.ps div{background:#fff;border:1.5px solid var(--linea);border-radius:6px;text-align:center;padding:3px 2px;font-size:9px}
+.ps div b{display:block;font-size:13px}
+.ps .p1{border-color:#f2a900;background:#fff7de}
+.sel{background:#fff;border:2px solid var(--marca);border-radius:6px;padding:6px 8px;font-size:11px;font-weight:700;margin-bottom:7px;display:flex;justify-content:space-between}
+table{width:100%;border-collapse:collapse;font-size:9.5px;background:#fff}
+th{background:var(--marca);color:#fff;text-align:left;padding:4px}
+td{padding:4px;border-bottom:1px solid var(--linea)}
+.pag{display:flex;justify-content:space-between;align-items:center;font-size:9.5px;color:var(--suave);margin-top:5px}
+.pag span.b{border:1.5px solid var(--marca);color:var(--marca);font-weight:800;border-radius:5px;padding:2px 6px}
+.desp{display:flex;justify-content:space-between;align-items:center;background:#fff4dc;border:1px solid #f0d9a6;border-radius:8px;padding:8px;font-weight:800;font-size:11px;margin-bottom:8px;color:#7a4f10}
+.desp.gr{background:#eef0f4;border-color:#d8dce5;color:var(--tinta)}
+.tabs{display:flex;gap:4px;margin-bottom:8px}
+.tabs span{flex:1;text-align:center;font-size:10.5px;font-weight:700;padding:6px 2px;border-radius:6px;background:#fff;border:1.5px solid var(--linea)}
+.tabs span.on{background:var(--marca);color:#fff;border-color:var(--marca)}
+.menu-arriba{display:flex;gap:4px;padding:6px;background:linear-gradient(90deg,#2a4bb0,#1d3a8a)}
+.menu-arriba span{flex:1;text-align:center;color:#fff;font-size:10px;font-weight:700;padding:5px 2px;border-radius:6px}
+.menu-arriba span.on{background:#fff;color:var(--marca)}
+.menu-abajo{position:absolute;left:0;right:0;bottom:0;display:flex;background:linear-gradient(90deg,#2a4bb0,#1d3a8a);padding:5px 4px 7px}
+.menu-abajo span{flex:1;text-align:center;color:#fff;font-size:9px;font-weight:700;padding:4px 2px;border-radius:7px}
+.menu-abajo span i{display:block;font-style:normal;font-size:14px}
+.menu-abajo span.on{background:#fff;color:var(--marca)}
+.menu-abajo span.sa{color:#ffd0d6}
+.podio{display:flex;align-items:flex-end;justify-content:center;gap:4px;margin:6px 0}
+.podio div{width:56px;text-align:center;font-size:8.5px;font-weight:700}
+.podio i{display:grid;place-items:center;background:var(--marca);color:#fff;font-style:normal;font-weight:800;font-size:13px;border-radius:5px 5px 0 0;margin-top:2px}
+.sello{display:inline-block;border:2px solid var(--rojo);color:var(--rojo);font-weight:800;font-size:10px;padding:1px 8px;transform:rotate(-4deg);background:#fff}
+.oc{display:none}
+[data-op="c1"] .c1, [data-op="c2"] .c2{display:flex}
+.porc{font-size:24px;font-weight:800;color:var(--rojo);line-height:1}
+</style>
+</head>
+<body data-op="c1">
+<div class="barra">
+  <h1>Votaciones en el celular</h1>
+  <div id="ops"><button data-o="c1" class="on">C1 · Compacto</button> <button data-o="c2">C2 · Como app (menú abajo)</button></div>
+</div>
+<p class="intro">Cada celular es una pantalla de <b>360 × 720</b>. La etiqueta verde «Cabe sin bajar» marca las pantallas que entran enteras. Hoy, por ejemplo, el registro baja 1,5 pantallas y elegir partido baja varias. Cambie entre <b>C1</b> y <b>C2</b> arriba.</p>
+
+<!-- ===================== C1 ===================== -->
+<div class="tels oc c1">
+  <div class="caso"><h3>1 · Registro</h3><div class="tel"><span class="ok-cabe">Cabe sin bajar</span>
+    <div class="cab" style="padding:8px 12px;font-size:12px"><span>Elecciones 2026</span><span class="pl">Votación abierta</span></div>
+    <div class="cu"><h4>Registro</h4><p class="baj">Escriba sus datos para votar.</p>
+      <div class="sec"><div class="lb">Nombre <span style="color:var(--rojo)">*</span><span class="pi">Aa Solo letras</span><small>14/30 ✓</small></div><div class="in">María Fernanda</div>
+        <div class="lb">Apellido <span style="color:var(--rojo)">*</span><span class="pi">Aa Solo letras</span><small>13/30 ✓</small></div><div class="in">Quispe Huamán</div>
+        <div class="lb">DNI <span style="color:var(--rojo)">*</span><span class="pi n">123 Solo números</span><small>8/8 ✓</small></div><div class="in" style="margin:0">45879123</div></div>
+      <div class="btn">Ingresar →</div><div class="lk">Entrar como administrador</div></div></div>
+    <p>Contador al lado del título (no debajo) y menos espacio entre cuadros.</p></div>
+
+  <div class="caso"><h3>2 · Elegir partido (60 partidos)</h3><div class="tel"><span class="ok-cabe">Botón siempre a la vista</span>
+    <div class="cab" style="padding:8px 12px;font-size:12px"><span>Hola, María</span><span class="pl">DNI 45879123</span></div>
+    <div class="cu"><h4>Elija un partido</h4><p class="baj">Toque uno. Solo puede votar una vez.</p>
+      <div class="in">🔍 Buscar partido o candidato</div>
+      <div class="fila"><span class="lg" style="background:#1d3a8a">SN</span><div><b>Partido Sol Naciente</b><small>Juan Carlos Mendoza</small></div><span class="rd"></span></div>
+      <div class="fila el"><span class="lg" style="background:#c8102e">RV</span><div><b>Renovación Verde</b><small>Rosa Elena Paredes</small></div><span class="rd"></span></div>
+      <div class="fila"><span class="lg" style="background:#e39b00">UP</span><div><b>Unidad del Pueblo</b><small>Luis Alberto Torres</small></div><span class="rd"></span></div>
+      <div class="fila"><span class="lg" style="background:#1f8a4c">FA</span><div><b>Fuerza Andina Unida</b><small>Carmen Lucía Rojas</small></div><span class="rd"></span></div>
+      <div class="fila"><span class="lg" style="background:#6b4fbb">MJ</span><div><b>Movimiento Juventud</b><small>Pedro Pablo Ríos</small></div><span class="rd"></span></div>
+      <div class="fila"><span class="lg" style="background:#0f7c8c">AP</span><div><b>Acción Popular Sur</b><small>Ana Lucía Vera</small></div><span class="rd"></span></div>
+      <p class="baj" style="text-align:center">… 60 partidos · baje para ver más</p></div>
+    <div class="fijo"><div class="btn v">Votar por Renovación Verde</div></div></div>
+    <p>Partidos en filas finas (no tarjetas altas): entran 6–7 a la vista. La descripción sale al tocar el partido. Buscador y «Votar» fijo abajo.</p></div>
+
+  <div class="caso"><h3>3 · Pantalla final</h3><div class="tel"><span class="ok-cabe">Cabe sin bajar</span>
+    <div class="cab" style="padding:8px 12px;font-size:12px"><span>Elecciones 2026</span><span class="sal">← Salir</span></div>
+    <div class="cu" style="text-align:center"><span class="sello">FINALIZÓ</span><h4 style="margin-top:6px">Ganó Renovación Verde</h4><p class="baj">Rosa Elena Paredes · 22% de 214 votos</p>
+      <div class="podio"><div>Sol Nac.<i style="height:42px">2</i></div><div>Renovación<i style="height:60px;background:#f2a900;color:#14213d">1</i></div><div>Unidad<i style="height:30px">3</i></div><div>F. Andina<i style="height:20px">4</i></div></div>
+      <div class="sec" style="text-align:left"><div class="st">▮ Todos los partidos</div>
+        <div class="br"><span>Renovación V.</span><span class="ri"><i style="width:22%;background:#c8102e"></i></span><span class="nu">22%</span></div>
+        <div class="br"><span>Sol Naciente</span><span class="ri"><i style="width:18%;background:#1d3a8a"></i></span><span class="nu">18%</span></div>
+        <div class="br"><span>Unidad Pueblo</span><span class="ri"><i style="width:11%;background:#e39b00"></i></span><span class="nu">11%</span></div>
+        <div class="br"><span>Fuerza Andina</span><span class="ri"><i style="width:9%;background:#1f8a4c"></i></span><span class="nu">9%</span></div>
+        <div class="br"><span>Juventud</span><span class="ri"><i style="width:6%;background:#6b4fbb"></i></span><span class="nu">6%</span></div>
+        <p class="lk" style="margin:4px 0 0">Ver los 60 partidos ▾</p></div></div></div>
+    <p>Podio más bajo y barras finas: en celular se ven los 5 primeros; «Ver todos» abre el resto.</p></div>
+
+  <div class="caso"><h3>4 · Admin · Inscribir</h3><div class="tel"><span class="ok-cabe">Cabe sin bajar</span>
+    <div class="cab osc" style="padding:8px 12px;font-size:12px"><span>Panel del administrador</span></div>
+    <div class="menu-arriba"><span class="on">➕ Inscribir</span><span>📊 Resultados</span><span>📢 Publicar</span><span>🚪 Salir</span></div>
+    <div class="cu"><h4 style="font-size:15px">Inscribir participante</h4>
+      <div class="sec" style="margin-top:6px"><div class="lb">Nombre *<span class="pi">Aa Solo letras</span><small>10/30 ✓</small></div><div class="in">Rosa Elena</div>
+        <div class="lb">Apellido *<span class="pi">Aa Solo letras</span><small>13/30 ✓</small></div><div class="in">Paredes Salas</div>
+        <div class="lb">Partido *<span class="pi" style="background:#e4e7ee;color:var(--suave)">Aa 1 Letras y números</span><small>16/40 ✓</small></div><div class="in" style="margin:0">Renovación Verde</div></div>
+      <div class="desp"><span>＋ Logo y descripción (opcional)</span><span>▾</span></div>
+      <div class="btn" style="margin-bottom:8px">➕ Inscribir participante</div>
+      <div class="desp gr"><span>≡ Inscritos (60) · buscar y editar</span><span>▾</span></div></div></div>
+    <p>Lo opcional y la lista de inscritos quedan cerrados como desplegables; se abren al tocarlos. Menú en una fila arriba.</p></div>
+
+  <div class="caso"><h3>5 · Admin · Resultados General</h3><div class="tel"><span class="ok-cabe">Cabe sin bajar</span>
+    <div class="cab osc" style="padding:8px 12px;font-size:12px"><span>Panel del administrador</span></div>
+    <div class="menu-arriba"><span>➕ Inscribir</span><span class="on">📊 Resultados</span><span>📢 Publicar</span><span>🚪 Salir</span></div>
+    <div class="cu"><div style="display:flex;justify-content:space-between;align-items:center"><h4 style="font-size:15px">Resultados</h4><span style="font-size:9px;color:var(--rojo);font-weight:800;background:#fde8eb;padding:2px 7px;border-radius:99px">● EN VIVO · 214</span></div>
+      <div class="sel" style="margin-top:6px"><span>📊 General (60 partidos)</span><span>▾</span></div>
+      <div class="sec ve"><div class="st">★ Quién va ganando</div><div class="ps"><div class="p1"><b>1.º</b>Renovación<br>47</div><div><b>2.º</b>Sol Nac.<br>38</div><div><b>3.º</b>Unidad<br>24</div><div><b>4.º</b>F. Andina<br>19</div></div></div>
+      <div class="sec"><div class="st">▮ Porcentaje por partido</div>
+        <div class="br"><span>Renovación V.</span><span class="ri"><i style="width:22%;background:#c8102e"></i></span><span class="nu">22%</span></div>
+        <div class="br"><span>Sol Naciente</span><span class="ri"><i style="width:18%;background:#1d3a8a"></i></span><span class="nu">18%</span></div>
+        <div class="br"><span>Unidad Pueblo</span><span class="ri"><i style="width:11%;background:#e39b00"></i></span><span class="nu">11%</span></div>
+        <div class="br"><span>Fuerza Andina</span><span class="ri"><i style="width:9%;background:#1f8a4c"></i></span><span class="nu">9%</span></div>
+        <div class="br"><span>Juventud</span><span class="ri"><i style="width:6%;background:#6b4fbb"></i></span><span class="nu">6%</span></div>
+        <p class="lk" style="margin:4px 0 0">Ver los 60 partidos ▾</p></div></div></div>
+    <p>«Quién va ganando» primero (lo más importante), luego las barras finas.</p></div>
+
+  <div class="caso"><h3>6 · Admin · Un partido y sus votantes</h3><div class="tel"><span class="ok-cabe">Cabe sin bajar</span>
+    <div class="cab osc" style="padding:8px 12px;font-size:12px"><span>Panel del administrador</span></div>
+    <div class="menu-arriba"><span>➕ Inscribir</span><span class="on">📊 Resultados</span><span>📢 Publicar</span><span>🚪 Salir</span></div>
+    <div class="cu"><div class="sel"><span>Renovación Verde</span><span>▾</span></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="btn s" style="padding:4px 8px;font-size:10.5px">← General</span><span class="porc">22%</span><span class="baj" style="margin:0">47 de 214 · 1.º lugar</span></div>
+      <div class="sec gr"><div class="st">≡ Quiénes votaron (47)</div><div class="in" style="margin-bottom:5px">🔍 Buscar por DNI o nombre</div>
+        <table><tr><th>N.º</th><th>Nombre</th><th>Apellido</th><th>DNI</th></tr>
+          <tr><td>1</td><td>María F.</td><td>Quispe H.</td><td>45879123</td></tr><tr><td>2</td><td>José A.</td><td>Ramírez C.</td><td>70214588</td></tr><tr><td>3</td><td>Ana G.</td><td>Flores V.</td><td>41236987</td></tr><tr><td>4</td><td>Pedro M.</td><td>Salazar R.</td><td>40001112</td></tr><tr><td>5</td><td>Lucía V.</td><td>Campos M.</td><td>40001113</td></tr><tr><td>6</td><td>Rocío A.</td><td>Villanueva</td><td>40001114</td></tr><tr><td>7</td><td>Carlos E.</td><td>Ruiz Díaz</td><td>40001115</td></tr><tr><td>8</td><td>Elena M.</td><td>Torres P.</td><td>40001116</td></tr></table>
+        <div class="pag"><span class="b">← Ant.</span><span>Pág. 1 de 2</span><span class="b">Sig. →</span></div></div></div></div>
+    <p>Porcentaje en una sola línea arriba y la tabla ocupa el resto; filas finas (8–10 a la vista).</p></div>
+</div>
+
+<!-- ===================== C2 ===================== -->
+<div class="tels oc c2">
+  <div class="caso"><h3>1 · Registro</h3><div class="tel"><span class="ok-cabe">Cabe sin bajar</span>
+    <div class="cab" style="padding:8px 12px;font-size:12px"><span>Elecciones 2026</span><span class="pl">Votación abierta</span></div>
+    <div class="cu"><h4>Registro</h4><p class="baj">Escriba sus datos para votar.</p>
+      <div class="sec"><div class="lb">Nombre *<span class="pi">Aa Solo letras</span><small>14/30 ✓</small></div><div class="in">María Fernanda</div>
+        <div class="lb">Apellido *<span class="pi">Aa Solo letras</span><small>13/30 ✓</small></div><div class="in">Quispe Huamán</div>
+        <div class="lb">DNI *<span class="pi n">123 Solo números</span><small>8/8 ✓</small></div><div class="in" style="margin:0">45879123</div></div>
+      <div class="lk" style="margin-top:2px">Entrar como administrador</div></div>
+    <div class="fijo"><div class="btn">Ingresar →</div></div></div>
+    <p>Igual que C1, pero el botón «Ingresar» queda pegado abajo, cerca del dedo.</p></div>
+
+  <div class="caso"><h3>2 · Elegir partido (60 partidos)</h3><div class="tel"><span class="ok-cabe">Botón siempre a la vista</span>
+    <div class="cab" style="padding:8px 12px;font-size:12px"><span>Hola, María</span><span class="pl">DNI 45879123</span></div>
+    <div class="cu"><div class="in">🔍 Buscar partido o candidato (60)</div>
+      <div class="g2">
+        <div class="tj"><span class="lg" style="background:#1d3a8a">SN</span>Sol Naciente</div><div class="tj el"><span class="lg" style="background:#c8102e">RV</span>Renovación Verde</div>
+        <div class="tj"><span class="lg" style="background:#e39b00">UP</span>Unidad del Pueblo</div><div class="tj"><span class="lg" style="background:#1f8a4c">FA</span>Fuerza Andina</div>
+        <div class="tj"><span class="lg" style="background:#6b4fbb">MJ</span>Mov. Juventud</div><div class="tj"><span class="lg" style="background:#0f7c8c">AP</span>Acción Popular</div>
+        <div class="tj"><span class="lg" style="background:#b5487a">PD</span>Patria Digna</div><div class="tj"><span class="lg" style="background:#5b6b2e">TA</span>Tierra Andina</div>
+      </div>
+      <div class="sec" style="margin-top:6px;font-size:10.5px"><b>Renovación Verde</b> · Rosa Elena Paredes<br><span style="color:var(--suave)">Por un distrito limpio y seguro</span></div></div>
+    <div class="fijo"><div class="btn v">Votar por Renovación Verde</div></div></div>
+    <p>Cuadritos de 2 en 2 (entran 8 a la vista). Al elegir, abajo aparece el candidato y la descripción.</p></div>
+
+  <div class="caso"><h3>3 · Pantalla final</h3><div class="tel"><span class="ok-cabe">Cabe sin bajar</span>
+    <div class="cab" style="padding:8px 12px;font-size:12px"><span>Elecciones 2026</span><span class="sal">← Salir</span></div>
+    <div class="cu" style="text-align:center"><span class="sello">FINALIZÓ</span><h4 style="margin-top:6px">Ganó Renovación Verde</h4><p class="baj">22% de 214 votos</p>
+      <div class="tabs"><span class="on">🏆 Podio</span><span>▮ Todos (60)</span></div>
+      <div class="podio" style="margin-top:14px"><div>Sol Nac.<br>38<i style="height:80px">2</i></div><div>Renovación<br>47<i style="height:110px;background:#f2a900;color:#14213d">1</i></div><div>Unidad<br>24<i style="height:56px">3</i></div><div>F. Andina<br>19<i style="height:38px">4</i></div></div></div></div>
+    <p>Dos pestañas: «Podio» y «Todos». Cada una cabe en la pantalla; la lista de 60 baja dentro de su pestaña.</p></div>
+
+  <div class="caso"><h3>4 · Admin · Inscribir</h3><div class="tel"><span class="ok-cabe">Cabe sin bajar</span>
+    <div class="cab osc" style="padding:8px 12px;font-size:12px"><span>Inscribir participante</span><span class="pl">Admin General</span></div>
+    <div class="cu"><div class="tabs"><span class="on">1 · Datos</span><span>2 · Opcional</span><span>Inscritos (60)</span></div>
+      <div class="sec"><div class="lb">Nombre *<span class="pi">Aa Solo letras</span><small>10/30 ✓</small></div><div class="in">Rosa Elena</div>
+        <div class="lb">Apellido *<span class="pi">Aa Solo letras</span><small>13/30 ✓</small></div><div class="in">Paredes Salas</div>
+        <div class="lb">Partido *<span class="pi" style="background:#e4e7ee;color:var(--suave)">Aa 1 Letras y números</span><small>16/40 ✓</small></div><div class="in" style="margin:0">Renovación Verde</div></div>
+      <div class="btn">➕ Inscribir participante</div></div>
+    <div class="menu-abajo"><span class="on"><i>➕</i>Inscribir</span><span><i>📊</i>Resultados</span><span><i>📢</i>Publicar</span><span class="sa"><i>🚪</i>Salir</span></div></div>
+    <p>Menú abajo como una app (más cerca del dedo). El formulario va en pestañas: Datos, Opcional, Inscritos.</p></div>
+
+  <div class="caso"><h3>5 · Admin · Resultados General</h3><div class="tel"><span class="ok-cabe">Cabe sin bajar</span>
+    <div class="cab osc" style="padding:8px 12px;font-size:12px"><span>Resultados</span><span style="font-size:9px;color:#ffb3bd;font-weight:800">● EN VIVO · 214</span></div>
+    <div class="cu"><div class="sel"><span>📊 General (60 partidos)</span><span>▾</span></div>
+      <div class="sec ve"><div class="st">★ Quién va ganando</div><div class="ps"><div class="p1"><b>1.º</b>Renovación<br>47</div><div><b>2.º</b>Sol Nac.<br>38</div><div><b>3.º</b>Unidad<br>24</div><div><b>4.º</b>F. Andina<br>19</div></div></div>
+      <div class="sec"><div class="st">▮ Porcentaje por partido</div>
+        <div class="br"><span>Renovación V.</span><span class="ri"><i style="width:22%;background:#c8102e"></i></span><span class="nu">22%</span></div>
+        <div class="br"><span>Sol Naciente</span><span class="ri"><i style="width:18%;background:#1d3a8a"></i></span><span class="nu">18%</span></div>
+        <div class="br"><span>Unidad Pueblo</span><span class="ri"><i style="width:11%;background:#e39b00"></i></span><span class="nu">11%</span></div>
+        <div class="br"><span>Fuerza Andina</span><span class="ri"><i style="width:9%;background:#1f8a4c"></i></span><span class="nu">9%</span></div>
+        <p class="lk" style="margin:4px 0 0">Ver los 60 partidos ▾</p></div></div>
+    <div class="menu-abajo"><span><i>➕</i>Inscribir</span><span class="on"><i>📊</i>Resultados</span><span><i>📢</i>Publicar</span><span class="sa"><i>🚪</i>Salir</span></div></div>
+    <p>La cabecera muestra la sección y el «EN VIVO»; se gana espacio arriba.</p></div>
+
+  <div class="caso"><h3>6 · Admin · Un partido y sus votantes</h3><div class="tel"><span class="ok-cabe">Cabe sin bajar</span>
+    <div class="cab osc" style="padding:8px 12px;font-size:12px"><span>← Renovación Verde</span><span style="font-size:13px;font-weight:800;color:#ffb3bd">22%</span></div>
+    <div class="cu"><div class="sel"><span>Renovación Verde · 47 votos · 1.º</span><span>▾</span></div>
+      <div class="sec gr"><div class="in" style="margin-bottom:5px">🔍 Buscar por DNI o nombre</div>
+        <table><tr><th>N.º</th><th>Nombre</th><th>Apellido</th><th>DNI</th></tr>
+          <tr><td>1</td><td>María F.</td><td>Quispe H.</td><td>45879123</td></tr><tr><td>2</td><td>José A.</td><td>Ramírez C.</td><td>70214588</td></tr><tr><td>3</td><td>Ana G.</td><td>Flores V.</td><td>41236987</td></tr><tr><td>4</td><td>Pedro M.</td><td>Salazar R.</td><td>40001112</td></tr><tr><td>5</td><td>Lucía V.</td><td>Campos M.</td><td>40001113</td></tr><tr><td>6</td><td>Rocío A.</td><td>Villanueva</td><td>40001114</td></tr><tr><td>7</td><td>Carlos E.</td><td>Ruiz Díaz</td><td>40001115</td></tr></table>
+        <div class="pag"><span class="b">← Ant.</span><span>Pág. 1 de 2</span><span class="b">Sig. →</span></div></div></div>
+    <div class="menu-abajo"><span><i>➕</i>Inscribir</span><span class="on"><i>📊</i>Resultados</span><span><i>📢</i>Publicar</span><span class="sa"><i>🚪</i>Salir</span></div></div>
+    <p>El nombre del partido y su % van en la cabecera con «←» para volver a General.</p></div>
+</div>
+
+<script>
+document.querySelectorAll('.tel .ok-cabe').forEach(e => e.closest('.caso').querySelector('h3').append(e));
+document.getElementById('ops').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  document.body.dataset.op = b.dataset.o;
+  document.querySelectorAll('#ops button').forEach(x => x.classList.toggle('on', x === b));
+});
+if (new URLSearchParams(location.search).get('o')) document.querySelector(`#ops button[data-o="${new URLSearchParams(location.search).get('o')}"]`).click();
+</script>
+</body>
+</html>

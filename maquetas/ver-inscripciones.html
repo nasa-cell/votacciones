@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votaciones - Ver inscripciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--fondo:#e6eaf2;--tinta:#14213d;--suave:#56607a;--linea:#cfd6e4;--marca:#1d3a8a;--claro:#e3e9f8;--rojo:#c8102e;--ok:#1f8a4c}
+*{box-sizing:border-box}
+body{margin:0;background:#cfd6e4;font-family:'Public Sans',sans-serif;color:var(--tinta)}
+.barra{background:#14213d;color:#fff;padding:12px 16px;font-weight:800;font-size:17px}
+.hoja{max-width:1200px;margin:0 auto;padding:16px}
+.intro{font-size:15px;margin:0 0 18px}
+.op{background:#fff;border-radius:12px;padding:14px;margin-bottom:26px}
+.op > h2{font-size:19px;margin:0 0 2px}
+.op > h2 span{color:#b7791f}
+.op > p{margin:0 0 12px;color:var(--suave);font-size:14px}
+.par{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.pc{flex:1;min-width:520px;border:6px solid #14213d;border-radius:12px;overflow:hidden;position:relative;height:480px;background:var(--fondo);font-size:12px}
+.cel{width:270px;border:7px solid #14213d;border-radius:26px;overflow:hidden;position:relative;height:540px;background:var(--fondo);font-size:11.5px}
+@media (max-width:860px){.pc{min-width:0;width:100%}}
+.et{font-size:12px;font-weight:800;color:var(--suave);margin-bottom:4px}
+.cab{background:#14213d;color:#fff;font-weight:700;padding:8px 12px}
+.lado{position:absolute;top:33px;bottom:0;left:0;width:120px;background:linear-gradient(180deg,#2a4bb0,#1d3a8a 60%,#162d6e);padding:8px;display:flex;flex-direction:column;gap:4px}
+.lado span{color:#fff;font-weight:700;padding:6px 8px;border-radius:7px;font-size:11px}
+.lado span.on{background:#fff;color:var(--marca)}
+.cont{position:absolute;top:33px;left:120px;right:0;bottom:0;padding:12px;opacity:.35}
+.cel .cont{left:0;top:72px;opacity:.35}
+.fila-menu{position:absolute;top:33px;left:0;right:0;display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:4px;background:linear-gradient(90deg,#2a4bb0,#1d3a8a)}
+.fila-menu span{color:#fff;font-weight:700;text-align:center;padding:4px;border-radius:6px;font-size:10px}
+.fila-menu span.on{background:#fff;color:var(--marca)}
+.tt{font-size:15px;font-weight:800;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.bv{display:inline-flex;align-items:center;gap:5px;background:#fff;color:var(--marca);border:2px solid var(--marca);border-radius:7px;font-weight:800;font-size:11px;padding:5px 9px;white-space:nowrap}
+.bv.vivo{opacity:1;position:relative;z-index:2;box-shadow:0 0 0 4px rgba(242,169,0,.6)}
+.velo{position:absolute;inset:0;background:rgba(20,33,61,.55);z-index:3}
+.caja{position:absolute;z-index:4;background:#fff;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden}
+.caja .ct{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--linea);font-weight:800;font-size:13px}
+.caja .ct .x{width:24px;height:24px;border-radius:6px;border:1.5px solid var(--linea);display:grid;place-items:center;font-size:12px}
+.buscar{margin:8px 12px;background:#fff;border:1.5px solid #b9c3d8;border-radius:6px;padding:6px 8px;font-size:11px;color:var(--suave)}
+.lista{overflow:auto;padding:0 12px 10px;flex:1}
+table{width:100%;border-collapse:collapse;font-size:10.5px}
+th{background:var(--marca);color:#fff;text-align:left;padding:5px;position:sticky;top:0}
+td{padding:5px;border-bottom:1px solid var(--linea);vertical-align:top}
+tr:nth-child(even) td{background:#f5f7fb}
+.lg{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:9px;flex:none}
+.ficha{display:flex;gap:8px;background:#fff;border:1.5px solid var(--linea);border-radius:9px;padding:8px;margin-bottom:6px}
+.ficha .lg{width:38px;height:38px;font-size:12px}
+.ficha b{display:block;font-size:12px}
+.ficha .d{font-size:10.5px;color:var(--suave);line-height:1.45}
+.ficha .d i{font-style:normal;color:var(--tinta);font-weight:600}
+.ficha .ds{margin-top:4px;background:#fff4dc;border-radius:5px;padding:3px 6px;font-size:10.5px}
+.pie{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:8px 12px;border-top:1px solid var(--linea);font-size:10.5px;color:var(--suave)}
+.pie .b{background:var(--marca);color:#fff;font-weight:800;border-radius:6px;padding:6px 10px}
+.hoja-baja{position:absolute;left:0;right:0;bottom:0;height:78%;border-radius:16px 16px 0 0}
+.asa{width:40px;height:4px;border-radius:9px;background:#b9c3d8;margin:6px auto 0}
+.ficha-sola{padding:12px;text-align:center}
+.ficha-sola .lg{width:70px;height:70px;font-size:20px;margin:0 auto 8px}
+.ficha-sola dl{text-align:left;display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11.5px;margin:8px 0 0;background:var(--claro);border-radius:8px;padding:8px}
+.ficha-sola dt{color:var(--suave)}
+.ficha-sola dd{margin:0;font-weight:700}
+.nav{display:flex;justify-content:space-between;padding:8px 12px;border-top:1px solid var(--linea)}
+.nav span{border:1.5px solid var(--marca);color:var(--marca);font-weight:800;border-radius:6px;padding:5px 9px;font-size:10.5px}
+</style>
+</head>
+<body>
+<div class="barra">Votaciones · botón «Ver inscripciones»</div>
+<div class="hoja">
+<p class="intro">El botón <b>«👁 Ver inscripciones»</b> va junto al título «Inscribir participante» (marcado en amarillo). Al tocarlo se abre un cuadro con <b>todo lo que se escribió</b> de cada participante: nombre, apellido, partido, descripción y logo. Se cierra con ✕, con «Cerrar» o tocando afuera. Elija V1, V2 o V3.</p>
+
+<!-- V1 -->
+<section class="op"><h2><span>V1</span> · Cuadro con tabla</h2><p>Una tabla con todas las columnas; en celular la tabla se vuelve fichas apiladas.</p>
+<div class="par">
+  <div><div class="et">PC</div><div class="pc">
+    <div class="cab">Panel del administrador</div><div class="lado"><span class="on">➕ Inscribir</span><span>📊 Resultados</span><span>📢 Publicar</span></div>
+    <div class="cont"><div class="tt">Inscribir participante</div></div>
+    <div style="position:absolute;top:44px;right:12px;z-index:2"><span class="bv vivo">👁 Ver inscripciones (4)</span></div>
+    <div class="velo"></div>
+    <div class="caja" style="top:84px;left:140px;right:30px;bottom:20px">
+      <div class="ct">Inscripciones (4)<span class="x">✕</span></div>
+      <div class="buscar">🔍 Buscar por partido o nombre</div>
+      <div class="lista"><table><tr><th>N.º</th><th>Logo</th><th>Partido</th><th>Nombre</th><th>Apellido</th><th>Descripción</th></tr>
+        <tr><td>1</td><td><span class="lg" style="background:#c8102e">RV</span></td><td><b>Renovación Verde</b></td><td>Rosa Elena</td><td>Paredes Salas</td><td>Por un distrito limpio y seguro</td></tr>
+        <tr><td>2</td><td><span class="lg" style="background:#1d3a8a">SN</span></td><td><b>Partido Sol Naciente</b></td><td>Juan Carlos</td><td>Mendoza Ruiz</td><td>Trabajo para todos los jóvenes</td></tr>
+        <tr><td>3</td><td><span class="lg" style="background:#e39b00">UP</span></td><td><b>Unidad del Pueblo</b></td><td>Luis Alberto</td><td>Torres Vega</td><td style="color:var(--suave)">—</td></tr>
+        <tr><td>4</td><td><span class="lg" style="background:#1f8a4c">FA</span></td><td><b>Fuerza Andina Unida</b></td><td>Carmen Lucía</td><td>Rojas Flores</td><td>Agua para todos los pueblos</td></tr></table></div>
+      <div class="pie"><span>4 participantes</span><span class="b">Cerrar</span></div></div>
+  </div></div>
+  <div><div class="et">Celular</div><div class="cel">
+    <div class="cab">Panel del administrador</div><div class="fila-menu"><span class="on">➕ Inscribir</span><span>📊 Resultados</span><span>📢 Publicar</span><span>🚪 Salir</span></div>
+    <div class="velo"></div>
+    <div class="caja" style="top:20px;left:8px;right:8px;bottom:20px">
+      <div class="ct">Inscripciones (4)<span class="x">✕</span></div>
+      <div class="buscar">🔍 Buscar por partido o nombre</div>
+      <div class="lista">
+        <div class="ficha"><span class="lg" style="background:#c8102e">RV</span><div><b>1 · Renovación Verde</b><div class="d"><i>Rosa Elena</i> <i>Paredes Salas</i></div><div class="ds">Por un distrito limpio y seguro</div></div></div>
+        <div class="ficha"><span class="lg" style="background:#1d3a8a">SN</span><div><b>2 · Partido Sol Naciente</b><div class="d"><i>Juan Carlos</i> <i>Mendoza Ruiz</i></div><div class="ds">Trabajo para todos los jóvenes</div></div></div>
+        <div class="ficha"><span class="lg" style="background:#e39b00">UP</span><div><b>3 · Unidad del Pueblo</b><div class="d"><i>Luis Alberto</i> <i>Torres Vega</i><br>Sin descripción</div></div></div>
+      </div>
+      <div class="pie"><span>4 participantes</span><span class="b">Cerrar</span></div></div>
+  </div></div>
+</div></section>
+
+<!-- V2 -->
+<section class="op"><h2><span>V2</span> · Fichas con todos los datos</h2><p>Cada participante en su ficha con el logo grande y cada dato con su nombre («Nombre:», «Apellido:», …). En PC, 2 fichas por fila; en celular sube una hoja desde abajo.</p>
+<div class="par">
+  <div><div class="et">PC</div><div class="pc">
+    <div class="cab">Panel del administrador</div><div class="lado"><span class="on">➕ Inscribir</span><span>📊 Resultados</span><span>📢 Publicar</span></div>
+    <div class="cont"><div class="tt">Inscribir participante</div></div>
+    <div style="position:absolute;top:44px;right:12px;z-index:2"><span class="bv vivo">👁 Ver inscripciones (4)</span></div>
+    <div class="velo"></div>
+    <div class="caja" style="top:84px;left:140px;right:30px;bottom:20px">
+      <div class="ct">Inscripciones (4)<span class="x">✕</span></div>
+      <div class="buscar">🔍 Buscar por partido o nombre</div>
+      <div class="lista" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;align-content:start">
+        <div class="ficha" style="margin:0"><span class="lg" style="background:#c8102e">RV</span><div><b>Renovación Verde</b><div class="d">Nombre: <i>Rosa Elena</i><br>Apellido: <i>Paredes Salas</i></div><div class="ds">Por un distrito limpio y seguro</div></div></div>
+        <div class="ficha" style="margin:0"><span class="lg" style="background:#1d3a8a">SN</span><div><b>Partido Sol Naciente</b><div class="d">Nombre: <i>Juan Carlos</i><br>Apellido: <i>Mendoza Ruiz</i></div><div class="ds">Trabajo para todos los jóvenes</div></div></div>
+        <div class="ficha" style="margin:0"><span class="lg" style="background:#e39b00">UP</span><div><b>Unidad del Pueblo</b><div class="d">Nombre: <i>Luis Alberto</i><br>Apellido: <i>Torres Vega</i><br>Sin descripción</div></div></div>
+        <div class="ficha" style="margin:0"><span class="lg" style="background:#1f8a4c">FA</span><div><b>Fuerza Andina Unida</b><div class="d">Nombre: <i>Carmen Lucía</i><br>Apellido: <i>Rojas Flores</i></div><div class="ds">Agua para todos los pueblos</div></div></div>
+      </div>
+      <div class="pie"><span>4 participantes</span><span class="b">Cerrar</span></div></div>
+  </div></div>
+  <div><div class="et">Celular</div><div class="cel">
+    <div class="cab">Panel del administrador</div><div class="fila-menu"><span class="on">➕ Inscribir</span><span>📊 Resultados</span><span>📢 Publicar</span><span>🚪 Salir</span></div>
+    <div class="velo"></div>
+    <div class="caja hoja-baja"><div class="asa"></div>
+      <div class="ct">Inscripciones (4)<span class="x">✕</span></div>
+      <div class="buscar">🔍 Buscar por partido o nombre</div>
+      <div class="lista">
+        <div class="ficha"><span class="lg" style="background:#c8102e">RV</span><div><b>Renovación Verde</b><div class="d">Nombre: <i>Rosa Elena</i><br>Apellido: <i>Paredes Salas</i></div><div class="ds">Por un distrito limpio y seguro</div></div></div>
+        <div class="ficha"><span class="lg" style="background:#1d3a8a">SN</span><div><b>Partido Sol Naciente</b><div class="d">Nombre: <i>Juan Carlos</i><br>Apellido: <i>Mendoza Ruiz</i></div><div class="ds">Trabajo para todos los jóvenes</div></div></div>
+      </div></div>
+  </div></div>
+</div></section>
+
+<!-- V3 -->
+<section class="op"><h2><span>V3</span> · Una ficha a la vez, con Anterior / Siguiente</h2><p>Se ve un participante en grande (logo y todos sus datos) y se pasa al siguiente con flechas. Arriba se puede saltar a uno con el desplegable.</p>
+<div class="par">
+  <div><div class="et">PC</div><div class="pc">
+    <div class="cab">Panel del administrador</div><div class="lado"><span class="on">➕ Inscribir</span><span>📊 Resultados</span><span>📢 Publicar</span></div>
+    <div class="cont"><div class="tt">Inscribir participante</div></div>
+    <div style="position:absolute;top:44px;right:12px;z-index:2"><span class="bv vivo">👁 Ver inscripciones (4)</span></div>
+    <div class="velo"></div>
+    <div class="caja" style="top:84px;left:170px;right:110px;bottom:12px">
+      <div class="ct">Inscripción 1 de 4<span class="x">✕</span></div>
+      <div class="buscar">▾ Renovación Verde</div>
+      <div class="ficha-sola"><span class="lg" style="background:#c8102e">RV</span><b style="font-size:15px">Renovación Verde</b>
+        <dl><dt>Nombre</dt><dd>Rosa Elena</dd><dt>Apellido</dt><dd>Paredes Salas</dd><dt>Partido</dt><dd>Renovación Verde</dd><dt>Descripción</dt><dd>Por un distrito limpio y seguro</dd></dl></div>
+      <div class="nav"><span>← Anterior</span><span>Siguiente →</span></div></div>
+  </div></div>
+  <div><div class="et">Celular</div><div class="cel">
+    <div class="cab">Panel del administrador</div><div class="fila-menu"><span class="on">➕ Inscribir</span><span>📊 Resultados</span><span>📢 Publicar</span><span>🚪 Salir</span></div>
+    <div class="velo"></div>
+    <div class="caja" style="top:40px;left:10px;right:10px;bottom:40px">
+      <div class="ct">Inscripción 1 de 4<span class="x">✕</span></div>
+      <div class="buscar">▾ Renovación Verde</div>
+      <div class="ficha-sola" style="flex:1"><span class="lg" style="background:#c8102e">RV</span><b style="font-size:14px">Renovación Verde</b>
+        <dl><dt>Nombre</dt><dd>Rosa Elena</dd><dt>Apellido</dt><dd>Paredes Salas</dd><dt>Partido</dt><dd>Renovación Verde</dd><dt>Descripción</dt><dd>Por un distrito limpio y seguro</dd></dl></div>
+      <div class="nav"><span>← Anterior</span><span>Siguiente →</span></div></div>
+  </div></div>
+</div></section>
+</div>
+</body>
+</html>

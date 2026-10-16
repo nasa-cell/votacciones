@@ -1,0 +1,135 @@
+// Prueba del servidor con datos de prueba en una carpeta temporal (no toca datos reales).
+const { spawn } = require('child_process');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
+const PUERTO = 3471;
+const BASE = `http://localhost:${PUERTO}`;
+const carpeta = fs.mkdtempSync(path.join(os.tmpdir(), 'votaciones-prueba-'));
+let bien = 0, mal = 0, cookie = '';
+
+function revisar(condicion, texto) {
+  if (condicion) { bien++; console.log('  OK  ', texto); }
+  else { mal++; console.log('  FALLA', texto); }
+}
+
+async function api(ruta, { metodo = 'GET', cuerpo, admin = false } = {}) {
+  const r = await fetch(BASE + ruta, {
+    method: cuerpo && metodo === 'GET' ? 'POST' : metodo,
+    headers: { 'Content-Type': 'application/json', ...(admin && cookie ? { Cookie: cookie } : {}) },
+    body: cuerpo ? JSON.stringify(cuerpo) : undefined,
+  });
+  const galleta = r.headers.get('set-cookie');
+  if (galleta) cookie = galleta.split(';')[0];
+  return { estado: r.status, datos: await r.json().catch(() => ({})) };
+}
+
+const dni = n => String(10000000 + n);
+const votante = n => ({ nombre: 'Votante Prueba', apellido: 'Apellido Numero', dni: dni(n) });
+
+async function principal() {
+  console.log('Votaciones · prueba completa');
+
+  // Votante no ve resultados antes de publicar
+  revisar((await api('/api/resultados')).estado === 403, 'resultados ocultos antes de publicar');
+  revisar((await api('/api/admin/resultados')).estado === 401, 'panel admin sin sesión responde 401');
+
+  // Admin
+  revisar((await api('/api/admin/ingresar', { cuerpo: { nombre: 'Administrador', clave: 'mala' } })).estado === 401, 'contraseña mala rechazada');
+  revisar((await api('/api/admin/ingresar', { cuerpo: { nombre: 'Administrador General', clave: '1234' } })).estado === 200, 'admin entra con 1234');
+
+  // Validaciones al inscribir
+  const base = { nombre: 'Rosa Elena', apellido: 'Paredes Salas', partido: 'Renovación Verde' };
+  revisar((await api('/api/admin/candidatos', { cuerpo: { ...base, nombre: 'Rosa' }, admin: true })).estado === 400, 'nombre de 4 letras rechazado');
+  revisar((await api('/api/admin/candidatos', { cuerpo: { ...base, partido: 'Corto' }, admin: true })).estado === 400, 'partido de 5 letras rechazado');
+  revisar((await api('/api/admin/candidatos', { cuerpo: { ...base, partido: 'x'.repeat(41) }, admin: true })).estado === 400, 'partido de 41 letras rechazado');
+  revisar((await api('/api/admin/candidatos', { cuerpo: { ...base, descripcion: 'corta' }, admin: true })).estado === 400, 'descripción de 5 letras rechazada');
+  revisar((await api('/api/admin/candidatos', { cuerpo: { ...base, logo: 'data:text/html;base64,AAAA' }, admin: true })).estado === 400, 'logo que no es imagen rechazado');
+
+  const logo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  const a = await api('/api/admin/candidatos', { cuerpo: { ...base, descripcion: 'Por un distrito limpio', logo }, admin: true });
+  revisar(a.estado === 200 && a.datos.id, 'inscribe Renovación Verde con logo y descripción');
+  const b = await api('/api/admin/candidatos', { cuerpo: { nombre: 'Juan Carlos', apellido: 'Mendoza Ruiz', partido: 'Partido Sol Naciente' }, admin: true });
+  const c = await api('/api/admin/candidatos', { cuerpo: { nombre: 'Luis Alberto', apellido: 'Torres Vega', partido: 'Unidad del Pueblo' }, admin: true });
+  const d = await api('/api/admin/candidatos', { cuerpo: { nombre: 'Carmen Lucía', apellido: 'Rojas Flores', partido: 'Fuerza Andina Unida' }, admin: true });
+  revisar(b.estado === 200 && c.estado === 200 && d.estado === 200, 'inscribe 3 partidos más sin logo');
+  revisar((await api('/api/admin/candidatos', { cuerpo: { ...base, partido: 'renovación verde' }, admin: true })).estado === 409, 'partido repetido rechazado');
+  const e = await api(`/api/admin/candidatos/${d.datos.id}`, { metodo: 'PUT', cuerpo: { nombre: 'Carmen Lucía', apellido: 'Rojas Flores', partido: 'Fuerza Andina Unida', descripcion: 'Agua para todos los pueblos' }, admin: true });
+  revisar(e.estado === 200 && e.datos.descripcion === 'Agua para todos los pueblos', 'edita un participante');
+
+  // Registro del votante
+  revisar((await api('/api/ingresar', { cuerpo: { ...votante(1), dni: '123' } })).estado === 400, 'DNI de 3 números rechazado');
+  revisar((await api('/api/ingresar', { cuerpo: { ...votante(1), nombre: 'Ana' } })).estado === 400, 'nombre de votante corto rechazado');
+  revisar((await api('/api/ingresar', { cuerpo: votante(1) })).estado === 200, 'votante válido ingresa');
+  revisar((await api('/api/candidatos')).datos.length === 4, 'votante ve 4 partidos');
+
+  // Votos: 40 a la vez
+  const ids = [a.datos.id, a.datos.id, a.datos.id, a.datos.id, b.datos.id, b.datos.id, b.datos.id, c.datos.id, c.datos.id, d.datos.id];
+  const tandas = await Promise.all(Array.from({ length: 40 }, (_, i) => api('/api/votar', { cuerpo: { ...votante(i + 1), candidatoId: ids[i % 10] } })));
+  revisar(tandas.every(t => t.estado === 200), '40 votos a la vez guardados');
+
+  // Mismo DNI 20 veces a la vez: solo se acepta una
+  const repetidos = await Promise.all(Array.from({ length: 20 }, () => api('/api/votar', { cuerpo: { ...votante(500), candidatoId: b.datos.id } })));
+  revisar(repetidos.filter(t => t.estado === 200).length === 1, 'mismo DNI 20 veces a la vez: solo 1 voto');
+  revisar((await api('/api/ingresar', { cuerpo: votante(1) })).datos.codigo === 'dni_repetido', 'DNI que ya votó no puede volver a ingresar');
+  revisar((await api('/api/votar', { cuerpo: { ...votante(1), candidatoId: b.datos.id } })).estado === 409, 'DNI que ya votó no puede votar de nuevo');
+  revisar((await api('/api/votar', { cuerpo: { ...votante(900), candidatoId: 9999 } })).estado === 404, 'voto a partido que no existe rechazado');
+
+  // Resultados del admin
+  const r = (await api('/api/admin/resultados', { admin: true })).datos;
+  revisar(r.total === 41, `total de votos 41 (dio ${r.total})`);
+  revisar(r.partidos[0].partido === 'Renovación Verde' && r.partidos[0].votos === 16, 'Renovación Verde va primero con 16');
+  revisar(Math.abs(r.partidos.reduce((s, p) => s + p.porcentaje, 0) - 100) < 0.5, 'porcentajes suman 100');
+  const v = (await api(`/api/admin/votantes/${a.datos.id}`, { admin: true })).datos;
+  revisar(v.total === 16 && v.filas.length === 16 && v.filas[0].dni && v.filas[0].nombre && v.paginas === 1, 'tabla de votantes de un partido con DNI');
+  const busca = (await api(`/api/admin/votantes/${a.datos.id}?buscar=${dni(1)}`, { admin: true })).datos;
+  revisar(busca.total === 1 && busca.filas[0].dni === dni(1), 'buscar votante por DNI');
+  const quita = await api(`/api/admin/candidatos/${d.datos.id}`, { metodo: 'DELETE', admin: true });
+  revisar(quita.estado === 200 && quita.datos.votosLiberados === 4, `quitar partido con 4 votos los libera (${quita.datos.votosLiberados})`);
+  revisar((await api('/api/ingresar', { cuerpo: votante(10) })).estado === 200, 'quien votó por el partido quitado puede registrarse otra vez');
+  revisar((await api('/api/votar', { cuerpo: { ...votante(10), candidatoId: b.datos.id } })).estado === 200, 'y puede votar de nuevo');
+  revisar((await api('/api/admin/resultados', { admin: true })).datos.total === 38, 'total queda en 38 (41 − 4 + 1)');
+  const sinVotos = await api('/api/admin/candidatos', { cuerpo: { nombre: 'Pedro Pablo', apellido: 'Gutiérrez Paz', partido: 'Partido de Prueba Uno' }, admin: true });
+  revisar((await api(`/api/admin/candidatos/${sinVotos.datos.id}`, { metodo: 'DELETE', admin: true })).estado === 200, 'quita partido sin votos');
+
+  // Publicar
+  revisar((await api('/api/admin/publicar', { cuerpo: {} })).estado === 401, 'publicar sin sesión rechazado');
+  revisar((await api('/api/admin/publicar', { cuerpo: {}, admin: true })).estado === 200, 'admin publica');
+  revisar((await api('/api/ingresar', { cuerpo: votante(77) })).datos.publicado === true, 'tras publicar, al ingresar va a resultados');
+  revisar((await api('/api/votar', { cuerpo: { ...votante(78), candidatoId: b.datos.id } })).estado === 409, 'tras publicar no se puede votar');
+  const pub = await api('/api/resultados');
+  revisar(pub.estado === 200 && pub.datos.partidos.length === 3, 'resultados públicos visibles');
+  revisar(!JSON.stringify(pub.datos).includes(dni(1)), 'resultados públicos sin DNI de votantes');
+  revisar((await api('/api/admin/candidatos', { cuerpo: { nombre: 'Pedro Pablo', apellido: 'Gutiérrez Paz', partido: 'Partido de Prueba Dos' }, admin: true })).estado === 409, 'tras publicar no se inscribe');
+
+  // Ocultar y reabrir
+  revisar((await api('/api/admin/ocultar', { cuerpo: {} })).estado === 401, 'ocultar sin sesión rechazado');
+  revisar((await api('/api/admin/ocultar', { cuerpo: {}, admin: true })).estado === 200, 'admin oculta resultados');
+  revisar((await api('/api/resultados')).estado === 403, 'ocultos: nadie ve resultados');
+  revisar((await api('/api/ingresar', { cuerpo: votante(80) })).datos.codigo === 'cerrada', 'ocultos: la votación sigue cerrada al ingresar');
+  revisar((await api('/api/votar', { cuerpo: { ...votante(80), candidatoId: b.datos.id } })).estado === 409, 'ocultos: no se puede votar');
+  revisar((await api('/api/admin/reabrir', { cuerpo: {}, admin: true })).estado === 200, 'admin reabre la votación');
+  revisar((await api('/api/estado')).datos.cerrada === false, 'reabierta: estado abierto');
+  revisar((await api('/api/votar', { cuerpo: { ...votante(80), candidatoId: b.datos.id } })).estado === 200, 'reabierta: se puede votar');
+  revisar((await api('/api/admin/resultados', { admin: true })).datos.total === 39, 'reabierta: los votos anteriores se mantienen (39)');
+  revisar((await api('/api/resultados')).estado === 403, 'reabierta: resultados ocultos');
+  revisar((await api('/api/admin/publicar', { cuerpo: {}, admin: true })).estado === 200 && (await api('/api/resultados')).estado === 200, 'se puede publicar otra vez');
+
+  // Límite de intentos de contraseña
+  let ultimo;
+  for (let i = 0; i < 6; i++) ultimo = await api('/api/admin/ingresar', { cuerpo: { nombre: 'Intruso Prueba', clave: 'x' + i } });
+  revisar(ultimo.estado === 429, 'tras 5 contraseñas malas pide esperar');
+}
+
+const servidor = spawn(process.execPath, [path.join(__dirname, '..', 'servidor.js')], {
+  env: { ...process.env, PORT: PUERTO, CARPETA_DATOS: carpeta, DATABASE_URL: '' },
+  stdio: ['ignore', 'pipe', 'inherit'],
+});
+servidor.stdout.once('data', async () => {
+  try { await principal(); } catch (e) { mal++; console.error(e); }
+  servidor.kill();
+  fs.rmSync(carpeta, { recursive: true, force: true });
+  console.log(`\nResultado: ${bien} bien, ${mal} mal`);
+  process.exit(mal ? 1 : 0);
+});

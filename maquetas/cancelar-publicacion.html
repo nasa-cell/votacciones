@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votaciones - Cancelar publicación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../publico/estilos/estilos.css">
+<style>
+body{display:block}
+.hoja{max-width:1150px;margin:0 auto;padding:18px 16px 50px}
+.ops{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:18px}
+.op{background:#fff;border:1px solid var(--linea);border-radius:10px;overflow:hidden}
+.op > h2{font-size:15px;padding:10px 14px;background:#14213d;color:#fff;margin:0}
+.op > h2 span{color:#f2a900;margin-right:6px}
+.demo{padding:14px;background:var(--fondo)}
+.nota{font-size:13px;color:var(--suave);padding:10px 14px;margin:0}
+.est{display:flex;align-items:center;gap:8px;background:var(--verde-claro);border:2px solid var(--ok);border-radius:8px;padding:10px;font-size:14px;color:#145c33;margin-bottom:12px}
+.est b{font-size:15px}
+.btn-borde-rojo{background:#fff;color:var(--acento);border:2px solid var(--acento)}
+.btn-borde-rojo:hover{background:#fff5f6}
+.mini-modal{background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);padding:14px;margin-top:12px;text-align:center;font-size:13px}
+.mini-modal h4{margin:0 0 6px;font-size:15px}
+.mini-modal p{margin:0;color:var(--suave)}
+.mini-modal .fila-botones{margin-top:10px}
+.mini-modal .btn{min-height:38px;font-size:13px}
+.inter{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:2px solid var(--linea);border-radius:10px;padding:12px;margin-bottom:10px}
+.inter b{display:block;font-size:14px}
+.inter small{color:var(--suave)}
+.palanca{width:58px;height:32px;border-radius:99px;background:var(--ok);position:relative;flex:none}
+.palanca::after{content:"";position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:#fff}
+.palanca.apagada{background:#b9c3d8}
+.palanca.apagada::after{right:auto;left:4px}
+.dos-acc{display:grid;gap:8px}
+.acc{background:#fff;border:2px solid var(--linea);border-radius:10px;padding:10px}
+.acc b{font-size:14px}
+.acc p{margin:3px 0 8px;font-size:12.5px;color:var(--suave)}
+.acc .btn{min-height:38px;font-size:13px}
+</style>
+</head>
+<body>
+<header class="cabeza"><span>Votaciones · cancelar publicación</span><span class="pill">Elija R1, R2 o R3</span></header>
+<div class="hoja">
+<p style="margin:0 0 16px;font-size:15px">En la sección <b>📢 Publicar</b>, después de publicar, aparece cómo deshacerlo. Siempre pregunta <b>«¿Estás seguro?»</b> antes. Los votos ya guardados no se pierden.</p>
+<div class="ops">
+
+  <div class="op"><h2><span>R1</span>Un botón: cancelar y reabrir</h2><div class="demo">
+    <div class="est">✅ <span><b>Resultados publicados.</b><br>La votación está cerrada.</span></div>
+    <button class="btn btn-borde-rojo">↩ Cancelar publicación</button>
+    <div class="mini-modal"><h4>¿Estás seguro de cancelar la publicación?</h4><p>Los resultados se ocultan otra vez y la votación se vuelve a abrir: se podrá seguir votando. Los 248 votos se mantienen.</p>
+      <div class="fila-botones"><button class="btn btn-sec">No</button><button class="btn btn-rojo">Sí, cancelar</button></div></div>
+  </div><p class="nota">Lo más simple: un botón deshace todo y la votación sigue como antes de publicar.</p></div>
+
+  <div class="op"><h2><span>R2</span>Dos botones: ocultar o reabrir</h2><div class="demo">
+    <div class="est">✅ <span><b>Resultados publicados.</b><br>La votación está cerrada.</span></div>
+    <div class="dos-acc">
+      <div class="acc"><b>🙈 Ocultar resultados</b><p>Nadie ve los resultados, pero la votación sigue cerrada (no se puede votar).</p><button class="btn btn-sec">Ocultar resultados</button></div>
+      <div class="acc"><b>↩ Reabrir votación</b><p>Se ocultan los resultados y se puede volver a votar.</p><button class="btn btn-borde-rojo">Reabrir votación</button></div>
+    </div>
+  </div><p class="nota">Más control: por ejemplo, ocultar si se publicó por error pero sin dejar votar de nuevo.</p></div>
+
+  <div class="op"><h2><span>R3</span>Palanca de encendido</h2><div class="demo">
+    <div class="inter"><span><b>Resultados publicados</b><small>Todos ven los ganadores · votación cerrada</small></span><span class="palanca"></span></div>
+    <div class="inter"><span><b>Resultados publicados</b><small>Apagado: resultados ocultos · se puede votar</small></span><span class="palanca apagada"></span></div>
+    <p style="font-size:12.5px;color:var(--suave);margin:4px 0 0">Arriba: encendida (publicado). Abajo: apagada (como antes de publicar). Al tocarla pregunta «¿Estás seguro?».</p>
+  </div><p class="nota">Un solo control que se prende y se apaga; se ve de un vistazo el estado.</p></div>
+
+</div>
+</div>
+</body>
+</html>

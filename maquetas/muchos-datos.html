@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votaciones - Muchos datos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../publico/estilos/estilos.css">
+<style>
+body{display:block}
+.hoja{max-width:1150px;margin:0 auto;padding:20px 16px 60px}
+.grupo{margin-bottom:44px}
+.grupo > h2{font-size:22px;margin-bottom:4px}
+.grupo > p{color:var(--suave);margin:0 0 16px}
+.flujo{display:grid;grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);gap:10px;align-items:center}
+@media (max-width:860px){.flujo{grid-template-columns:1fr}.flecha{transform:rotate(90deg);justify-self:center}}
+.flecha{font-size:30px;color:var(--marca);text-align:center;font-weight:800}
+.paso{background:#fff;border:1px solid var(--linea);border-radius:10px;overflow:hidden;align-self:stretch}
+.paso > h3{font-size:14px;padding:9px 14px;background:#14213d;color:#fff}
+.paso > h3 span{color:#f2a900;margin-right:6px}
+.paso .demo{padding:12px;background:var(--fondo)}
+.nota{font-size:13px;color:var(--suave);padding:10px 14px}
+.bar{grid-template-columns:minmax(70px,120px) minmax(0,1fr) 44px;font-size:12.5px;gap:8px}
+.bar .riel{height:16px}
+.bar.clic{cursor:pointer;border-radius:6px;padding:3px 4px;margin:-3px -4px}
+.bar.clic:hover{background:#fff}
+.bar .ir{color:var(--marca);font-weight:800}
+.sel select{width:100%;font:inherit;font-size:14px;padding:9px 10px;border:2px solid var(--marca);border-radius:8px;background:#fff;color:var(--tinta);margin-bottom:10px}
+.mas{display:block;text-align:center;font-size:13px;font-weight:800;color:var(--marca);margin-top:8px}
+.puestos{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.puesto{padding:6px}
+.puesto .n{font-size:17px}
+.puesto b{font-size:11.5px}
+.puesto small{font-size:11px}
+.volver{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--marca);background:#fff;border:2px solid var(--marca);border-radius:8px;padding:6px 10px;margin-bottom:10px}
+.porc{font-size:32px;font-weight:800;color:#c8102e;line-height:1}
+table{font-size:12.5px}
+th,td{padding:6px}
+.pag{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:8px;font-size:12px;color:var(--suave)}
+.pag .btn-chico{min-height:30px;padding:3px 9px;font-size:12px}
+.caja-scroll{max-height:160px;overflow:auto;border:1px solid var(--linea);border-radius:8px;background:#fff}
+.cuenta{font-size:12px;color:var(--suave);margin:4px 0 8px}
+.seccion{margin-bottom:10px}
+.sec-tit{padding:9px 12px 0;font-size:12px}
+.sec-cuerpo{padding:10px 12px}
+.resultados-lista{max-height:150px;overflow:auto;padding-right:4px;display:flex;flex-direction:column;gap:8px}
+</style>
+</head>
+<body>
+<header class="cabeza"><span>Votaciones · muchos partidos y votantes</span><span class="pill">Elija L1 o L2</span></header>
+<div class="hoja">
+  <p style="color:var(--suave);margin:0 0 22px">En las dos opciones el orden es el mismo: <b>1)</b> General: todos los partidos y quién va ganando, sin votantes. <b>2)</b> Toca un partido: se ve ese partido y <b>recién ahí</b> la tabla de quiénes votaron por él, con «← Volver a General». Ejemplo con 62 partidos y 214 votantes.</p>
+
+  <!-- L1 -->
+  <section class="grupo">
+    <h2>L1 · Desplegable + tabla por páginas</h2>
+    <p>El partido se elige en un desplegable arriba. La tabla de votantes va de 25 en 25.</p>
+    <div class="flujo">
+      <div class="paso"><h3><span>1</span>General</h3><div class="demo">
+        <div class="sel"><select><option>📊 General (62 partidos)</option><option>Renovación Verde</option><option>Partido Sol Naciente</option></select></div>
+        <section class="seccion"><h4 class="sec-tit"><span class="ic">▮</span>Porcentaje por partido</h4><div class="sec-cuerpo">
+          <div class="barras">
+            <div class="bar"><span class="nom">Renovación V.</span><div class="riel"><div class="lleno" style="width:22%;background:#c8102e"></div></div><span class="num">22%</span></div>
+            <div class="bar"><span class="nom">Sol Naciente</span><div class="riel"><div class="lleno" style="width:18%;background:#1d3a8a"></div></div><span class="num">18%</span></div>
+            <div class="bar"><span class="nom">Unidad Pueblo</span><div class="riel"><div class="lleno" style="width:11%;background:#e39b00"></div></div><span class="num">11%</span></div>
+          </div>
+          <span class="mas">Se ven los 10 primeros · Ver los 62 partidos ▾</span></div></section>
+        <section class="seccion s-res"><h4 class="sec-tit"><span class="ic">★</span>Quién va ganando</h4><div class="sec-cuerpo"><div class="puestos">
+          <div class="puesto p1"><div class="n">1.º</div><b>Renovación</b><small>47</small></div><div class="puesto"><div class="n">2.º</div><b>Sol Naciente</b><small>38</small></div><div class="puesto"><div class="n">3.º</div><b>Unidad</b><small>24</small></div><div class="puesto"><div class="n">4.º</div><b>F. Andina</b><small>19</small></div>
+        </div></div></section>
+      </div><p class="nota">Aquí no hay tabla de votantes: solo partidos.</p></div>
+
+      <div class="flecha" aria-hidden="true">→</div>
+
+      <div class="paso"><h3><span>2</span>Un partido y sus votantes</h3><div class="demo">
+        <div class="sel"><select><option>Renovación Verde</option></select></div>
+        <span class="volver">← Volver a General</span>
+        <section class="seccion"><h4 class="sec-tit"><span class="ic">▮</span>Renovación Verde</h4><div class="sec-cuerpo">
+          <div class="porc">22%</div><div class="cuenta">47 de 214 votos · 1.º lugar</div></div></section>
+        <section class="seccion s-lista"><h4 class="sec-tit"><span class="ic">≡</span>Quiénes votaron (47)</h4><div class="sec-cuerpo">
+          <input class="input" placeholder="🔍 Buscar por DNI o nombre" style="padding:7px;font-size:13px;margin-bottom:8px">
+          <table><thead><tr><th>Nombre</th><th>Apellido</th><th>DNI</th></tr></thead><tbody>
+            <tr><td>María Fernanda</td><td>Quispe Huamán</td><td>45879123</td></tr><tr><td>José Antonio</td><td>Ramírez Castro</td><td>70214588</td></tr><tr><td>Ana Gabriela</td><td>Flores Vargas</td><td>41236987</td></tr></tbody></table>
+          <div class="pag"><button class="btn btn-sec btn-chico">← Anterior</button><span>Página 1 de 2</span><button class="btn btn-sec btn-chico">Siguiente →</button></div>
+        </div></section>
+      </div><p class="nota">La tabla aparece solo aquí, de 25 en 25.</p></div>
+    </div>
+  </section>
+
+  <!-- L2 -->
+  <section class="grupo">
+    <h2>L2 · Tocar el partido en la lista + tabla con desplazamiento</h2>
+    <p>En General se busca el partido escribiendo y se toca su barra. La tabla de votantes tiene su propia barra para bajar (cabecera fija).</p>
+    <div class="flujo">
+      <div class="paso"><h3><span>1</span>General</h3><div class="demo">
+        <input class="input" placeholder="🔍 Buscar partido… (62)" style="padding:8px;font-size:13px;margin-bottom:10px">
+        <section class="seccion"><h4 class="sec-tit"><span class="ic">▮</span>Toque un partido para ver sus votantes</h4><div class="sec-cuerpo">
+          <div class="resultados-lista">
+            <div class="bar clic"><span class="nom">Renovación V.</span><div class="riel"><div class="lleno" style="width:22%;background:#c8102e"></div></div><span class="num">22% <span class="ir">›</span></span></div>
+            <div class="bar clic"><span class="nom">Sol Naciente</span><div class="riel"><div class="lleno" style="width:18%;background:#1d3a8a"></div></div><span class="num">18% <span class="ir">›</span></span></div>
+            <div class="bar clic"><span class="nom">Unidad Pueblo</span><div class="riel"><div class="lleno" style="width:11%;background:#e39b00"></div></div><span class="num">11% <span class="ir">›</span></span></div>
+            <div class="bar clic"><span class="nom">Fuerza Andina</span><div class="riel"><div class="lleno" style="width:9%;background:#1f8a4c"></div></div><span class="num">9% <span class="ir">›</span></span></div>
+            <div class="bar clic"><span class="nom">Juventud Act.</span><div class="riel"><div class="lleno" style="width:6%;background:#6b4fbb"></div></div><span class="num">6% <span class="ir">›</span></span></div>
+          </div></div></section>
+        <section class="seccion s-res"><h4 class="sec-tit"><span class="ic">★</span>Quién va ganando</h4><div class="sec-cuerpo"><div class="puestos">
+          <div class="puesto p1"><div class="n">1.º</div><b>Renovación</b><small>47</small></div><div class="puesto"><div class="n">2.º</div><b>Sol Naciente</b><small>38</small></div><div class="puesto"><div class="n">3.º</div><b>Unidad</b><small>24</small></div><div class="puesto"><div class="n">4.º</div><b>F. Andina</b><small>19</small></div>
+        </div></div></section>
+      </div><p class="nota">Los 62 partidos en una caja que baja sola; la página no crece.</p></div>
+
+      <div class="flecha" aria-hidden="true">→</div>
+
+      <div class="paso"><h3><span>2</span>Un partido y sus votantes</h3><div class="demo">
+        <span class="volver">← Volver a General</span>
+        <section class="seccion"><h4 class="sec-tit"><span class="ic">▮</span>Renovación Verde</h4><div class="sec-cuerpo">
+          <div class="porc">22%</div><div class="cuenta">47 de 214 votos · 1.º lugar</div></div></section>
+        <section class="seccion s-lista"><h4 class="sec-tit"><span class="ic">≡</span>Quiénes votaron (47)</h4><div class="sec-cuerpo">
+          <input class="input" placeholder="🔍 Buscar por DNI o nombre" style="padding:7px;font-size:13px;margin-bottom:8px">
+          <div class="caja-scroll"><table><thead><tr><th>Nombre</th><th>Apellido</th><th>DNI</th></tr></thead><tbody>
+            <tr><td>María Fernanda</td><td>Quispe Huamán</td><td>45879123</td></tr><tr><td>José Antonio</td><td>Ramírez Castro</td><td>70214588</td></tr><tr><td>Ana Gabriela</td><td>Flores Vargas</td><td>41236987</td></tr><tr><td>Pedro Manuel</td><td>Salazar Ríos</td><td>40001112</td></tr><tr><td>Lucía Valeria</td><td>Campos Medina</td><td>40001113</td></tr><tr><td>Rocío Andrea</td><td>Villanueva Paz</td><td>40001114</td></tr></tbody></table></div>
+          <div class="cuenta" style="margin-top:6px">47 votantes · baje dentro de la caja</div>
+        </div></section>
+      </div><p class="nota">La tabla aparece solo aquí y baja dentro de su caja.</p></div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

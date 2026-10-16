@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votaciones - Maquetas A</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fondo:#e6eaf2; --hoja:#ffffff; --tinta:#14213d; --suave:#56607a; --linea:#cfd6e4;
+  --marca:#1d3a8a; --marca-hover:#172f70; --marca-activo:#11245a; --marca-claro:#e3e9f8;
+  --acento:#c8102e; --acento-hover:#a50d26; --ok:#1f8a4c;
+  --ambar:#b7791f; --ambar-claro:#fff4dc; --verde-claro:#e4f4ea;
+  --b1:#1d3a8a; --b2:#c8102e; --b3:#f2a900; --b4:#1f8a4c;
+  --campo-fondo:#f3f5fa; --campo-borde:#b9c3d8;
+  --radio:10px; --sombra:0 2px 10px rgba(20,33,61,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);font-family:'Public Sans',sans-serif;line-height:1.45}
+h1,h2,h3,h4{margin:0;font-weight:800}
+.barra{position:sticky;top:0;z-index:5;background:var(--hoja);border-bottom:1px solid var(--linea);padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.barra h1{font-size:18px}
+.temas{display:flex;gap:6px;flex-wrap:wrap}
+.temas button{font:inherit;font-size:14px;font-weight:600;padding:8px 12px;border:2px solid var(--linea);background:var(--hoja);color:var(--tinta);border-radius:var(--radio);cursor:pointer}
+.temas button.activo{background:var(--marca);color:#fff;border-color:var(--marca)}
+.intro{max-width:1100px;margin:20px auto 0;padding:0 16px;color:var(--suave);font-size:15px}
+.rejilla{max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:30px}
+.bloque{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:820px){.bloque{grid-template-columns:1fr}}
+.etiqueta{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--acento);font-weight:700;margin-bottom:6px}
+.pantalla{background:#f7f8fb;border:1px solid var(--linea);border-radius:var(--radio);box-shadow:var(--sombra);overflow:hidden}
+.cabeza{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:var(--marca);color:#fff;font-weight:700;font-size:14px}
+.cabeza .pill{font-size:12px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.18)}
+.cuerpo{padding:20px 18px}
+.centro{max-width:400px;margin:0 auto}
+.titulo-pant{font-size:23px;margin-bottom:4px}
+.bajada{color:var(--suave);font-size:14px;margin:0 0 14px}
+
+/* ----- SECCIONES (cambian según variante) ----- */
+.seccion{margin-bottom:14px;border-radius:var(--radio)}
+.sec-tit{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.sec-tit .ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:12px;color:#fff;background:var(--marca)}
+.s-opc .sec-tit .ic{background:var(--ambar)}
+.s-lista .sec-tit .ic{background:var(--suave)}
+.s-res .sec-tit .ic{background:var(--ok)}
+.sec-cuerpo{padding:14px}
+
+/* V1 cajas blancas con franja de color */
+[data-var="v1"] .seccion{background:#fff;border:1px solid var(--linea);border-left:5px solid var(--marca);box-shadow:0 1px 3px rgba(20,33,61,.06)}
+[data-var="v1"] .s-opc{border-left-color:var(--ambar)}
+[data-var="v1"] .s-lista{border-left-color:var(--suave)}
+[data-var="v1"] .s-res{border-left-color:var(--ok)}
+[data-var="v1"] .sec-tit{padding:12px 14px 0}
+
+/* V2 fondos de color por sección */
+[data-var="v2"] .seccion{background:var(--marca-claro);border:1px solid #c6d2ef}
+[data-var="v2"] .s-opc{background:var(--ambar-claro);border-color:#f0d9a6}
+[data-var="v2"] .s-lista{background:#eef0f4;border-color:#d8dce5}
+[data-var="v2"] .s-res{background:var(--verde-claro);border-color:#bfe3cc}
+[data-var="v2"] .sec-tit{padding:12px 14px 0}
+[data-var="v2"] .input{background:#fff}
+
+/* V3 banda de título + cuerpo blanco */
+[data-var="v3"] .seccion{background:#fff;border:1px solid var(--linea);overflow:hidden}
+[data-var="v3"] .sec-tit{background:var(--marca-claro);color:var(--marca);padding:10px 14px;border-bottom:1px solid #c6d2ef}
+[data-var="v3"] .s-opc .sec-tit{background:var(--ambar-claro);color:#7a4f10;border-color:#f0d9a6}
+[data-var="v3"] .s-lista .sec-tit{background:#eef0f4;color:var(--suave);border-color:#d8dce5}
+[data-var="v3"] .s-res .sec-tit{background:var(--verde-claro);color:#17663a;border-color:#bfe3cc}
+[data-var="v3"] .input{background:#f4f7ff;border-width:0 0 2px;border-color:var(--marca);border-radius:6px 6px 0 0}
+
+/* ----- CAMPOS ----- */
+.campo{margin-bottom:12px}
+.campo:last-child{margin-bottom:0}
+.campo label{display:flex;gap:4px;font-size:13px;font-weight:700;margin-bottom:5px}
+.campo label small{color:var(--suave);font-weight:500;margin-left:auto}
+.campo label .req{color:var(--acento)}
+.input{width:100%;padding:12px 13px;border:2px solid var(--campo-borde);border-radius:8px;background:var(--campo-fondo);color:var(--tinta);font:inherit;font-size:15px;transition:border-color .12s,background .12s}
+.input:hover{border-color:#8f9bb8}
+.input.foco{border-color:var(--marca);background:#fff;outline:3px solid rgba(29,58,138,.22);outline-offset:0}
+.input.mal{border-color:var(--acento);background:#fff5f6}
+.contador{display:block;text-align:right;font-size:12px;color:var(--suave);margin-top:3px}
+.contador.ok{color:var(--ok)}
+.aviso-mal{color:var(--acento);font-size:12px;margin-top:4px;font-weight:600}
+.soltar{border:2px dashed var(--ambar);border-radius:8px;padding:16px;text-align:center;color:#7a4f10;font-size:13px;background:#fffaf0}
+.soltar b{display:block;font-size:22px;line-height:1;margin-bottom:4px}
+
+/* ----- BOTONES ----- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;padding:12px 18px;border:2px solid transparent;border-radius:8px;font:inherit;font-weight:800;font-size:16px;cursor:pointer;transition:background .12s ease-out,transform .08s ease-out,box-shadow .12s}
+.btn-pri{background:var(--marca);color:#fff;box-shadow:0 3px 0 var(--marca-activo)}
+.btn-pri:hover{background:var(--marca-hover)}
+.btn-pri:active{background:var(--marca-activo);transform:translateY(2px);box-shadow:0 1px 0 var(--marca-activo)}
+.btn:focus-visible{outline:3px solid var(--b3);outline-offset:3px}
+.btn-sec{background:#fff;color:var(--marca);border-color:var(--marca)}
+.btn-sec:hover{background:var(--marca-claro)}
+.btn-rojo{background:var(--acento);color:#fff;box-shadow:0 3px 0 #7d0a1d}
+.btn-rojo:hover{background:var(--acento-hover)}
+.btn-verde{background:var(--ok);color:#fff;box-shadow:0 3px 0 #135c31}
+.btn-verde:hover{background:#18723e}
+.btn[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none}
+.btn-chico{width:auto;min-height:34px;padding:5px 12px;font-size:13px;font-weight:700;box-shadow:none}
+.btn-ancho-auto{width:auto}
+.enlace{display:block;text-align:center;margin-top:14px;font-size:14px;color:var(--marca);font-weight:600;text-decoration:underline;cursor:pointer}
+.estados{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.estados .btn{width:auto;font-size:13px;min-height:38px;padding:7px 12px}
+.estados small{display:block;text-align:center;font-size:11px;color:var(--suave);margin-top:3px}
+
+.notas{background:var(--hoja);border:1px solid var(--linea);border-radius:var(--radio);padding:16px 18px;font-size:14px}
+.notas h3{font-size:16px;margin-bottom:8px}
+.notas ul{margin:0;padding-left:18px}
+.notas li{margin-bottom:6px}
+
+/* ----- VOTAR ----- */
+.partidos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.partido{position:relative;border:2px solid var(--linea);border-radius:var(--radio);padding:14px;text-align:center;background:#fff;cursor:pointer;transition:border-color .12s,box-shadow .12s}
+.partido:hover{border-color:#8f9bb8}
+.partido.elegido{border-color:var(--marca);box-shadow:0 0 0 3px rgba(29,58,138,.25);background:#f5f8ff}
+.partido.elegido::after{content:"✓ Elegido";position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--marca);color:#fff;font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px}
+.logo{width:56px;height:56px;border-radius:50%;margin:0 auto 8px;display:grid;place-items:center;font-weight:800;color:#fff;font-size:20px}
+.partido b{display:block;font-size:14px}
+.partido span{display:block;font-size:12px;color:var(--suave);margin-top:3px}
+.partido em{display:block;font-style:normal;font-size:11.5px;color:var(--suave);margin-top:6px;border-top:1px dashed var(--linea);padding-top:6px}
+.modal-fondo{background:rgba(20,33,61,.55);padding:28px 16px}
+.modal{background:#fff;border-radius:var(--radio);max-width:340px;margin:0 auto;padding:20px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.modal .fila{display:flex;gap:10px;margin-top:16px}
+.grande{font-size:52px;line-height:1}
+
+/* ----- PANEL ADMIN ----- */
+.panel{display:grid;grid-template-columns:160px minmax(0,1fr);min-height:340px}
+@media (max-width:560px){.panel{grid-template-columns:1fr}}
+.menu{background:#14213d;padding:12px;display:flex;flex-direction:column;gap:6px}
+@media (max-width:560px){.menu{flex-direction:row;flex-wrap:wrap}}
+.menu a{padding:10px 12px;border-radius:8px;font-size:14px;font-weight:600;color:#c9d2ea;text-decoration:none;cursor:pointer}
+.menu a:hover{background:rgba(255,255,255,.08);color:#fff}
+.menu a.on{background:#fff;color:var(--marca);font-weight:800}
+.contenido{padding:16px;min-width:0}
+.fila-tit{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.fila-tit h2{font-size:20px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.chip{font-size:13px;font-weight:700;padding:7px 13px;border-radius:8px;border:2px solid var(--marca);color:var(--marca);background:#fff;cursor:pointer}
+.chip:hover{background:var(--marca-claro)}
+.chip.on{background:var(--marca);color:#fff}
+.chip.gen{border-color:#14213d;color:#14213d}
+.chip.gen.on{background:#14213d;color:#fff}
+.barras{display:flex;flex-direction:column;gap:9px}
+.bar{display:grid;grid-template-columns:110px minmax(0,1fr) 46px;gap:8px;align-items:center;font-size:13px;font-weight:600}
+.bar .riel{height:22px;background:#e1e6f0;border-radius:6px;overflow:hidden}
+.bar .lleno{height:100%;border-radius:6px}
+.bar .num{text-align:right;font-weight:800}
+.vivo{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--acento);font-weight:800;background:#fde8eb;padding:4px 10px;border-radius:99px}
+.vivo::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--acento);animation:latido 1.2s infinite}
+@keyframes latido{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.vivo::before{animation:none}}
+.dos{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:700px){.dos{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff}
+th{background:var(--marca);color:#fff;text-align:left;padding:8px 6px;font-weight:700}
+td{padding:7px 6px;border-bottom:1px solid var(--linea)}
+tbody tr:nth-child(even) td{background:#f5f7fb}
+.puestos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:480px){.puestos{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.puesto{border:2px solid var(--linea);border-radius:var(--radio);padding:10px;text-align:center;background:#fff}
+.puesto .n{font-size:24px;font-weight:800}
+.puesto.p1{border-color:var(--b3);background:#fff7de}
+.puesto small{display:block;color:var(--suave);font-size:12px}
+.lista-cand{display:flex;flex-direction:column;gap:8px}
+.cand{display:flex;align-items:center;gap:10px;border:1px solid var(--linea);border-radius:8px;padding:8px 10px;font-size:13px;background:#fff}
+.cand .logo{width:34px;height:34px;font-size:13px;margin:0}
+.cand .logo{flex:none}.cand .datos{flex:1;min-width:0}
+.cand small{color:var(--suave)}
+.cand .acc{display:flex;gap:6px}
+.buscar{margin-bottom:8px}
+.buscar .input{padding:8px 10px;font-size:13px}
+
+/* ----- FINAL ----- */
+.podio{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:18px 0}
+.escalon{width:min(22%,110px);text-align:center}
+.escalon .caja{background:var(--marca);color:#fff;font-weight:800;font-size:28px;display:grid;place-items:center;border-radius:var(--radio) var(--radio) 0 0}
+.escalon b{display:block;font-size:12px;margin-bottom:6px}
+.fin{text-align:center}
+.fin h2{font-size:clamp(26px,5vw,40px)}
+.sello{display:inline-block;border:3px solid var(--acento);color:var(--acento);padding:4px 14px;font-weight:800;transform:rotate(-4deg);margin-bottom:10px;letter-spacing:.05em;background:#fff}
+.caja-error{border:2px solid var(--acento);background:#fff5f6;border-radius:8px;padding:12px;font-size:14px;margin-bottom:14px}
+.caja-aviso{border:2px solid var(--ambar);background:var(--ambar-claro);border-radius:8px;padding:12px;font-size:14px;color:#5e3d0c}
+.pie{max-width:1100px;margin:0 auto;padding:10px 16px 40px;color:var(--suave);font-size:13px}
+</style>
+</head>
+<body data-var="v1">
+
+<div class="barra">
+  <h1>Votaciones · Estilo A</h1>
+  <div class="temas" id="temas">
+    <button data-v="v1" class="activo">A1 · Franja de color</button>
+    <button data-v="v2">A2 · Fondos de color</button>
+    <button data-v="v3">A3 · Banda de título</button>
+  </div>
+</div>
+
+<p class="intro">Estilo A mejorado. Botones con relieve y colores distintos según lo que hacen; cuadros de escritura grises con borde marcado (se ponen blancos al escribir); cada apartado en su propia caja. Hay 3 formas de separar los apartados: cambie con los botones de arriba y elija A1, A2 o A3.</p>
+
+<div class="rejilla">
+
+  <!-- 1 REGISTRO -->
+  <div class="bloque">
+    <div>
+      <div class="etiqueta">Pantalla 1 · Registro del votante</div>
+      <div class="pantalla">
+        <div class="cabeza"><span>Elecciones 2026</span><span class="pill">Votación abierta</span></div>
+        <div class="cuerpo"><div class="centro">
+          <h2 class="titulo-pant">Registro</h2>
+          <p class="bajada">Escriba sus datos para poder votar.</p>
+          <section class="seccion">
+            <h4 class="sec-tit"><span class="ic">1</span>Sus datos</h4>
+            <div class="sec-cuerpo">
+              <div class="campo"><label>Nombre <span class="req">*</span><small>10 a 30 letras</small></label><input class="input" value="María Fernanda"><span class="contador ok">14 / 30 ✓</span></div>
+              <div class="campo"><label>Apellido <span class="req">*</span><small>10 a 30 letras</small></label><input class="input foco" value="Quispe Hua"><span class="contador ok">10 / 30 ✓</span></div>
+              <div class="campo"><label>DNI <span class="req">*</span><small>8 números</small></label><input class="input" placeholder="Ej.: 45879123"></div>
+            </div>
+          </section>
+          <button class="btn btn-pri">Ingresar →</button>
+          <span class="enlace">Entrar como administrador</span>
+        </div></div>
+      </div>
+    </div>
+    <div class="notas">
+      <h3>Qué hace</h3>
+      <ul>
+        <li>Cuadros de escritura grises con borde marcado. El que se está usando se pone blanco con borde azul (como «Apellido»).</li>
+        <li>El contador debajo se pone verde cuando ya tiene las letras necesarias.</li>
+        <li>Nombre, apellido y DNI son obligatorios (asterisco rojo).</li>
+        <li>DNI de 8 números. No se aceptan DNI repetidos.</li>
+        <li>Si el admin ya publicó, al ingresar se ve la pantalla 9.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2 ACCESO ADMIN -->
+  <div class="bloque">
+    <div>
+      <div class="etiqueta">Pantalla 2 · Acceso del administrador</div>
+      <div class="pantalla">
+        <div class="cabeza" style="background:#14213d"><span>Elecciones 2026</span><span class="pill">Administrador</span></div>
+        <div class="cuerpo"><div class="centro">
+          <h2 class="titulo-pant" style="margin-bottom:14px">Acceso del administrador</h2>
+          <section class="seccion">
+            <h4 class="sec-tit"><span class="ic">🔒</span>Datos de acceso</h4>
+            <div class="sec-cuerpo">
+              <div class="campo"><label>Nombre y apellido</label><input class="input" value="Administrador General"></div>
+              <div class="campo"><label>Contraseña</label><input class="input mal" type="password" value="12"><div class="aviso-mal">Contraseña incorrecta.</div></div>
+            </div>
+          </section>
+          <button class="btn btn-pri" style="background:#14213d;box-shadow:0 3px 0 #000">Ingresar al panel</button>
+          <span class="enlace">← Volver al registro</span>
+        </div></div>
+      </div>
+    </div>
+    <div class="notas">
+      <h3>Qué hace</h3>
+      <ul>
+        <li>Cabecera y botón en azul oscuro para que se note que es otra entrada.</li>
+        <li>El admin pone su nombre y la contraseña (1234) y entra sin registrarse.</li>
+        <li>Si la contraseña está mal, el cuadro se pone rojo con el aviso.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 3 VOTAR -->
+  <div class="bloque">
+    <div>
+      <div class="etiqueta">Pantalla 3 · Elegir partido y votar</div>
+      <div class="pantalla">
+        <div class="cabeza"><span>Hola, María Fernanda</span><span class="pill">DNI 45879123</span></div>
+        <div class="cuerpo">
+          <h2 class="titulo-pant">Elija un partido</h2>
+          <p class="bajada">Toque una tarjeta. Solo puede votar una vez.</p>
+          <section class="seccion">
+            <h4 class="sec-tit"><span class="ic">✓</span>Partidos</h4>
+            <div class="sec-cuerpo" style="padding-top:20px">
+              <div class="partidos">
+                <div class="partido"><div class="logo" style="background:var(--b1)">SN</div><b>Partido Sol Naciente</b><span>Juan Carlos Mendoza</span><em>Trabajo para todos los jóvenes</em></div>
+                <div class="partido elegido"><div class="logo" style="background:var(--b2)">RV</div><b>Renovación Verde</b><span>Rosa Elena Paredes</span><em>Por un distrito limpio y seguro</em></div>
+                <div class="partido"><div class="logo" style="background:var(--b3)">UP</div><b>Unidad del Pueblo</b><span>Luis Alberto Torres</span></div>
+                <div class="partido"><div class="logo" style="background:var(--b4)">FA</div><b>Fuerza Andina Unida</b><span>Carmen Lucía Rojas</span></div>
+              </div>
+            </div>
+          </section>
+          <button class="btn btn-verde">Votar por Renovación Verde</button>
+        </div>
+        <div class="modal-fondo">
+          <div class="modal">
+            <h3 style="font-size:18px">¿Confirma su voto?</h3>
+            <p style="font-size:14px;color:var(--suave);margin:8px 0 0">Va a votar por <b style="color:var(--tinta)">Renovación Verde</b>. Después no se puede cambiar.</p>
+            <div class="fila"><button class="btn btn-sec">Volver</button><button class="btn btn-verde">Sí, votar</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notas">
+      <h3>Qué hace</h3>
+      <ul>
+        <li>La tarjeta elegida se marca con borde azul y la etiqueta «✓ Elegido».</li>
+        <li>El botón de votar es verde (acción de confirmar), distinto del azul de «Ingresar».</li>
+        <li>Mientras no elija un partido, el botón aparece apagado.</li>
+        <li>El votante no ve porcentajes. Al confirmar, el voto se guarda con su nombre, apellido y DNI.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 4 VOTO LISTO / YA VOTO -->
+  <div class="bloque">
+    <div>
+      <div class="etiqueta">Pantalla 4 · Voto registrado / DNI repetido</div>
+      <div class="pantalla">
+        <div class="cabeza"><span>Elecciones 2026</span><span class="pill">Voto guardado</span></div>
+        <div class="cuerpo"><div class="centro" style="text-align:center">
+          <section class="seccion s-res"><div class="sec-cuerpo">
+            <div class="grande" style="color:var(--ok)">✓</div>
+            <h2 style="font-size:24px;margin:8px 0">¡Gracias por votar!</h2>
+            <p style="color:var(--suave);font-size:14px;margin:0">Su voto quedó guardado. Los resultados se verán cuando el administrador los publique.</p>
+          </div></section>
+          <button class="btn btn-sec">Salir</button>
+        </div></div>
+        <div class="cuerpo" style="border-top:1px solid var(--linea)"><div class="centro">
+          <div class="caja-error"><b>Este DNI ya votó.</b><br>Cada persona puede votar una sola vez.</div>
+          <div class="campo"><label>DNI</label><input class="input mal" value="45879123"><div class="aviso-mal">El DNI 45879123 ya está registrado.</div></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="notas">
+      <h3>Qué hace</h3>
+      <ul>
+        <li>Arriba: lo que ve la persona después de votar, en una caja verde.</li>
+        <li>Abajo: aviso en rojo si alguien entra con un DNI que ya votó.</li>
+        <li>El servidor también revisa el DNI: no se puede votar dos veces ni recargando la página.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 5 INSCRIBIR -->
+  <div class="bloque">
+    <div>
+      <div class="etiqueta">Pantalla 5 · Panel admin · Inscribir participante</div>
+      <div class="pantalla">
+        <div class="cabeza" style="background:#14213d"><span>Panel del administrador</span><span class="pill">Salir</span></div>
+        <div class="panel">
+          <div class="menu"><a class="on">➕ Inscribir</a><a>📊 Resultados</a><a>📢 Publicar</a></div>
+          <div class="contenido">
+            <div class="fila-tit"><h2>Inscribir participante</h2></div>
+            <div class="dos">
+              <section class="seccion">
+                <h4 class="sec-tit"><span class="ic">*</span>Obligatorio</h4>
+                <div class="sec-cuerpo">
+                  <div class="campo"><label>Nombre <span class="req">*</span><small>10–30</small></label><input class="input" value="Rosa Elena"></div>
+                  <div class="campo"><label>Apellido <span class="req">*</span><small>10–30</small></label><input class="input" value="Paredes Salas"></div>
+                  <div class="campo"><label>Partido <span class="req">*</span><small>10–40</small></label><input class="input foco" value="Renovación Verde"></div>
+                </div>
+              </section>
+              <section class="seccion s-opc">
+                <h4 class="sec-tit"><span class="ic">+</span>Opcional</h4>
+                <div class="sec-cuerpo">
+                  <div class="campo"><label>Logo</label><div class="soltar"><b>⬆</b>Suelte la imagen aquí<br>o toque para elegirla</div></div>
+                  <div class="campo"><label>Descripción <small>10–50</small></label><input class="input" value="Por un distrito limpio y seguro"><span class="contador ok">31 / 50 ✓</span></div>
+                </div>
+              </section>
+            </div>
+            <button class="btn btn-pri" style="margin-bottom:14px">➕ Inscribir participante</button>
+            <section class="seccion s-lista">
+              <h4 class="sec-tit"><span class="ic">≡</span>Inscritos (2)</h4>
+              <div class="sec-cuerpo">
+                <div class="lista-cand">
+                  <div class="cand"><div class="logo" style="background:var(--b1)">SN</div><div class="datos"><b>Partido Sol Naciente</b><br><small>Juan Carlos Mendoza</small></div><span class="acc"><button class="btn btn-sec btn-chico">✎ Editar</button><button class="btn btn-rojo btn-chico">Quitar</button></span></div>
+                  <div class="cand"><div class="logo" style="background:var(--b2)">RV</div><div class="datos"><b>Renovación Verde</b><br><small>Rosa Elena Paredes</small></div><span class="acc"><button class="btn btn-sec btn-chico">✎ Editar</button><button class="btn btn-rojo btn-chico">Quitar</button></span></div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notas">
+      <h3>Qué hace</h3>
+      <ul>
+        <li>Tres apartados separados: <b>Obligatorio</b> (azul), <b>Opcional</b> (ámbar) e <b>Inscritos</b> (gris).</li>
+        <li>Menú lateral oscuro: la sección abierta queda en blanco.</li>
+        <li>«Inscribir participante» es el botón principal, grande y azul con relieve.</li>
+        <li>En la lista, «Editar» es de borde azul y «Quitar» es rojo, para no confundirlos.</li>
+        <li>No deja inscribir dos veces el mismo partido.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 5b ESTADOS DE BOTONES -->
+  <div class="bloque">
+    <div>
+      <div class="etiqueta">Guía · Colores y estados de los botones</div>
+      <div class="pantalla"><div class="cuerpo">
+        <section class="seccion s-lista"><h4 class="sec-tit"><span class="ic">i</span>Cada color tiene un uso</h4>
+          <div class="sec-cuerpo">
+            <div class="estados">
+              <div><button class="btn btn-pri">Ingresar</button><small>Azul: avanzar</small></div>
+              <div><button class="btn btn-verde">Votar</button><small>Verde: confirmar</small></div>
+              <div><button class="btn btn-rojo">Publicar</button><small>Rojo: sin vuelta atrás</small></div>
+              <div><button class="btn btn-sec">Volver</button><small>Borde: secundario</small></div>
+              <div><button class="btn btn-pri" disabled>Votar</button><small>Apagado</small></div>
+            </div>
+          </div>
+        </section>
+      </div></div>
+    </div>
+    <div class="notas">
+      <h3>Qué hace</h3>
+      <ul>
+        <li>Pase el ratón por encima o apriete los botones: se oscurecen y se hunden un poco.</li>
+        <li>Con el teclado (tecla Tab) aparece un borde amarillo alrededor.</li>
+        <li>Al enviar, el botón muestra «Guardando…» y no deja apretar dos veces.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 6 GENERAL -->
+  <div class="bloque">
+    <div>
+      <div class="etiqueta">Pantalla 6 · Panel admin · Resultados «General» en vivo</div>
+      <div class="pantalla">
+        <div class="cabeza" style="background:#14213d"><span>Panel del administrador</span><span class="pill">Salir</span></div>
+        <div class="panel">
+          <div class="menu"><a>➕ Inscribir</a><a class="on">📊 Resultados</a><a>📢 Publicar</a></div>
+          <div class="contenido">
+            <div class="fila-tit"><h2>Resultados</h2><span class="vivo">EN VIVO · 248 votos</span></div>
+            <div class="chips"><span class="chip gen on">General</span><span class="chip">Sol Naciente</span><span class="chip">Renovación Verde</span><span class="chip">Unidad del Pueblo</span><span class="chip">Fuerza Andina</span></div>
+            <section class="seccion">
+              <h4 class="sec-tit"><span class="ic">▮</span>Porcentaje por partido</h4>
+              <div class="sec-cuerpo"><div class="barras">
+                <div class="bar"><span>Renovación V.</span><div class="riel"><div class="lleno" style="width:38%;background:var(--b2)"></div></div><span class="num">38%</span></div>
+                <div class="bar"><span>Sol Naciente</span><div class="riel"><div class="lleno" style="width:29%;background:var(--b1)"></div></div><span class="num">29%</span></div>
+                <div class="bar"><span>Unidad Pueblo</span><div class="riel"><div class="lleno" style="width:21%;background:var(--b3)"></div></div><span class="num">21%</span></div>
+                <div class="bar"><span>Fuerza Andina</span><div class="riel"><div class="lleno" style="width:12%;background:var(--b4)"></div></div><span class="num">12%</span></div>
+              </div></div>
+            </section>
+            <section class="seccion s-res">
+              <h4 class="sec-tit"><span class="ic">★</span>Quién va ganando</h4>
+              <div class="sec-cuerpo"><div class="puestos">
+                <div class="puesto p1"><div class="n">1.º</div><b>Renovación Verde</b><small>94 votos</small></div>
+                <div class="puesto"><div class="n">2.º</div><b>Sol Naciente</b><small>72 votos</small></div>
+                <div class="puesto"><div class="n">3.º</div><b>Unidad del Pueblo</b><small>52 votos</small></div>
+                <div class="puesto"><div class="n">4.º</div><b>Fuerza Andina</b><small>30 votos</small></div>
+              </div></div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notas">
+      <h3>Qué hace</h3>
+      <ul>
+        <li>Botones de partido con borde azul; «General» en azul oscuro para distinguirlo. El elegido se rellena.</li>
+        <li>Dos apartados: gráfico de barras arriba y «Quién va ganando» (1.º a 4.º) abajo.</li>
+        <li>Se actualiza solo cada pocos segundos.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 7 POR PARTIDO -->
+  <div class="bloque">
+    <div>
+      <div class="etiqueta">Pantalla 7 · Panel admin · Resultados de un partido</div>
+      <div class="pantalla">
+        <div class="cabeza" style="background:#14213d"><span>Panel del administrador</span><span class="pill">Salir</span></div>
+        <div class="panel">
+          <div class="menu"><a>➕ Inscribir</a><a class="on">📊 Resultados</a><a>📢 Publicar</a></div>
+          <div class="contenido">
+            <div class="fila-tit"><h2>Renovación Verde</h2><span class="vivo">EN VIVO</span></div>
+            <div class="chips"><span class="chip gen">General</span><span class="chip">Sol Naciente</span><span class="chip on">Renovación Verde</span><span class="chip">Unidad del Pueblo</span><span class="chip">Fuerza Andina</span></div>
+            <div class="dos">
+              <section class="seccion">
+                <h4 class="sec-tit"><span class="ic">▮</span>Porcentaje</h4>
+                <div class="sec-cuerpo">
+                  <div style="font-size:40px;font-weight:800;color:var(--b2)">38%</div>
+                  <div style="color:var(--suave);font-size:13px;margin-bottom:10px">94 de 248 votos</div>
+                  <div class="barras">
+                    <div class="bar"><span>Este partido</span><div class="riel"><div class="lleno" style="width:38%;background:var(--b2)"></div></div><span class="num">94</span></div>
+                    <div class="bar"><span>Los demás</span><div class="riel"><div class="lleno" style="width:62%;background:#8f9bb8"></div></div><span class="num">154</span></div>
+                  </div>
+                </div>
+              </section>
+              <section class="seccion s-lista">
+                <h4 class="sec-tit"><span class="ic">≡</span>Quiénes votaron</h4>
+                <div class="sec-cuerpo">
+                  <div class="buscar"><input class="input" placeholder="🔍 Buscar por DNI o nombre"></div>
+                  <table>
+                    <thead><tr><th>Nombre</th><th>Apellido</th><th>DNI</th></tr></thead>
+                    <tbody>
+                      <tr><td>María Fernanda</td><td>Quispe Huamán</td><td>45879123</td></tr>
+                      <tr><td>José Antonio</td><td>Ramírez Castro</td><td>70214588</td></tr>
+                      <tr><td>Ana Gabriela</td><td>Flores Vargas</td><td>41236987</td></tr>
+                      <tr><td colspan="3" style="color:var(--suave)">… 91 más</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notas">
+      <h3>Qué hace</h3>
+      <ul>
+        <li>Al apretar un partido: su porcentaje en barras a la izquierda.</li>
+        <li>A la derecha, la tabla con cabecera azul y filas alternadas: nombre, apellido y DNI de quienes votaron por él.</li>
+        <li>Buscador por DNI o nombre encima de la tabla.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 8 PUBLICAR -->
+  <div class="bloque">
+    <div>
+      <div class="etiqueta">Pantalla 8 · Panel admin · Publicar resultados</div>
+      <div class="pantalla">
+        <div class="cabeza" style="background:#14213d"><span>Panel del administrador</span><span class="pill">Salir</span></div>
+        <div class="panel">
+          <div class="menu"><a>➕ Inscribir</a><a>📊 Resultados</a><a class="on">📢 Publicar</a></div>
+          <div class="contenido">
+            <div class="fila-tit"><h2>Publicar resultados</h2></div>
+            <div class="caja-aviso" style="margin-bottom:14px"><b>Atención:</b> al publicar se cierra la votación. Nadie más podrá votar y todos verán los ganadores.</div>
+            <button class="btn btn-rojo btn-ancho-auto">📢 Publicar y cerrar votación</button>
+          </div>
+        </div>
+        <div class="modal-fondo">
+          <div class="modal">
+            <h3 style="font-size:18px">¿Publicar ahora?</h3>
+            <p style="font-size:14px;color:var(--suave);margin:8px 0 0">Se cierra la votación con 248 votos. Esto no se puede deshacer.</p>
+            <div class="fila"><button class="btn btn-sec">Cancelar</button><button class="btn btn-rojo">Publicar</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notas">
+      <h3>Qué hace</h3>
+      <ul>
+        <li>Aviso ámbar que explica qué pasa al publicar.</li>
+        <li>Botón rojo: es lo único que no tiene vuelta atrás. Pide confirmar.</li>
+        <li>Al publicar, todos los que entren ven la pantalla 9.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 9 FINAL -->
+  <div class="bloque">
+    <div>
+      <div class="etiqueta">Pantalla 9 · Votación finalizada (pantalla grande para todos)</div>
+      <div class="pantalla">
+        <div class="cabeza"><span>Elecciones 2026</span><span class="pill">Resultados oficiales</span></div>
+        <div class="cuerpo fin">
+          <div class="sello">FINALIZÓ</div>
+          <h2>Ganó Renovación Verde</h2>
+          <p style="color:var(--suave);margin:4px 0 0">Rosa Elena Paredes · 38% de 248 votos</p>
+          <div class="podio">
+            <div class="escalon"><b>Sol Naciente</b><div class="caja" style="height:90px">2</div></div>
+            <div class="escalon"><b>Renovación Verde</b><div class="caja" style="height:130px;background:var(--b3);color:#14213d">1</div></div>
+            <div class="escalon"><b>Unidad del Pueblo</b><div class="caja" style="height:65px">3</div></div>
+            <div class="escalon"><b>Fuerza Andina</b><div class="caja" style="height:42px">4</div></div>
+          </div>
+          <section class="seccion" style="max-width:540px;margin:0 auto;text-align:left">
+            <h4 class="sec-tit"><span class="ic">▮</span>Todos los partidos</h4>
+            <div class="sec-cuerpo"><div class="barras">
+              <div class="bar"><span>Renovación V.</span><div class="riel"><div class="lleno" style="width:38%;background:var(--b2)"></div></div><span class="num">38%</span></div>
+              <div class="bar"><span>Sol Naciente</span><div class="riel"><div class="lleno" style="width:29%;background:var(--b1)"></div></div><span class="num">29%</span></div>
+              <div class="bar"><span>Unidad Pueblo</span><div class="riel"><div class="lleno" style="width:21%;background:var(--b3)"></div></div><span class="num">21%</span></div>
+              <div class="bar"><span>Fuerza Andina</span><div class="riel"><div class="lleno" style="width:12%;background:var(--b4)"></div></div><span class="num">12%</span></div>
+            </div></div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <div class="notas">
+      <h3>Qué hace</h3>
+      <ul>
+        <li>Lo ve cualquiera que entre después de publicar.</li>
+        <li>«Finalizó», ganador, podio 1 a 4 y barras de todos los partidos en su propio apartado.</li>
+        <li>Aquí no se muestran nombres ni DNI de votantes.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<p class="pie">Para Render: un servidor (Node.js) guarda candidatos y votos en una base de datos gratis, revisa el DNI repetido y la contraseña del admin. Carpeta: D:\descargas\votacciones.</p>
+
+<script>
+var params = new URLSearchParams(location.search);
+function poner(v) {
+  document.body.dataset.var = v;
+  document.querySelectorAll('#temas button').forEach(function (x) { x.classList.toggle('activo', x.dataset.v === v); });
+}
+document.getElementById('temas').addEventListener('click', function (e) {
+  var b = e.target.closest('button');
+  if (b) poner(b.dataset.v);
+});
+if (params.get('v')) poner(params.get('v'));
+</script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel del administrador</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos/estilos.css">
+</head>
+<body>
+<header class="cabeza oscura"><span id="cabeza-titulo">Elecciones 2026</span></header>
+
+<main>
+  <!-- Acceso -->
+  <section id="vista-acceso" class="cuerpo" hidden>
+    <div class="centro">
+      <h1 class="titulo-pant" style="margin-bottom:16px">Acceso del administrador</h1>
+      <div id="acceso-error" class="caja-error" hidden role="alert"></div>
+      <form id="form-acceso" novalidate>
+        <section class="seccion">
+          <h2 class="sec-tit"><span class="ic">🔒</span>Datos de acceso</h2>
+          <div class="sec-cuerpo">
+            <div class="campo"><label for="a-nombre">Nombre y apellido <span class="pista letras">Aa Solo letras</span></label><input class="input" id="a-nombre" autocomplete="name" maxlength="60" required></div>
+            <div class="campo"><label for="a-clave">Contraseña</label><input class="input" id="a-clave" type="password" autocomplete="current-password" required></div>
+          </div>
+        </section>
+        <button class="btn btn-oscuro" type="submit" id="btn-acceso">Ingresar al panel</button>
+      </form>
+      <a class="enlace" href="index.html">← Volver al registro</a>
+    </div>
+  </section>
+
+  <!-- Panel -->
+  <div id="vista-panel" class="panel" hidden>
+    <nav class="menu" aria-label="Secciones">
+      <button type="button" data-ir="inscribir" class="on"><i aria-hidden="true">➕</i>Inscribir</button>
+      <button type="button" data-ir="resultados"><i aria-hidden="true">📊</i>Resultados</button>
+      <button type="button" data-ir="publicar"><i aria-hidden="true">📢</i>Publicar</button>
+      <div class="menu-pie">
+        <div class="quien-admin"><i aria-hidden="true">👤</i><span><b id="nombre-admin"></b><small>Sesión abierta</small></span></div>
+        <button type="button" class="salir" id="btn-salir-admin" aria-label="Cerrar sesión"><i aria-hidden="true">🚪</i><span class="texto-largo">Cerrar sesión</span><span class="texto-corto">Salir</span></button>
+      </div>
+    </nav>
+
+    <div class="contenido">
+      <div id="aviso-publicado" class="caja-ok" hidden>Los resultados ya están publicados. La votación está cerrada. <a href="index.html">Ver pantalla final</a></div>
+
+      <!-- Inscribir -->
+      <section id="sec-inscribir">
+        <div class="fila-tit"><h1 id="tit-inscribir">Inscribir participante</h1><button type="button" class="btn btn-sec btn-chico" id="btn-ver-inscripciones">👁 Ver inscripciones (<span id="cuenta-inscripciones">0</span>)</button></div>
+        <div id="inscribir-error" class="caja-error" hidden role="alert"></div>
+        <div id="inscribir-ok" class="caja-ok" hidden role="status"></div>
+        <form id="form-candidato" novalidate>
+          <div class="dos" style="margin-bottom:16px">
+            <section class="seccion">
+              <h2 class="sec-tit"><span class="ic">*</span>Obligatorio</h2>
+              <div class="sec-cuerpo">
+                <div class="campo"><label for="c-nombre">Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10–30</small></label><input class="input" id="c-nombre" maxlength="30" required><span class="contador"></span></div>
+                <div class="campo"><label for="c-apellido">Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10–30</small></label><input class="input" id="c-apellido" maxlength="30" required><span class="contador"></span></div>
+                <div class="campo"><label for="c-partido">Partido <span class="req">*</span><span class="pista texto">Aa 1 Letras y números</span><small>10–40</small></label><input class="input" id="c-partido" maxlength="40" required><span class="contador"></span></div>
+              </div>
+            </section>
+            <details class="seccion s-opc desplegable" id="det-opcional" open>
+              <summary class="sec-tit"><span class="ic">+</span>Opcional: logo y descripción<span class="flecha-desp" aria-hidden="true">▾</span></summary>
+              <div class="sec-cuerpo">
+                <div class="campo">
+                  <label>Logo</label>
+                  <div class="soltar" id="zona-logo"><b aria-hidden="true">⬆</b>Suelte la imagen aquí<br>o toque para elegirla<input type="file" id="c-logo" accept="image/png,image/jpeg,image/webp" aria-label="Elegir logo"></div>
+                  <div class="vista-logo" id="vista-logo" hidden><img id="img-logo" alt="Logo elegido"><span>Logo listo</span><button type="button" class="btn btn-sec btn-chico" id="btn-acomodar-logo">✋ Acomodar</button><button type="button" class="btn btn-rojo btn-chico" id="btn-quitar-logo">Quitar</button></div>
+                </div>
+                <div class="campo"><label for="c-descripcion">Descripción <span class="pista texto">Aa 1 Letras y números</span><small>10–50</small></label><textarea class="input" id="c-descripcion" maxlength="50" rows="2"></textarea><span class="contador"></span></div>
+              </div>
+            </details>
+          </div>
+          <div class="fila-botones" style="margin-bottom:16px">
+            <button class="btn btn-pri" type="submit" id="btn-inscribir">➕ Inscribir participante</button>
+            <button class="btn btn-sec" type="button" id="btn-cancelar-edicion" hidden>Cancelar edición</button>
+          </div>
+        </form>
+        <details class="seccion s-lista desplegable" id="det-inscritos" open>
+          <summary class="sec-tit"><span class="ic">≡</span><span id="tit-inscritos">Inscritos (0)</span><span class="flecha-desp" aria-hidden="true">▾</span></summary>
+          <div class="sec-cuerpo">
+            <div class="campo" id="campo-buscar-inscrito" hidden><input class="input" id="buscar-inscrito" placeholder="🔍 Buscar inscrito por partido o nombre" aria-label="Buscar inscrito"></div>
+            <div class="lista-cand caja-larga" id="lista-inscritos"></div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Resultados -->
+      <section id="sec-resultados" hidden>
+        <div class="fila-tit"><h1 id="tit-resultados">Resultados</h1><span class="vivo" id="vivo">EN VIVO</span></div>
+        <div class="campo elegir-vista"><label for="elegir-partido">Ver resultados de</label><select class="input" id="elegir-partido"></select></div>
+
+        <div id="res-general">
+          <section class="seccion">
+            <h2 class="sec-tit"><span class="ic">▮</span>Porcentaje por partido</h2>
+            <div class="sec-cuerpo"><div class="barras" id="barras-general"></div><button type="button" class="enlace" id="btn-ver-todos" hidden></button></div>
+          </section>
+          <section class="seccion s-res">
+            <h2 class="sec-tit"><span class="ic">★</span>Quién va ganando</h2>
+            <div class="sec-cuerpo"><div class="puestos" id="puestos"></div></div>
+          </section>
+        </div>
+
+        <div id="res-partido" hidden>
+          <button type="button" class="btn btn-sec btn-chico" id="btn-volver-general" style="margin-bottom:14px">← Volver a General</button>
+          <section class="seccion">
+            <h2 class="sec-tit"><span class="ic">▮</span><span id="tit-partido-sec">Porcentaje</span></h2>
+            <div class="sec-cuerpo">
+              <div class="porc-grande" id="porc-partido"></div>
+              <div id="detalle-partido" style="color:var(--suave);font-size:14px;margin-bottom:12px"></div>
+              <div class="barras" id="barras-partido"></div>
+            </div>
+          </section>
+          <section class="seccion s-lista">
+            <h2 class="sec-tit"><span class="ic">≡</span><span id="tit-votantes">Quiénes votaron</span></h2>
+            <div class="sec-cuerpo">
+              <div class="campo"><input class="input" id="buscar" placeholder="🔍 Buscar por DNI o nombre" aria-label="Buscar votante"></div>
+              <div class="tabla-caja">
+                <table>
+                  <thead><tr><th>N.º</th><th>Nombre</th><th>Apellido</th><th>DNI</th></tr></thead>
+                  <tbody id="tabla-votantes"></tbody>
+                </table>
+              </div>
+              <div class="paginas" id="paginas">
+                <button type="button" class="btn btn-sec btn-chico" id="pag-anterior">← Anterior</button>
+                <span id="pag-texto"></span>
+                <button type="button" class="btn btn-sec btn-chico" id="pag-siguiente">Siguiente →</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- Publicar -->
+      <section id="sec-publicar" hidden>
+        <div class="fila-tit"><h1>Publicar resultados</h1></div>
+        <div id="publicar-error" class="caja-error" hidden role="alert"></div>
+        <div id="estado-abierta" class="caja-aviso"><b>Atención:</b> al publicar se cierra la votación. Nadie más podrá votar y todos verán los ganadores.</div>
+        <div id="estado-publicado" class="caja-ok estado-grande" hidden>✅ <span><b>Resultados publicados.</b><br>La votación está cerrada y todos ven los ganadores.</span></div>
+        <div id="estado-oculto" class="caja-aviso estado-grande" hidden>🙈 <span><b>Votación cerrada, resultados ocultos.</b><br>Nadie puede votar ni ver los resultados.</span></div>
+        <div class="acciones-publicar">
+          <div class="accion" id="accion-publicar">
+            <b>📢 Publicar resultados</b><p>Cierra la votación y todos ven los ganadores.</p>
+            <button class="btn btn-rojo" type="button" id="btn-publicar">📢 Publicar y cerrar votación</button>
+          </div>
+          <div class="accion" id="accion-ocultar" hidden>
+            <b>🙈 Ocultar resultados</b><p>Nadie ve los resultados, pero la votación sigue cerrada (no se puede votar).</p>
+            <button class="btn btn-sec" type="button" id="btn-ocultar">Ocultar resultados</button>
+          </div>
+          <div class="accion" id="accion-reabrir" hidden>
+            <b>↩ Reabrir votación</b><p>Se ocultan los resultados y se puede volver a votar. Los votos guardados se mantienen.</p>
+            <button class="btn btn-borde-rojo" type="button" id="btn-reabrir">Reabrir votación</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="scripts/comun.js"></script>
+<script src="scripts/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "votaciones",
+  "version": "1.0.0",
+  "description": "Elecciones: registro de votantes, voto único por DNI y panel del administrador con resultados en vivo.",
+  "main": "servidor.js",
+  "scripts": {
+    "start": "node servidor.js",
+    "prueba": "node pruebas/prueba-completa.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}
