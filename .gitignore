@@ -2,3 +2,5 @@ node_modules/
 datos/
 *.log
 
+.neon
+.env.local

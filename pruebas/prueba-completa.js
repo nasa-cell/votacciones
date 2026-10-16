@@ -123,7 +123,7 @@ async function principal() {
 }
 
 const servidor = spawn(process.execPath, [path.join(__dirname, '..', 'servidor.js')], {
-  env: { ...process.env, PORT: PUERTO, CARPETA_DATOS: carpeta, DATABASE_URL: '' },
+  env: { ...process.env, PORT: PUERTO, CARPETA_DATOS: carpeta, DATABASE_URL: process.env.PRUEBA_DATABASE_URL || '' },
   stdio: ['ignore', 'pipe', 'inherit'],
 });
 servidor.stdout.once('data', async () => {
