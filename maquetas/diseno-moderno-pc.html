@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votaciones - Diseño moderno PC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#e9e9ec;color:#18181b;font:15px system-ui,sans-serif}
+.hoja{max-width:1380px;margin:0 auto;padding:18px 16px 50px}
+.hoja > h1{font-size:21px;margin:0 0 4px}
+.hoja > p{margin:0 0 14px;color:#52525b}
+.elegir{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.elegir button{font:600 15px system-ui;padding:10px 16px;border-radius:10px;border:1.5px solid #c8c8ce;background:#fff;color:#18181b;cursor:pointer}
+.elegir button.activa{background:#18181b;color:#fff;border-color:#18181b}
+.nota-d{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:14px;color:#3f3f46;line-height:1.5}
+.nota-d b{color:#18181b}
+.pantallas{display:grid;gap:22px}
+.marco{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.marco .barra-nav{height:30px;background:#f1f1f3;display:flex;align-items:center;gap:6px;padding:0 12px;border-bottom:1px solid #e4e4e7}
+.marco .barra-nav i{width:10px;height:10px;border-radius:50%;background:#d4d4d8}
+.marco .barra-nav span{margin-left:10px;font:12px system-ui;color:#71717a;background:#fff;border-radius:6px;padding:2px 10px}
+.escala{width:100%;overflow:hidden;position:relative}
+.escala > .pc{width:1280px;height:760px;transform-origin:0 0;position:absolute;left:0;top:0}
+.cap{font:700 13px system-ui;color:#52525b;margin:8px 2px 0}
+.aviso-sim{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#18181bee;color:#fff;font:600 13px system-ui;padding:9px 16px;border-radius:99px;z-index:9;pointer-events:none}
+svg.ico{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ================= estructura común ================= */
+.pc{display:flex;flex-direction:column}
+.app{display:grid;grid-template-columns:232px 1fr;height:100%}
+.lado{display:flex;flex-direction:column;padding:20px 14px;gap:4px}
+.logo-app{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;padding:0 8px 18px}
+.logo-app .marca{width:32px;height:32px;display:grid;place-items:center;border-radius:9px}
+.item{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:9px;font-weight:600;font-size:14.5px;cursor:pointer}
+.pie{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.quien{display:flex;align-items:center;gap:10px;font-size:13px;padding:0 6px}
+.quien .av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px}
+.quien b{display:block;font-size:13.5px}
+.salir{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;border:0;font-family:inherit}
+.main{padding:28px 36px;overflow:hidden}
+.tit-fila{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.tit-fila h2{margin:0;font-size:30px;letter-spacing:-.025em}
+.vivo{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:99px}
+.vivo::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.rejilla{display:grid;grid-template-columns:1.55fr 1fr;gap:18px}
+.caja{border-radius:14px;padding:22px}
+.caja h3{margin:0 0 16px;font-size:15px;display:flex;align-items:center;gap:8px}
+.bar{display:grid;grid-template-columns:170px 1fr 70px;gap:14px;align-items:center;margin-bottom:14px;font-size:14px;font-weight:600}
+.bar .riel{height:12px;border-radius:99px;overflow:hidden}
+.bar .riel i{display:block;height:100%;border-radius:99px}
+.bar .n{text-align:right;font-variant-numeric:tabular-nums}
+.selector{display:flex;align-items:center;justify-content:space-between;border-radius:10px;padding:11px 14px;font-weight:600;margin-bottom:18px;font-size:14.5px}
+.puesto{display:flex;align-items:center;gap:12px;padding:12px 0}
+.puesto .num{width:30px;font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
+.puesto .lg{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;flex:none}
+.puesto .tx{flex:1;font-size:14px}
+.puesto .tx small{display:block;font-size:12.5px}
+.puesto .pc2{font-weight:700;font-variant-numeric:tabular-nums}
+.total{display:flex;gap:28px;margin-bottom:18px}
+.total div b{display:block;font-size:26px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.total div span{font-size:13px}
+
+/* votante */
+.vt{height:100%;display:flex;flex-direction:column}
+.vt-top{display:flex;align-items:center;justify-content:space-between;padding:18px 40px}
+.estado{font-size:13px;font-weight:600;padding:6px 12px;border-radius:99px;display:inline-flex;gap:7px;align-items:center}
+.estado::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.vt-cuerpo{flex:1;padding:10px 40px 30px;display:grid;grid-template-columns:330px 1fr;gap:40px}
+.vt-izq h2{font-size:40px;letter-spacing:-.03em;margin:8px 0 10px;line-height:1.05}
+.vt-izq p{font-size:15.5px;line-height:1.55;margin:0 0 20px}
+.paso{display:flex;gap:10px;align-items:center;font-size:14px;font-weight:600;margin-bottom:10px}
+.paso i{font-style:normal;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:700}
+.cartas{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-content:start}
+.carta{border-radius:14px;padding:18px;display:flex;gap:14px;align-items:flex-start;cursor:pointer;position:relative}
+.carta .lg{width:52px;height:52px;border-radius:13px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:17px;flex:none}
+.carta b{display:block;font-size:16px;margin-bottom:2px}
+.carta span{font-size:13.5px}
+.carta em{display:block;font-style:normal;font-size:13px;margin-top:8px}
+.carta .ok{position:absolute;top:14px;right:14px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center}
+.votar{grid-column:2;display:flex;justify-content:flex-end;align-items:center;gap:14px}
+.btn{font:inherit;font-weight:700;font-size:15.5px;padding:14px 26px;border-radius:11px;border:0;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+
+/* final */
+.fn{height:100%;display:grid;grid-template-columns:1fr 1fr}
+.fn-izq{padding:40px 46px;display:flex;flex-direction:column;justify-content:center}
+.fn-izq .chip{align-self:flex-start;font-size:13px;font-weight:700;letter-spacing:.06em;padding:6px 12px;border-radius:8px}
+.fn-izq h2{font-size:58px;letter-spacing:-.035em;line-height:1;margin:18px 0 12px}
+.fn-izq p{font-size:16px;margin:0 0 26px}
+.grande-pc{font-size:96px;font-weight:800;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.fn-der{padding:40px 46px;display:flex;flex-direction:column;justify-content:center}
+.podio{display:flex;align-items:flex-end;gap:12px;height:250px;margin-bottom:26px}
+.esc{flex:1;text-align:center;font-size:13px;font-weight:600}
+.esc .lg{width:40px;height:40px;border-radius:11px;margin:0 auto 8px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px}
+.esc .col{border-radius:10px 10px 0 0;display:grid;place-items:start center;padding-top:12px;font-weight:800;font-size:22px;margin-top:8px}
+
+/* ================= M1 · Hoja clara ================= */
+.m1{font-family:Geist,system-ui,sans-serif;background:#fafaf9;color:#18181b}
+.m1 .lado{background:#fff;border-right:1px solid #ececea}
+.m1 .logo-app .marca{background:#18181b;color:#fff}
+.m1 .item{color:#52525b}
+.m1 .item:hover{background:#f4f4f2}
+.m1 .item.on{background:#f1f1ef;color:#18181b}
+.m1 .item.on svg{color:#2f5bea}
+.m1 .quien .av{background:#e8edff;color:#2f5bea}
+.m1 .quien small{color:#71717a}
+.m1 .salir{background:#fff;color:#b42318;border:1px solid #f1d1cd}
+.m1 .vivo{background:#fff1f0;color:#d92d20}
+.m1 .caja{background:#fff;border:1px solid #ececea}
+.m1 .selector{background:#fff;border:1px solid #e4e4e2}
+.m1 .bar .riel{background:#f1f1ef}
+.m1 .puesto{border-bottom:1px solid #f1f1ef}
+.m1 .puesto .tx small,.m1 .total div span{color:#71717a}
+.m1 .puesto:first-of-type .num{color:#2f5bea}
+.m1 .vt-top{border-bottom:1px solid #ececea;background:#fff}
+.m1 .estado{background:#ecfdf3;color:#067647}
+.m1 .vt-izq p{color:#52525b}
+.m1 .paso i{background:#f1f1ef;color:#52525b}
+.m1 .paso.hecho i{background:#18181b;color:#fff}
+.m1 .carta{background:#fff;border:1.5px solid #ececea}
+.m1 .carta:hover{border-color:#c9c9c6}
+.m1 .carta.sel{border-color:#2f5bea;box-shadow:0 0 0 4px #e8edff}
+.m1 .carta span,.m1 .carta em{color:#71717a}
+.m1 .carta .ok{border:1.5px solid #d4d4d2}
+.m1 .carta.sel .ok{background:#2f5bea;border-color:#2f5bea;color:#fff}
+.m1 .btn{background:#18181b;color:#fff}
+.m1 .btn.sec{background:#fff;color:#18181b;border:1px solid #e4e4e2}
+.m1 .fn-izq{background:#fff;border-right:1px solid #ececea}
+.m1 .fn-izq .chip{background:#18181b;color:#fff}
+.m1 .fn-izq p{color:#52525b}
+.m1 .esc .col{background:#f1f1ef;color:#52525b}
+.m1 .esc.uno .col{background:#2f5bea;color:#fff}
+
+/* ================= M2 · Noche ================= */
+.m2{font-family:Onest,system-ui,sans-serif;background:#0f1115;color:#ecedf1}
+.m2 .lado{background:#0b0c10;border-right:1px solid #1e2129}
+.m2 .logo-app .marca{background:#c6f432;color:#0b0c10}
+.m2 .item{color:#9aa0ad}
+.m2 .item:hover{background:#171a21;color:#ecedf1}
+.m2 .item.on{background:#1b1f27;color:#fff}
+.m2 .item.on svg{color:#c6f432}
+.m2 .quien .av{background:#262a34;color:#c6f432}
+.m2 .quien small{color:#8a909c}
+.m2 .salir{background:#1b1f27;color:#ff8a80}
+.m2 .vivo{background:#2a1517;color:#ff6b61}
+.m2 .caja{background:#161920;border:1px solid #232733}
+.m2 .selector{background:#161920;border:1px solid #2a2f3b}
+.m2 .bar .riel{background:#232733}
+.m2 .puesto{border-bottom:1px solid #232733}
+.m2 .puesto .tx small,.m2 .total div span{color:#8a909c}
+.m2 .puesto:first-of-type .num{color:#c6f432}
+.m2 .vt-top{border-bottom:1px solid #1e2129}
+.m2 .estado{background:#1d2a12;color:#c6f432}
+.m2 .vt-izq p{color:#a1a7b3}
+.m2 .paso i{background:#232733;color:#a1a7b3}
+.m2 .paso.hecho i{background:#c6f432;color:#0b0c10}
+.m2 .carta{background:#161920;border:1.5px solid #232733}
+.m2 .carta:hover{border-color:#3a4050}
+.m2 .carta.sel{border-color:#c6f432;background:#1a1e15}
+.m2 .carta span,.m2 .carta em{color:#8a909c}
+.m2 .carta .ok{border:1.5px solid #3a4050}
+.m2 .carta.sel .ok{background:#c6f432;border-color:#c6f432;color:#0b0c10}
+.m2 .btn{background:#c6f432;color:#0b0c10}
+.m2 .btn.sec{background:#1b1f27;color:#ecedf1}
+.m2 .fn-izq{background:#0b0c10}
+.m2 .fn-izq .chip{background:#c6f432;color:#0b0c10}
+.m2 .fn-izq p{color:#a1a7b3}
+.m2 .grande-pc{color:#c6f432}
+.m2 .esc .col{background:#232733;color:#a1a7b3}
+.m2 .esc.uno .col{background:#c6f432;color:#0b0c10}
+
+/* ================= M3 · Cartel ================= */
+.m3{font-family:"Bricolage Grotesque",system-ui,sans-serif;background:#f4f1ea;color:#141414}
+.m3 .lado{background:#141414;color:#f4f1ea}
+.m3 .logo-app .marca{background:#ff5a1f;color:#141414}
+.m3 .item{color:#b9b4a8}
+.m3 .item:hover{background:#232323;color:#fff}
+.m3 .item.on{background:#ff5a1f;color:#141414}
+.m3 .quien .av{background:#f4f1ea;color:#141414}
+.m3 .quien small{color:#9c978b}
+.m3 .salir{background:#232323;color:#ffb199}
+.m3 .tit-fila h2{font-size:40px;letter-spacing:-.035em}
+.m3 .vivo{background:#141414;color:#ff5a1f}
+.m3 .caja{background:#fff;border:2px solid #141414}
+.m3 .caja.color{background:#ff5a1f;border-color:#ff5a1f}
+.m3 .caja.color .puesto{border-color:rgba(20,20,20,.18)}
+.m3 .caja.color .tx small{color:#3a1a0c}
+.m3 .selector{background:#fff;border:2px solid #141414}
+.m3 .bar .riel{background:#ece7dc;border-radius:3px}
+.m3 .bar .riel i{border-radius:3px}
+.m3 .puesto{border-bottom:2px solid #ece7dc}
+.m3 .puesto .tx small,.m3 .total div span{color:#6d685d}
+.m3 .total div b{font-size:34px}
+.m3 .vt-top{background:#141414;color:#f4f1ea}
+.m3 .estado{background:#ff5a1f;color:#141414}
+.m3 .vt-izq h2{font-size:52px}
+.m3 .vt-izq p{color:#4a463e}
+.m3 .paso i{background:#e2ddd1;color:#141414}
+.m3 .paso.hecho i{background:#141414;color:#ff5a1f}
+.m3 .carta{background:#fff;border:2px solid #141414}
+.m3 .carta:hover{background:#fffaf2}
+.m3 .carta.sel{background:#ff5a1f}
+.m3 .carta span,.m3 .carta em{color:#5a554b}
+.m3 .carta.sel span,.m3 .carta.sel em{color:#3a1a0c}
+.m3 .carta .ok{border:2px solid #141414}
+.m3 .carta.sel .ok{background:#141414;color:#ff5a1f}
+.m3 .btn{background:#141414;color:#fff;border-radius:10px}
+.m3 .btn.sec{background:transparent;color:#141414;border:2px solid #141414}
+.m3 .fn-izq{background:#ff5a1f}
+.m3 .fn-izq .chip{background:#141414;color:#ff5a1f}
+.m3 .fn-izq h2{font-size:72px}
+.m3 .fn-izq p{color:#3a1a0c}
+.m3 .esc .col{background:#141414;color:#f4f1ea;border-radius:6px 6px 0 0}
+.m3 .esc.uno .col{background:#ff5a1f;color:#141414}
+.pc .carta span.lg,.pc .carta.sel span.lg{color:#fff}
+</style>
+</head>
+<body>
+<div class="hoja">
+  <h1>Votaciones · diseño moderno en PC</h1>
+  <p>Sin franja azul ni menú azul. Mismas pantallas en tres estilos. Toca las tarjetas y los botones.</p>
+  <div class="elegir" id="elegir">
+    <button data-m="m1" class="activa">M1 · Hoja clara</button>
+    <button data-m="m2">M2 · Noche</button>
+    <button data-m="m3">M3 · Cartel</button>
+  </div>
+  <div class="nota-d" id="nota"></div>
+  <div class="pantallas" id="pantallas"></div>
+</div>
+<script>
+const NOTAS = {
+  m1: '<b>Hoja clara:</b> blanco y gris muy suave, menú lateral blanco con una línea fina, letras negras y un solo color de acento (azul vivo) solo en lo elegido. Limpio, como Notion o Linear. Letra Geist.',
+  m2: '<b>Noche:</b> modo oscuro completo, gris carbón, con un verde lima que marca lo importante (lo elegido, el ganador, el botón principal). Moderno, se ve bien en pantallas grandes y proyector. Letra Onest.',
+  m3: '<b>Cartel:</b> fondo arena, menú negro y un naranja fuerte que ocupa bloques enteros (el ganador, lo elegido). Letras grandes y gruesas, como un afiche de campaña. Letra Bricolage.'
+};
+const P = [['RV','Renovación Verde','Rosa Elena Paredes Salas','Por un distrito limpio y seguro','#16a34a',43],
+  ['PS','Partido Sol Naciente','Juan Carlos Mendoza Ruiz','Trabajo para todos los jóvenes','#e11d48',31],
+  ['UD','Unidad del Pueblo','Luis Alberto Torres Vega','','#d97706',18],
+  ['FA','Fuerza Andina Unida','Carmen Lucía Rojas Flores','Salud y educación primero','#2563eb',9]];
+const TOTAL = 101;
+const pc = n => (n / TOTAL * 100).toFixed(1).replace('.', ',') + ' %';
+const I = {
+  urna: '<path d="M3 13h18v8H3z"/><path d="M8 13V5h8v8"/><path d="m10 9 1.5 1.5L14 8"/>',
+  mas: '<path d="M12 5v14M5 12h14"/>',
+  barras: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  mega: '<path d="m3 11 15-6v14L3 13z"/><path d="M7 13v5a2 2 0 0 0 4 0v-4"/>',
+  salir: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/>',
+  check: '<path d="m5 12 5 5L20 7"/>',
+  abajo: '<path d="m6 9 6 6 6-6"/>',
+  copa: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+  ojo: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'
+};
+const ico = n => `<svg class="ico" viewBox="0 0 24 24">${I[n]}</svg>`;
+const lado = activo => `<aside class="lado"><div class="logo-app"><span class="marca">${ico('urna')}</span>Elecciones 2026</div>
+  ${[['mas','Inscribir'],['barras','Resultados'],['mega','Publicar']].map(([i, t]) => `<div class="item ${t === activo ? 'on' : ''}" data-dice="Abre ${t}">${ico(i)}${t}</div>`).join('')}
+  <div class="pie"><div class="quien"><span class="av">AG</span><span><b>Administrador General</b><small>Sesión abierta</small></span></div>
+  <button class="salir" data-dice="Pregunta «¿Estás seguro?» y cierra la sesión">${ico('salir')}Cerrar sesión</button></div></aside>`;
+
+function resultados(m) {
+  const colorBarra = (p, i) => m === 'm2' && i === 0 ? '#c6f432' : m === 'm3' && i === 0 ? '#ff5a1f' : p[4];
+  return `<div class="app">${lado('Resultados')}<main class="main">
+    <div class="tit-fila"><h2>Resultados</h2><span class="vivo">En vivo · ${TOTAL} votos</span></div>
+    <div class="selector" data-dice="Elige General o un partido">Ver resultados de: General (4 partidos)${ico('abajo')}</div>
+    <div class="rejilla">
+      <section class="caja"><h3>${ico('barras')}Porcentaje por partido</h3>
+        <div class="total"><div><b>${TOTAL}</b><span>votos</span></div><div><b>4</b><span>partidos</span></div><div><b>42,6 %</b><span>el primero</span></div></div>
+        ${P.map((p, i) => `<div class="bar"><span>${p[1]}</span><div class="riel"><i style="width:${p[5] / 43 * 100}%;background:${colorBarra(p, i)}"></i></div><span class="n">${pc(p[5])}</span></div>`).join('')}
+      </section>
+      <section class="caja color"><h3>${ico('copa')}Quién va ganando</h3>
+        ${P.map((p, i) => `<div class="puesto"><span class="num">${i + 1}</span><span class="lg" style="background:${p[4]}">${p[0]}</span><span class="tx"><b>${p[1]}</b><small>${p[2]}</small></span><span class="pc2">${p[5]}</span></div>`).join('')}
+      </section>
+    </div></main></div>`;
+}
+function votar() {
+  return `<div class="vt"><div class="vt-top"><div class="logo-app" style="padding:0">${'<span class="marca">' + ico('urna') + '</span>'}Elecciones 2026</div><span class="estado">Votación abierta</span></div>
+  <div class="vt-cuerpo"><div class="vt-izq"><h2>Hola, María.<br>Elija un partido.</h2><p>Toque una tarjeta y después «Votar». Solo puede votar una vez.</p>
+    <div class="paso hecho"><i>${ico('check')}</i>Sus datos (DNI 47001234)</div><div class="paso"><i>2</i>Elegir partido</div><div class="paso"><i>3</i>Confirmar</div></div>
+    <div><div class="cartas">${P.map((p, i) => `<div class="carta ${i === 0 ? 'sel' : ''}"><span class="lg" style="background:${p[4]}">${p[0]}</span><div><b>${p[1]}</b><span>${p[2]}</span>${p[3] ? `<em>${p[3]}</em>` : ''}</div><span class="ok">${ico('check')}</span></div>`).join('')}</div>
+    <div class="votar" style="margin-top:22px"><button class="btn sec" data-dice="Pregunta «¿Estás seguro?» y sale">Salir sin votar</button><button class="btn principal" data-dice="Pregunta «¿Estás seguro?» y guarda el voto">${ico('check')}<span>Votar por Renovación Verde</span></button></div></div>
+  </div></div>`;
+}
+function final() {
+  const orden = [[P[1], 2, 150], [P[0], 1, 210], [P[2], 3, 110], [P[3], 4, 80]];
+  return `<div class="fn"><div class="fn-izq"><span class="chip">FINALIZÓ</span><h2>Ganó Renovación Verde</h2><p>Rosa Elena Paredes Salas · ${TOTAL} votos en total</p>
+    <div class="grande-pc">42,6 %</div><div style="margin-top:28px"><button class="btn sec" data-dice="Pregunta «¿Estás seguro?» y muestra la despedida">${ico('salir')}Salir</button></div></div>
+    <div class="fn-der"><div class="podio">${orden.map(([p, n, h]) => `<div class="esc ${n === 1 ? 'uno' : ''}"><span class="lg" style="background:${p[4]}">${p[0]}</span>${p[1]}<div class="col" style="height:${h}px">${n}</div></div>`).join('')}</div>
+    ${P.map((p, i) => `<div class="bar" style="grid-template-columns:160px 1fr 64px"><span>${p[1]}</span><div class="riel"><i style="width:${p[5] / 43 * 100}%;background:${p[4]}"></i></div><span class="n">${pc(p[5])}</span></div>`).join('')}</div></div>`;
+}
+const PANT = [['Administrador · resultados en vivo', 'admin.html', resultados], ['Votante · elegir partido', 'votacciones.onrender.com', votar], ['Votante · FINALIZÓ', 'votacciones.onrender.com', final]];
+function pintar(m) {
+  document.getElementById('nota').innerHTML = NOTAS[m];
+  document.getElementById('pantallas').innerHTML = PANT.map(([n, url, f]) => `<div><div class="marco"><div class="barra-nav"><i></i><i></i><i></i><span>${url}</span></div><div class="escala"><div class="pc ${m}">${f(m)}</div></div></div><div class="cap">${n}</div></div>`).join('');
+  ajustar();
+}
+function ajustar() {
+  document.querySelectorAll('.escala').forEach(e => {
+    const s = e.clientWidth / 1280;
+    e.style.height = 760 * s + 'px';
+    e.firstElementChild.style.transform = `scale(${s})`;
+  });
+}
+let avisoT;
+function decir(t) {
+  let a = document.querySelector('.aviso-sim');
+  if (!a) { a = document.createElement('div'); a.className = 'aviso-sim'; document.body.appendChild(a); }
+  a.textContent = '👉 ' + t; clearTimeout(avisoT); avisoT = setTimeout(() => a.remove(), 1700);
+}
+document.getElementById('elegir').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#elegir button').forEach(x => x.classList.toggle('activa', x === b));
+  pintar(b.dataset.m);
+});
+document.getElementById('pantallas').addEventListener('click', e => {
+  const c = e.target.closest('.carta');
+  if (c) {
+    c.parentElement.querySelectorAll('.carta').forEach(x => x.classList.toggle('sel', x === c));
+    c.closest('.vt').querySelector('.principal span').textContent = 'Votar por ' + c.querySelector('b').textContent;
+    return;
+  }
+  const t = e.target.closest('[data-dice]'); if (t) decir(t.dataset.dice);
+});
+addEventListener('resize', ajustar);
+pintar('m1');
+</script>
+</body>
+</html>

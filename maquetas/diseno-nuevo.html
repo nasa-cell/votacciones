@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votaciones - Diseño nuevo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Source+Serif+4:wght@400;600&family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#eef0f5;color:#14213d;font:15px system-ui,sans-serif}
+.hoja{max-width:1240px;margin:0 auto;padding:18px 16px 50px}
+.hoja > h1{font-size:21px;margin:0 0 4px}
+.hoja > p{margin:0 0 14px;color:#56607a}
+.elegir{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.elegir button{font:700 15px system-ui;padding:10px 16px;border-radius:99px;border:2px solid #c9cfdd;background:#fff;color:#14213d;cursor:pointer}
+.elegir button.activa{background:#14213d;color:#fff;border-color:#14213d}
+.nota-d{background:#fff;border:1px solid #dde2ee;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:14px;color:#3b4560}
+.nota-d b{color:#14213d}
+.fila-tel{display:flex;gap:22px;flex-wrap:wrap;justify-content:center}
+.tel{width:360px;height:740px;border-radius:30px;border:8px solid #1b2233;overflow:hidden;position:relative;box-shadow:0 18px 40px rgba(20,33,61,.18);flex:none}
+.tel > .pant{height:100%;overflow-y:auto;overflow-x:hidden;position:relative}
+.cap{text-align:center;font:700 13px system-ui;color:#56607a;margin-top:8px}
+.aviso-sim{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);background:#111d;color:#fff;font:600 13px system-ui;padding:8px 14px;border-radius:99px;white-space:nowrap;z-index:9;pointer-events:none}
+@media (max-width:420px){.tel{width:100%;height:700px;border-width:5px}}
+
+/* ======= Estructura común (lo que cambia es el estilo de cada diseño) ======= */
+.top{display:flex;align-items:center;gap:8px;padding:14px 16px}
+.marca{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;flex:1;min-width:0}
+.marca i{font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;font-style:normal;display:grid;place-items:center;width:30px;height:30px;flex:none}
+.pill{font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;white-space:nowrap}
+.salir{font-size:13px;font-weight:700;padding:7px 12px;cursor:pointer}
+.cuerpo{padding:6px 16px 24px}
+.cuerpo h2{margin:6px 0 4px}
+.baj{margin:0 0 16px}
+.tarjeta{padding:16px;margin-bottom:16px}
+.campo{margin-bottom:14px}
+.campo label{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-weight:700;font-size:14px;margin-bottom:6px}
+.campo label small{margin-left:auto;font-weight:600;font-size:12px}
+.chip{font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px}
+.inp{width:100%;font:inherit;font-size:16px;padding:12px 13px;outline:none}
+.err{font-size:13px;font-weight:700;margin-top:6px;display:flex;gap:6px}
+.boton{width:100%;font:inherit;font-weight:800;font-size:16px;padding:14px;cursor:pointer;border:0;display:block;text-align:center}
+.enl{display:block;text-align:center;margin-top:14px;font-size:14px;font-weight:700;text-decoration:underline;cursor:pointer}
+.buscar{margin-bottom:12px}
+.partidos{display:grid;gap:10px}
+.partido{display:flex;align-items:center;gap:12px;padding:12px;cursor:pointer;position:relative}
+.logo{width:48px;height:48px;flex:none;display:grid;place-items:center;font-weight:800;font-size:17px;color:#fff}
+.partido .txt{flex:1;min-width:0}
+.partido b{display:block;font-size:15px}
+.partido span{font-size:13px}
+.marca-voto{width:26px;height:26px;flex:none;display:grid;place-items:center;font-weight:800}
+.fijo{position:sticky;bottom:0;padding:12px 16px 16px;margin:0 -16px -24px}
+.sello{display:inline-block;font-weight:800;letter-spacing:.14em}
+.ganador{text-align:center;padding-top:6px}
+.ganador h2{font-size:24px;margin:10px 0 2px}
+.ganador p{margin:0}
+.podio{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;align-items:end;gap:6px;margin:18px 0}
+.peldano{text-align:center}
+.peldano .logo{margin:0 auto 6px;width:40px;height:40px;font-size:14px}
+.peldano .col{display:grid;place-items:center;font-weight:800;font-size:18px}
+.peldano small{display:block;font-size:11px;font-weight:700;margin-top:4px;line-height:1.2}
+.barra{margin-bottom:12px}
+.barra .fila{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;margin-bottom:5px;gap:8px}
+.barra .riel{height:12px;overflow:hidden}
+.barra .riel i{display:block;height:100%}
+
+/* ======= D1 · Urna moderna ======= */
+.d1{font-family:Sora,system-ui,sans-serif;color:#0e1b3d;background:#f3f5fb}
+.d1 .top{background:linear-gradient(120deg,#0b1f4d,#1d3fa0);color:#fff}
+.d1 .marca i{background:#ffc83d;color:#0b1f4d;border-radius:9px}
+.d1 .pill{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.d1 .pill::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#3ee08f;margin-right:6px;box-shadow:0 0 0 3px rgba(62,224,143,.25)}
+.d1 .salir{background:#fff;color:#0b1f4d;border:0;border-radius:10px}
+.d1 .heroe{background:linear-gradient(120deg,#0b1f4d,#1d3fa0);color:#fff;padding:4px 16px 46px;margin-bottom:-30px}
+.d1 .heroe h2{font-size:25px;margin:6px 0 4px}
+.d1 .heroe .baj{color:#c4d0f5;margin:0}
+.d1 .tarjeta{background:#fff;border-radius:18px;box-shadow:0 10px 30px rgba(14,27,61,.12)}
+.d1 .chip{background:#eaf0ff;color:#1d3fa0}
+.d1 .campo label small{color:#7a86a6}
+.d1 .inp{border:2px solid #dbe2f3;border-radius:12px;background:#f8faff}
+.d1 .inp:focus{border-color:#1d3fa0;background:#fff;box-shadow:0 0 0 4px rgba(29,63,160,.12)}
+.d1 .inp.mal{border-color:#e5484d;background:#fff5f5}
+.d1 .err{color:#d02f35}
+.d1 .boton{border-radius:14px;background:linear-gradient(120deg,#1d3fa0,#3563e9);color:#fff;box-shadow:0 8px 20px rgba(29,63,160,.35)}
+.d1 .boton.verde{background:linear-gradient(120deg,#0f9d58,#22c47a);box-shadow:0 8px 20px rgba(15,157,88,.35)}
+.d1 .boton:disabled{background:#c9d1e6;box-shadow:none;cursor:not-allowed}
+.d1 .enl{color:#1d3fa0}
+.d1 .partido{background:#fff;border:2px solid #e3e8f4;border-radius:16px;transition:border-color .12s,box-shadow .12s,transform .08s}
+.d1 .partido:hover{border-color:#b8c6ec}
+.d1 .partido.sel{border-color:#1d3fa0;box-shadow:0 0 0 4px rgba(29,63,160,.14)}
+.d1 .logo{border-radius:14px}
+.d1 .partido span{color:#6a7594}
+.d1 .marca-voto{border:2px solid #c9d1e6;border-radius:50%;color:transparent}
+.d1 .partido.sel .marca-voto{background:#1d3fa0;border-color:#1d3fa0;color:#fff}
+.d1 .fijo{background:linear-gradient(transparent,#f3f5fb 30%)}
+.d1 .sello{background:#ffc83d;color:#0b1f4d;padding:6px 14px;border-radius:99px;font-size:13px}
+.d1 .ganador h2{color:#fff}
+.d1 .ganador p{color:#c4d0f5}
+.d1 .peldano .col{background:linear-gradient(#3563e9,#1d3fa0);color:#fff;border-radius:12px 12px 0 0}
+.d1 .peldano:nth-child(2) .col{background:linear-gradient(#ffd66b,#f0b400);color:#0b1f4d}
+.d1 .peldano small{color:#3b4766}
+.d1 .barra .riel{background:#e6ebf7;border-radius:99px}
+.d1 .barra .riel i{background:linear-gradient(90deg,#1d3fa0,#3563e9);border-radius:99px}
+.d1 .barra:first-child .riel i{background:linear-gradient(90deg,#f0b400,#ffd66b)}
+
+/* ======= D2 · Papeleta ======= */
+.d2{font-family:"Source Serif 4",Georgia,serif;color:#2b2118;background:#f6efe2 radial-gradient(circle at 20% 10%,#fbf6ec,transparent 60%)}
+.d2 h2,.d2 .marca,.d2 .boton,.d2 .sello,.d2 .peldano .col{font-family:Fraunces,Georgia,serif}
+.d2 .top{border-bottom:3px double #b9a17c}
+.d2 .marca i{border:2px solid #9e2a2b;color:#9e2a2b;border-radius:50%;font-size:14px}
+.d2 .pill{border:1.5px solid #4f6f52;color:#3d5a40;background:#eef2e6}
+.d2 .salir{background:transparent;border:1.5px solid #2b2118;color:#2b2118;border-radius:6px}
+.d2 .heroe{padding:4px 16px 2px}
+.d2 .heroe h2{font-size:28px;margin:8px 0 4px;color:#2b2118}
+.d2 .heroe .baj{color:#6b5b47}
+.d2 .tarjeta{background:#fffdf8;border:1px solid #d9c9aa;border-radius:4px;box-shadow:0 2px 0 #e7dbc3,0 10px 24px rgba(80,55,20,.10);position:relative}
+.d2 .tarjeta::before{content:"";position:absolute;inset:6px;border:1px dashed #d9c9aa;pointer-events:none;border-radius:2px}
+.d2 .chip{background:#efe4cf;color:#6b4f2a;font-family:system-ui}
+.d2 .campo label small{color:#8d7a5f}
+.d2 .inp{border:0;border-bottom:2px solid #b9a17c;background:transparent;border-radius:0;padding:10px 4px;font-family:"Source Serif 4",serif}
+.d2 .inp:focus{border-bottom-color:#2b2118}
+.d2 .inp.mal{border-bottom-color:#9e2a2b;background:#fbeeea}
+.d2 .err{color:#9e2a2b}
+.d2 .boton{background:#9e2a2b;color:#fff8ec;border-radius:6px;font-size:18px;box-shadow:0 3px 0 #6e1b1c}
+.d2 .boton.verde{background:#3d5a40;box-shadow:0 3px 0 #263a28}
+.d2 .boton:disabled{background:#cbbca2;box-shadow:none;color:#fff8ec;cursor:not-allowed}
+.d2 .enl{color:#6b4f2a}
+.d2 .partidos{gap:0;border-top:1px solid #d9c9aa}
+.d2 .partido{background:transparent;border-bottom:1px solid #d9c9aa;padding:14px 4px}
+.d2 .partido:hover{background:#fbf3e3}
+.d2 .logo{border-radius:50%;box-shadow:0 0 0 3px #fffdf8,0 0 0 4px #b9a17c}
+.d2 .partido span{color:#7b6a52;font-style:italic}
+.d2 .marca-voto{width:34px;height:34px;border:2px solid #2b2118;border-radius:3px;color:transparent;font-size:24px;font-family:Fraunces,serif}
+.d2 .partido.sel .marca-voto{color:#9e2a2b}
+.d2 .partido.sel{background:#fbefe0}
+.d2 .fijo{background:linear-gradient(transparent,#f6efe2 30%)}
+.d2 .sello{color:#9e2a2b;border:3px solid #9e2a2b;padding:6px 16px;font-size:22px;transform:rotate(-6deg);border-radius:6px;opacity:.9;box-shadow:inset 0 0 0 2px #f6efe2,inset 0 0 0 4px #9e2a2b}
+.d2 .ganador h2{font-size:27px}
+.d2 .ganador p{color:#6b5b47}
+.d2 .peldano .col{background:#e9dcc2;color:#2b2118;border:1px solid #b9a17c;border-bottom:0}
+.d2 .peldano:nth-child(2) .col{background:#9e2a2b;color:#fff8ec;border-color:#6e1b1c}
+.d2 .peldano small{color:#5a4a35}
+.d2 .barra .riel{background:#efe4cf;border-radius:2px;height:10px}
+.d2 .barra .riel i{background:#6b4f2a}
+.d2 .barra:first-child .riel i{background:#9e2a2b}
+
+/* ======= D3 · Fiesta cívica ======= */
+.d3{font-family:Nunito,system-ui,sans-serif;color:#24124a;background:#fff7fb}
+.d3 h2,.d3 .marca,.d3 .boton,.d3 .sello,.d3 .peldano .col{font-family:"Baloo 2",Nunito,sans-serif}
+.d3 .top{background:linear-gradient(110deg,#6d28d9,#db2777 60%,#f97316);color:#fff}
+.d3 .marca i{background:#fff;border-radius:50%;font-size:16px}
+.d3 .pill{background:#fff;color:#6d28d9}
+.d3 .salir{background:rgba(255,255,255,.22);border:2px solid #fff;color:#fff;border-radius:99px}
+.d3 .heroe{background:linear-gradient(110deg,#6d28d9,#db2777 60%,#f97316);color:#fff;padding:2px 16px 54px;margin-bottom:-38px;border-radius:0 0 34px 34px}
+.d3 .heroe h2{font-size:30px;margin:4px 0 2px;line-height:1.1}
+.d3 .heroe .baj{color:#ffe4f2;margin:0}
+.d3 .tarjeta{background:#fff;border-radius:24px;box-shadow:0 14px 34px rgba(109,40,217,.16)}
+.d3 .chip{background:#f3e8ff;color:#6d28d9}
+.d3 .campo label small{color:#9a86bd}
+.d3 .inp{border:2.5px solid #eadcff;border-radius:16px;background:#fbf8ff}
+.d3 .inp:focus{border-color:#a855f7;box-shadow:0 0 0 4px rgba(168,85,247,.18)}
+.d3 .inp.mal{border-color:#f43f5e;background:#fff1f3}
+.d3 .err{color:#e11d48}
+.d3 .boton{border-radius:99px;background:linear-gradient(110deg,#7c3aed,#db2777);color:#fff;font-size:18px;box-shadow:0 6px 0 #5b21b6}
+.d3 .boton:active{transform:translateY(3px);box-shadow:0 3px 0 #5b21b6}
+.d3 .boton.verde{background:linear-gradient(110deg,#10b981,#22c55e);box-shadow:0 6px 0 #047857}
+.d3 .boton:disabled{background:#e4dcef;box-shadow:0 6px 0 #cfc4e0;color:#8e80a8;cursor:not-allowed}
+.d3 .enl{color:#7c3aed}
+.d3 .partido{background:#fff;border:2.5px solid #f0e6ff;border-radius:20px;box-shadow:0 4px 0 #f0e6ff;transition:transform .1s}
+.d3 .partido:hover{transform:translateY(-2px)}
+.d3 .partido.sel{border-color:#a855f7;box-shadow:0 4px 0 #a855f7;background:#faf5ff}
+.d3 .logo{border-radius:50%}
+.d3 .partido span{color:#8e7aae}
+.d3 .marca-voto{border-radius:50%;background:#f3e8ff;color:transparent;font-size:15px}
+.d3 .partido.sel .marca-voto{background:linear-gradient(110deg,#7c3aed,#db2777);color:#fff}
+.d3 .fijo{background:linear-gradient(transparent,#fff7fb 30%)}
+.d3 .sello{background:#fff;color:#db2777;padding:6px 16px;border-radius:99px;font-size:15px;box-shadow:0 4px 0 rgba(0,0,0,.12)}
+.d3 .ganador h2{color:#fff;font-size:27px}
+.d3 .ganador p{color:#ffe4f2}
+.d3 .peldano .col{border-radius:16px 16px 0 0;color:#fff;background:#a855f7}
+.d3 .peldano:nth-child(1) .col{background:#ec4899}
+.d3 .peldano:nth-child(2) .col{background:linear-gradient(#fbbf24,#f97316)}
+.d3 .peldano:nth-child(4) .col{background:#38bdf8}
+.d3 .peldano small{color:#4b3a6e}
+.d3 .barra .riel{background:#f3e8ff;border-radius:99px;height:14px}
+.d3 .barra .riel i{background:linear-gradient(90deg,#7c3aed,#db2777);border-radius:99px}
+.d3 .barra:first-child .riel i{background:linear-gradient(90deg,#f97316,#fbbf24)}
+.confeti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.confeti i{position:absolute;width:8px;height:12px;border-radius:2px;opacity:.9;animation:caer 3.2s linear infinite}
+@keyframes caer{from{transform:translateY(-20px) rotate(0)}to{transform:translateY(760px) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){.confeti{display:none}}
+</style>
+</head>
+<body>
+<div class="hoja">
+  <h1>Votaciones · diseño nuevo</h1>
+  <p>Tres estilos para las mismas pantallas. Los botones se pueden tocar: elige un partido, escribe en los cuadros.</p>
+  <div class="elegir" id="elegir">
+    <button data-d="d1" class="activa">D1 · Urna moderna</button>
+    <button data-d="d2">D2 · Papeleta</button>
+    <button data-d="d3">D3 · Fiesta cívica</button>
+  </div>
+  <div class="nota-d" id="nota"></div>
+  <div class="fila-tel" id="fila"></div>
+</div>
+<script>
+const NOTAS = {
+  d1: '<b>Urna moderna:</b> franja azul noche con degradado, tarjetas blancas que flotan, detalles dorados y letra Sora. Serio y actual, como una app de banco.',
+  d2: '<b>Papeleta:</b> parece una cédula de votación de papel: fondo crema, letras con serifa, partidos en renglones con un recuadro donde se marca la ✗ y un sello rojo «FINALIZÓ».',
+  d3: '<b>Fiesta cívica:</b> degradado morado, rosa y naranja, botones redondos con relieve, colores vivos en el podio y confeti al ganar. Alegre, pensado para colegios.'
+};
+const PARTIDOS = [
+  ['RV', 'Renovación Verde', 'Rosa Elena Paredes Salas', '#16a34a', 42],
+  ['SN', 'Partido Sol Naciente', 'Juan Carlos Mendoza Ruiz', '#f59e0b', 31],
+  ['UP', 'Unidad del Pueblo', 'Luis Alberto Torres Vega', '#2563eb', 18],
+  ['FA', 'Fuerza Andina Unida', 'Carmen Lucía Rojas Flores', '#dc2626', 9]
+];
+const cabecera = (extra) => `<div class="top"><div class="marca"><i>🗳</i>Elecciones 2026</div>${extra}</div>`;
+function registro() {
+  return `${cabecera('<span class="pill">Abierta</span>')}
+  <div class="heroe"><h2>Registro</h2><p class="baj">Escriba sus datos para poder votar.</p></div>
+  <div class="cuerpo"><div class="tarjeta">
+    <div class="campo"><label>Nombre <span class="chip">Aa Solo letras</span><small>10 a 30</small></label><input class="inp" value="Rosa Elena"></div>
+    <div class="campo"><label>Apellido <span class="chip">Aa Solo letras</span><small>10 a 30</small></label><input class="inp" value="Paredes Salas"></div>
+    <div class="campo"><label>DNI <span class="chip">123 Solo números</span><small>8</small></label><input class="inp mal" value="458791" inputmode="numeric"><div class="err">⚠ El DNI tiene que tener 8 números.</div></div>
+  </div>
+  <button class="boton" data-dice="Revisa los datos y pasa a elegir">Ingresar →</button>
+  <a class="enl" data-dice="Abre el panel del administrador">Entrar como administrador</a></div>`;
+}
+function votar() {
+  return `${cabecera('<span class="pill">Abierta</span>')}
+  <div class="heroe"><h2>Elija un partido</h2><p class="baj">Toque una tarjeta. Solo puede votar una vez.</p></div>
+  <div class="cuerpo"><div class="tarjeta" style="padding:12px">
+    <input class="inp buscar" placeholder="🔍 Buscar partido o candidato">
+    <div class="partidos">${PARTIDOS.map(p => `<div class="partido" role="radio"><div class="logo" style="background:${p[3]}">${p[0]}</div><div class="txt"><b>${p[1]}</b><span>${p[2]}</span></div><div class="marca-voto">✓</div></div>`).join('')}</div>
+  </div>
+  <div class="fijo"><button class="boton verde votar" disabled>Elija un partido para votar</button></div></div>`;
+}
+function final(d) {
+  const orden = [PARTIDOS[1], PARTIDOS[0], PARTIDOS[2], PARTIDOS[3]];
+  const alto = [70, 100, 52, 38];
+  const pos = [2, 1, 3, 4];
+  const confeti = d === 'd3' ? `<div class="confeti">${Array.from({length: 22}, (_, i) => `<i style="left:${(i * 37) % 100}%;background:${['#f97316','#fbbf24','#a855f7','#ec4899','#38bdf8'][i % 5]};animation-delay:${(i * 0.29) % 3}s"></i>`).join('')}</div>` : '';
+  return `${confeti}${cabecera('<button class="salir" data-dice="Pregunta «¿Estás seguro?» y sale">← Salir</button>')}
+  <div class="heroe ganador"><span class="sello">FINALIZÓ</span><h2>🏆 Renovación Verde</h2><p>Rosa Elena Paredes Salas · 42 % de los votos</p></div>
+  <div class="cuerpo"><div class="tarjeta">
+    <div class="podio">${orden.map((p, i) => `<div class="peldano"><div class="logo" style="background:${p[3]}">${p[0]}</div><div class="col" style="height:${alto[i]}px">${pos[i]}</div><small>${p[1]}</small></div>`).join('')}</div>
+    ${PARTIDOS.map(p => `<div class="barra"><div class="fila"><span>${p[1]}</span><span>${p[4]} %</span></div><div class="riel"><i style="width:${p[4] / 42 * 100}%"></i></div></div>`).join('')}
+  </div></div>`;
+}
+function pintar(d) {
+  document.getElementById('nota').innerHTML = NOTAS[d];
+  const pant = [['Registro', registro()], ['Elegir partido', votar()], ['Resultados', final(d)]];
+  document.getElementById('fila').innerHTML = pant.map(([n, h]) => `<div><div class="tel"><div class="pant ${d}">${h}</div></div><div class="cap">${n}</div></div>`).join('');
+}
+function decir(caja, texto) {
+  const tel = caja.closest('.tel');
+  let a = tel.querySelector('.aviso-sim');
+  if (!a) { a = document.createElement('div'); a.className = 'aviso-sim'; tel.appendChild(a); }
+  a.textContent = '👉 ' + texto;
+  clearTimeout(a.t); a.t = setTimeout(() => a.remove(), 1700);
+}
+document.getElementById('elegir').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#elegir button').forEach(x => x.classList.toggle('activa', x === b));
+  pintar(b.dataset.d);
+});
+document.getElementById('fila').addEventListener('click', e => {
+  const p = e.target.closest('.partido');
+  if (p) {
+    p.parentElement.querySelectorAll('.partido').forEach(x => x.classList.toggle('sel', x === p));
+    const btn = p.closest('.pant').querySelector('.votar');
+    btn.disabled = false; btn.textContent = 'Votar por ' + p.querySelector('b').textContent;
+    btn.dataset.dice = 'Pregunta «¿Estás seguro?» y guarda el voto';
+    return;
+  }
+  const t = e.target.closest('[data-dice]');
+  if (t) decir(t, t.dataset.dice);
+});
+pintar('d1');
+</script>
+</body>
+</html>
