@@ -144,6 +144,16 @@ async function principal() {
   const sinVotos = await api('/api/admin/candidatos', { cuerpo: { nombre: 'Pedro Pablo', apellido: 'Gutiérrez Paz', partido: 'Partido de Prueba Uno' }, admin: true });
   revisar((await api(`/api/admin/candidatos/${sinVotos.datos.id}`, { metodo: 'DELETE', admin: true })).estado === 200, 'quita partido sin votos');
 
+  // Eliminar el voto de una persona: puede votar de nuevo
+  revisar((await api('/api/admin/votos/' + dni(1), { metodo: 'DELETE' })).estado === 401, 'eliminar voto sin sesión rechazado');
+  revisar((await api('/api/admin/votos/' + dni(85), { metodo: 'DELETE', admin: true })).datos.codigo === 'sin_voto', 'eliminar voto de quien no votó: avisa');
+  revisar((await api('/api/admin/votos/' + dni(1), { metodo: 'DELETE', admin: true })).estado === 200, 'admin elimina el voto de una persona');
+  revisar((await api('/api/admin/resultados', { admin: true })).datos.total === 37, 'los resultados bajan en 1 voto (37)');
+  revisar((await api('/api/admin/padron?filtro=votaron&buscar=' + dni(1), { admin: true })).datos.total === 0, 'en la lista vuelve a «Falta»');
+  revisar((await api('/api/ingresar', { cuerpo: votante(1) })).estado === 200, 'con el voto eliminado puede ingresar otra vez');
+  revisar((await api('/api/votar', { cuerpo: { ...votante(1), candidatoId: c.datos.id } })).estado === 200, 'y vuelve a votar');
+  revisar((await api('/api/admin/resultados', { admin: true })).datos.total === 38, 'total vuelve a 38');
+
   // Publicar
   revisar((await api('/api/admin/publicar', { cuerpo: {} })).estado === 401, 'publicar sin sesión rechazado');
   revisar((await api('/api/admin/publicar', { cuerpo: {}, admin: true })).estado === 200, 'admin publica');
@@ -153,6 +163,7 @@ async function principal() {
   revisar(pub.estado === 200 && pub.datos.partidos.length === 3, 'resultados públicos visibles');
   revisar(!JSON.stringify(pub.datos).includes(dni(1)), 'resultados públicos sin DNI de votantes');
   revisar((await api('/api/admin/candidatos', { cuerpo: { nombre: 'Pedro Pablo', apellido: 'Gutiérrez Paz', partido: 'Partido de Prueba Dos' }, admin: true })).estado === 409, 'tras publicar no se inscribe');
+  revisar((await api('/api/admin/votos/' + dni(1), { metodo: 'DELETE', admin: true })).estado === 409, 'tras publicar no se elimina ningún voto');
 
   // Ocultar y reabrir
   revisar((await api('/api/admin/ocultar', { cuerpo: {} })).estado === 401, 'ocultar sin sesión rechazado');

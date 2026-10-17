@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta - Confirmar en participantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../publico/estilos/estilos.css">
+<link rel="stylesheet" href="../publico/estilos/urna.css">
+<style>
+body{background:#dfe5f2}
+.guia{max-width:1100px;margin:0 auto;padding:18px 16px 0}
+.guia h1{font-size:23px;margin:0 0 6px}
+.guia p{margin:0 0 10px;color:var(--suave);font-size:15px}
+.elegir{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+.elegir button{font:inherit;font-weight:800;font-size:14px;padding:9px 14px;border-radius:12px;border:2px solid var(--marca);background:#fff;color:var(--marca);cursor:pointer}
+.elegir button.on{background:var(--marca);color:#fff}
+.explica{background:#fff;border-left:5px solid var(--dorado);border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:12px}
+.marcos{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;max-width:1100px;margin:0 auto;padding:0 16px 30px}
+.marco{border:7px solid #0b1f4d;border-radius:28px;overflow:hidden;background:var(--fondo);width:min(360px,100%);height:680px;position:relative;transform:translateZ(0)}
+.marco .modal-fondo{position:absolute}
+.et{font-size:12px;font-weight:800;color:var(--suave);margin:0 0 4px}
+.c{padding:12px}
+.c h2{font-size:19px;margin:0 0 8px}
+.tarjeta{background:#fff;border-radius:14px;box-shadow:var(--sombra);padding:10px 12px;margin-bottom:10px}
+.mini .campo{margin-bottom:8px}
+.fila-padron .bloq{border:none;background:#eef1f8;color:#9aa3bb;border-radius:8px;width:30px;height:30px;font-size:14px}
+.ok-flota{background:var(--verde-claro);color:#0b7a44;font-weight:700;font-size:13px;border-radius:10px;padding:7px 10px;margin-bottom:8px}
+.modal .aviso-voto{background:#fff5f6;border:2px solid var(--acento);border-radius:10px;padding:8px 10px;font-size:13.5px;color:var(--tinta);margin-top:10px;text-align:left}
+.modal .aviso-voto.suave{background:var(--ambar-claro);border-color:var(--dorado)}
+.borrar-voto{border:none;background:var(--ambar-claro);color:#8a5a00;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px;font-weight:800}
+button.etiqueta-voto{border:none;cursor:pointer;font:inherit;font-size:12px;font-weight:800}
+.fila-padron.voto button.etiqueta-voto:hover{background:#fde8eb;color:var(--acento)}
+.zona-voto{margin-top:10px;padding-top:10px;border-top:1px dashed var(--linea);font-size:13px;color:var(--suave)}
+.zona-voto .btn{margin-top:6px}
+</style>
+</head>
+<body>
+<div class="guia">
+  <h1>Participantes: «¿Estás seguro?» y botón Eliminar voto</h1>
+  <p>Agregar, editar, eliminar persona y eliminar voto: todos preguntan «¿Estás seguro?» antes. Al eliminar el voto, esa persona puede votar de nuevo.</p>
+  <p><b>Elija dónde va el botón «Eliminar voto»</b> (solo en quienes ya votaron). Pruébelo en «Óscar» o «Renzo».</p>
+  <div class="elegir" id="elegir">
+    <button class="on" data-op="A">A · Botón ↺ en la fila</button>
+    <button data-op="B">B · Tocar la etiqueta «Votó ✕»</button>
+    <button data-op="C">C · Dentro de Editar</button>
+  </div>
+  <div class="explica" id="explica"></div>
+</div>
+<div class="marcos">
+  <div><p class="et">Celular · pestaña Agregar</p><div class="marco" id="m-agregar"></div></div>
+  <div><p class="et">Celular · pestaña Lista</p><div class="marco" id="m-lista"></div></div>
+</div>
+
+<script>
+const EXPLICA = {
+  A: 'En la fila de quien votó, el ✕ rojo cambia por un botón ↺ «Eliminar voto». Se ve directo en la lista.',
+  B: 'La etiqueta verde «Votó ✕» es el botón: al tocarla pregunta si quiere eliminar el voto. La fila queda igual de limpia.',
+  C: 'En la lista no cambia nada. Al tocar ✎ de quien votó, debajo del formulario aparece el botón rojo «Eliminar su voto».',
+};
+let opcion = 'A';
+let lista = [
+  { nombre: 'Daniela', apellido: 'Vargas León', dni: '40000299', voto: false },
+  { nombre: 'Óscar', apellido: 'Salas Ponce', dni: '40000298', voto: true },
+  { nombre: 'Milagros', apellido: 'Ccori Apaza', dni: '40000297', voto: false },
+  { nombre: 'Renzo', apellido: 'Huamán Ríos', dni: '40000296', voto: true },
+  { nombre: 'Camila', apellido: 'Quispe Mamani', dni: '40000295', voto: false },
+];
+let editando = null;
+let aviso = '';
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const menu = '<header class="cabeza"><span id="cabeza-titulo">Panel del administrador</span></header>';
+
+function preguntar(marco, { titulo, cuerpo, si, claseSi }) {
+  return new Promise(resolver => {
+    const fondo = document.createElement('div');
+    fondo.className = 'modal-fondo';
+    fondo.innerHTML = `<div class="modal"><h3>${titulo}</h3>${cuerpo}<div class="fila-botones"><button class="btn btn-sec" data-r="0">Corregir</button><button class="btn ${claseSi}" data-r="1">${si}</button></div></div>`;
+    fondo.querySelector('[data-r="0"]').textContent = si.startsWith('Sí, elim') ? 'Cancelar' : si === 'Entendido' ? 'Cerrar' : 'Corregir';
+    fondo.addEventListener('click', e => {
+      const b = e.target.closest('[data-r]');
+      if (b) { fondo.remove(); resolver(b.dataset.r === '1'); }
+    });
+    marco.append(fondo);
+  });
+}
+
+const resumen = d => `<div class="resumen-datos"><p><span>Nombre: </span><b>${esc(d.nombre)}</b></p><p><span>Apellido: </span><b>${esc(d.apellido)}</b></p><p><span>DNI: </span><b>${esc(d.dni)}</b></p></div>`;
+
+function pintarAgregar() {
+  const m = document.getElementById('m-agregar');
+  const d = editando || { nombre: '', apellido: '', dni: '' };
+  m.innerHTML = `${menu}<div class="c"><h2>${editando ? 'Editar participante' : 'Agregar participante'}</h2>
+    ${aviso ? `<div class="ok-flota">${esc(aviso)}</div>` : ''}
+    <div class="tarjeta mini">
+      <div class="campo"><label>Nombre <span class="req">*</span><small>3 a 80</small></label><input class="input" id="f-nombre" value="${esc(d.nombre || 'María José')}"></div>
+      <div class="campo"><label>Apellido <span class="req">*</span><small>3 a 80</small></label><input class="input" id="f-apellido" value="${esc(d.apellido || 'Quispe Lima')}"></div>
+      <div class="campo"><label>DNI <span class="req">*</span><small>8</small></label><input class="input" id="f-dni" value="${esc(d.dni || '70011122')}" ${editando && editando.voto && opcion !== 'X' ? 'disabled' : ''}></div>
+      <div class="fila-botones"><button class="btn btn-pri" id="f-guardar">${editando ? '💾 Guardar cambios' : '➕ Agregar a la lista'}</button>${editando ? '<button class="btn btn-sec" id="f-cancelar">Cancelar edición</button>' : ''}</div>
+      ${editando && editando.voto && opcion === 'C' ? '<div class="zona-voto">Esta persona ya votó.<button class="btn btn-borde-rojo" id="f-borrar-voto">↺ Eliminar su voto</button></div>' : ''}
+    </div></div>`;
+  const bv = m.querySelector('#f-borrar-voto');
+  if (bv) bv.onclick = () => borrarVoto(m, lista.find(x => x.dni === editando.dni));
+  m.querySelector('#f-guardar').onclick = async () => {
+    const datos = { nombre: m.querySelector('#f-nombre').value, apellido: m.querySelector('#f-apellido').value, dni: m.querySelector('#f-dni').value };
+    const si = await preguntar(m, editando
+      ? { titulo: '¿Estás seguro de guardar los cambios?', cuerpo: `<p>Así quedará en la lista:</p>${resumen(datos)}`, si: 'Sí, guardar', claseSi: 'btn-pri' }
+      : { titulo: '¿Estás seguro o quieres corregir algo?', cuerpo: `<p>Se agregará a la lista de votantes:</p>${resumen(datos)}`, si: 'Sí, agregar', claseSi: 'btn-pri' });
+    if (!si) return;
+    if (editando) { Object.assign(lista.find(p => p.dni === editando.dni), datos); aviso = `✓ Cambios guardados: ${datos.nombre} ${datos.apellido}.`; }
+    else { lista.unshift({ ...datos, voto: false }); aviso = `✓ ${datos.nombre} ${datos.apellido} quedó en la lista.`; }
+    editando = null;
+    pintarTodo();
+  };
+  const c = m.querySelector('#f-cancelar');
+  if (c) c.onclick = () => { editando = null; aviso = ''; pintarTodo(); };
+}
+
+function pintarLista() {
+  const m = document.getElementById('m-lista');
+  const votaron = lista.filter(p => p.voto).length;
+  m.innerHTML = `${menu}<div class="c"><h2>Agregar participante</h2>
+    <div class="filtros-padron"><button class="on"><b>${lista.length}</b>Todos</button><button><b>${votaron}</b>✓ Votaron</button><button><b>${lista.length - votaron}</b>⏳ Faltan</button></div>
+    <div class="lista-padron">${lista.map(p => `<div class="fila-padron${p.voto ? ' voto' : ''}">
+      <span class="ini">${esc((p.nombre[0] + p.apellido[0]).toUpperCase())}</span>
+      <span><b>${esc(p.nombre)} ${esc(p.apellido)}</b><small>DNI ${esc(p.dni)}</small></span>
+      ${p.voto && opcion === 'B' ? `<button class="etiqueta-voto" data-voto="${p.dni}" title="Eliminar voto">Votó ✕</button>` : `<span class="etiqueta-voto">${p.voto ? 'Votó' : 'Falta'}</span>`}
+      <button class="editar-padron" data-editar="${p.dni}" title="Editar">✎</button>
+      ${p.voto && opcion === 'A' ? `<button class="borrar-voto" data-voto="${p.dni}" title="Eliminar voto">↺</button>` : p.voto ? `<button class="bloq" data-bloq="${p.dni}" title="Ya votó">✕</button>` : `<button class="quitar-padron" data-quitar="${p.dni}" title="Eliminar">✕</button>`}
+    </div>`).join('')}</div></div>`;
+  m.onclick = async e => {
+    const ed = e.target.closest('[data-editar]');
+    const qu = e.target.closest('[data-quitar]');
+    const bl = e.target.closest('[data-bloq]');
+    const vo = e.target.closest('[data-voto]');
+    if (vo) return borrarVoto(m, lista.find(x => x.dni === vo.dataset.voto));
+    if (ed) { editando = { ...lista.find(p => p.dni === ed.dataset.editar) }; aviso = ''; pintarAgregar(); return; }
+    if (bl) {
+      await preguntar(m, { titulo: 'No se puede eliminar', cuerpo: '<p>Esta persona ya votó. Primero elimine su voto y después podrá quitarla de la lista.</p>', si: 'Entendido', claseSi: 'btn-pri' });
+      return;
+    }
+    if (!qu) return;
+    const p = lista.find(x => x.dni === qu.dataset.quitar);
+    const si = await preguntar(m, { titulo: '¿Estás seguro de eliminar?', cuerpo: `<p><b>${esc(p.nombre)} ${esc(p.apellido)}</b> (DNI ${esc(p.dni)}) saldrá de la lista y ya no podrá votar.</p>`, si: 'Sí, eliminar', claseSi: 'btn-rojo' });
+    if (!si) return;
+    lista = lista.filter(x => x !== p);
+    aviso = `✓ ${p.nombre} ${p.apellido} fue eliminado de la lista.`;
+    pintarTodo();
+  };
+}
+
+async function borrarVoto(marco, p) {
+  const si = await preguntar(marco, { titulo: '¿Estás seguro de eliminar el voto?', cuerpo: `<p>Se borrará el voto de <b>${esc(p.nombre)} ${esc(p.apellido)}</b> (DNI ${esc(p.dni)}).</p><div class="aviso-voto suave">Los resultados bajarán en 1 voto y esta persona <b>podrá votar de nuevo</b>.</div>`, si: 'Sí, eliminar voto', claseSi: 'btn-rojo' });
+  if (!si) return;
+  p.voto = false;
+  if (editando && editando.dni === p.dni) editando = null;
+  aviso = `✓ Se eliminó el voto de ${p.nombre} ${p.apellido}. Ya puede votar de nuevo.`;
+  pintarTodo();
+}
+
+const abierto = id => document.querySelector('#' + id + ' .modal-fondo');
+function pintarTodo() { if (!abierto('m-agregar')) pintarAgregar(); if (!abierto('m-lista')) pintarLista(); }
+document.getElementById('elegir').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  opcion = b.dataset.op;
+  document.querySelectorAll('#elegir button').forEach(x => x.classList.toggle('on', x === b));
+  document.getElementById('explica').textContent = EXPLICA[opcion];
+  pintarTodo();
+};
+document.getElementById('explica').textContent = EXPLICA.A;
+pintarTodo();
+</script>
+</body>
+</html>

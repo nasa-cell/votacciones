@@ -659,7 +659,9 @@ async function cargarPadron() {
     el('span', {}, el('b', { title: `${p.nombre} ${p.apellido}` }, `${p.nombre} ${p.apellido}`), el('small', {}, `DNI ${p.dni}`)),
     el('span', { class: 'etiqueta-voto' }, p.voto ? 'Votó' : 'Falta'),
     el('button', { type: 'button', class: 'editar-padron', title: 'Editar', 'aria-label': `Editar a ${p.nombre} ${p.apellido}`, onclick: () => editarParticipante(p) }, '✎'),
-    p.voto ? el('span') : el('button', { type: 'button', class: 'quitar-padron', title: 'Quitar de la lista', 'aria-label': `Quitar a ${p.nombre} ${p.apellido}`, onclick: () => quitarParticipante(p) }, '✕'),
+    p.voto
+      ? el('button', { type: 'button', class: 'borrar-voto', title: 'Eliminar voto', 'aria-label': `Eliminar el voto de ${p.nombre} ${p.apellido}`, onclick: () => borrarVoto(p) }, '↺')
+      : el('button', { type: 'button', class: 'quitar-padron', title: 'Eliminar de la lista', 'aria-label': `Eliminar a ${p.nombre} ${p.apellido}`, onclick: () => quitarParticipante(p) }, '✕'),
   )) : [el('p', { class: 'vacio-padron' }, vacio)]));
   $('padron-pagina').textContent = `Página ${r.pagina} de ${r.paginas}`;
   $('padron-anterior').disabled = r.pagina <= 1;
@@ -705,6 +707,16 @@ $('form-padron').addEventListener('submit', async e => {
   if (!revisarPadron()) return;
   const cuerpo = { nombre: camposPadron.nombre.value, apellido: camposPadron.apellido.value, dni: camposPadron.dni.value };
   const editando = editandoDni;
+  const limpio = t => t.replace(/\s+/g, ' ').trim();
+  const si = await preguntar({
+    titulo: editando ? '¿Estás seguro de guardar los cambios?' : '¿Estás seguro o quieres corregir algo?',
+    texto: el('div', {},
+      el('p', {}, editando ? 'Así quedará en la lista:' : 'Se agregará a la lista de votantes:'),
+      el('div', { class: 'resumen-datos' }, ...[['Nombre', cuerpo.nombre], ['Apellido', cuerpo.apellido], ['DNI', cuerpo.dni]]
+        .map(([k, v]) => el('p', {}, el('span', {}, k + ': '), el('b', {}, limpio(v)))))),
+    si: editando ? 'Sí, guardar' : 'Sí, agregar', claseSi: 'btn-pri', no: 'Corregir',
+  });
+  if (!si) return;
   try {
     const p = await conCarga($('btn-agregar-participante'), 'Guardando…', () => editando
       ? pedir('/api/admin/padron/' + editando, { method: 'PUT', cuerpo })
@@ -721,11 +733,31 @@ $('form-padron').addEventListener('submit', async e => {
   }
 });
 
+async function borrarVoto(p) {
+  const si = await preguntar({
+    titulo: '¿Estás seguro de eliminar el voto?',
+    texto: el('div', {},
+      el('p', {}, 'Se borrará el voto de ', el('b', {}, `${p.nombre} ${p.apellido}`), ` (DNI ${p.dni}).`),
+      el('p', { class: 'aviso-voto' }, 'Los resultados bajarán en 1 voto y esta persona ', el('b', {}, 'podrá votar de nuevo'), '.')),
+    si: 'Sí, eliminar voto', claseSi: 'btn-rojo', no: 'Cancelar',
+  });
+  if (!si) return;
+  errorEn('padron-error');
+  errorEn('padron-ok');
+  try {
+    await pedir('/api/admin/votos/' + p.dni, { method: 'DELETE' });
+    errorEn('padron-ok', `✓ Se eliminó el voto de ${p.nombre} ${p.apellido}. Ya puede votar de nuevo.`);
+  } catch (err) {
+    await preguntar({ titulo: 'No se pudo eliminar el voto', texto: el('p', {}, err.message), si: 'Entendido', no: 'Cerrar' });
+  }
+  await cargarPadron();
+}
+
 async function quitarParticipante(p) {
   const si = await preguntar({
-    titulo: '¿Quitar de la lista?',
-    texto: el('p', {}, el('b', {}, `${p.nombre} ${p.apellido}`), ` (DNI ${p.dni}) ya no podrá votar.`),
-    si: 'Sí, quitar', claseSi: 'btn-rojo', no: 'Cancelar',
+    titulo: '¿Estás seguro de eliminar?',
+    texto: el('p', {}, el('b', {}, `${p.nombre} ${p.apellido}`), ` (DNI ${p.dni}) saldrá de la lista y ya no podrá votar.`),
+    si: 'Sí, eliminar', claseSi: 'btn-rojo', no: 'Cancelar',
   });
   if (!si) return;
   try {

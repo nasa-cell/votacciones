@@ -10,7 +10,7 @@ Página de elecciones: solo votan las personas que el administrador agregó a la
 ## Reglas
 
 - Votante: tiene que estar en la lista de participantes. Nombre y apellido de 3 a 80 letras, DNI de 8 números. Al ingresar se revisa cada casilla: no importan mayúsculas, minúsculas ni tildes, pero el DNI debe ser exacto. Si algo está mal, avisa debajo de esa casilla sin mostrar el dato correcto. Un DNI vota una sola vez («Usted ya votó»).
-- Lista de participantes: mismas reglas (3 a 80 letras, DNI de 8 números, sin DNI repetido). A quien ya votó no se le puede quitar ni cambiar el DNI, solo corregir el nombre.
+- Lista de participantes: mismas reglas (3 a 80 letras, DNI de 8 números, sin DNI repetido). Agregar, editar y eliminar preguntan «¿Estás seguro?» antes. A quien ya votó no se le puede quitar ni cambiar el DNI, solo corregir el nombre; el admin puede eliminar su voto (botón ↺) y entonces esa persona puede votar de nuevo. Con la votación cerrada no se eliminan votos.
 - Partido: candidato con nombre y apellido de 10 a 30, partido de 10 a 40 (no se repite). Logo y descripción (10 a 50) son opcionales. Al editar se aplican las mismas reglas.
 - Los votantes no ven porcentajes hasta que el admin publica. Al publicar se cierra la votación.
 - No se puede quitar un partido que ya tiene votos.

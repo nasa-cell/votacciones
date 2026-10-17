@@ -410,6 +410,10 @@ details.desplegable > summary:focus-visible{outline:3px solid #f2a900;outline-of
 .fila-padron.voto .etiqueta-voto{background:var(--verde-claro);color:#0b7a44}
 .quitar-padron{border:none;background:#fff5f6;color:var(--acento);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:14px;font-weight:800}
 .quitar-padron:hover{background:#fde8eb}
+.borrar-voto{border:none;background:var(--ambar-claro);color:#8a5a00;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;font-weight:800}
+.borrar-voto:hover{background:#ffe9b0}
+.borrar-voto:focus-visible{outline:3px solid #f2a900;outline-offset:2px}
+.modal .aviso-voto{background:var(--ambar-claro);border:2px solid var(--dorado);border-radius:10px;padding:8px 10px;font-size:14px;color:var(--tinta);text-align:left}
 .editar-padron{border:none;background:var(--marca-claro);color:var(--marca);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:15px;font-weight:800}
 .editar-padron:hover{background:#d9e3ff}
 .editar-padron:focus-visible{outline:3px solid #f2a900;outline-offset:2px}
@@ -427,9 +431,12 @@ details.desplegable > summary:focus-visible{outline:3px solid #f2a900;outline-of
   .padron .campo{margin-bottom:8px}
   .fila-padron{min-height:44px;padding:5px 6px;gap:6px;grid-template-columns:30px minmax(0,1fr) auto 30px 30px}
   .fila-padron .ini{width:30px;height:30px}
-  .editar-padron,.quitar-padron{width:30px;height:30px}
+  .editar-padron,.quitar-padron,.borrar-voto{width:30px;height:30px}
   .fila-padron b{font-size:13px}
   .paginas{margin-top:6px}
+  .padron-panel .paginas{flex-wrap:nowrap;gap:6px}
+  .padron-panel .paginas span{min-width:0;font-size:12px}
+  .padron-panel .paginas .btn-chico{padding:6px 10px;white-space:nowrap}
 }
 
 /* Menú del admin en celular: una sola fila con las 4 secciones y Salir (solo ícono) */

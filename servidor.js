@@ -64,6 +64,7 @@ const MENSAJES = {
   dni_en_lista: [409, 'Ese DNI ya está en la lista.'],
   no_en_lista: [404, 'Esa persona no está en la lista.'],
   participante_voto: [409, 'Esta persona ya votó. No se puede quitar de la lista.'],
+  sin_voto: [404, 'Esta persona todavía no votó.'],
   participante_voto_dni: [409, 'Esta persona ya votó. Se puede corregir su nombre, pero no su DNI.'],
 };
 
@@ -256,6 +257,14 @@ app.put('/api/admin/padron/:dni', soloAdmin, envolver(async (req, res) => {
   const d = validarDni(req.body?.dni);
   if (d.error) return res.status(400).json({ error: d.error, campo: 'dni' });
   res.json(await almacen.editarParticipante(anterior.dni, { ...persona.datos, dni: d.dni }));
+}));
+
+// Borra el voto de una persona: los resultados bajan en 1 y puede votar de nuevo.
+app.delete('/api/admin/votos/:dni', soloAdmin, envolver(async (req, res) => {
+  const d = validarDni(req.params.dni);
+  if (d.error) return res.status(404).json({ error: 'Esta persona todavía no votó.' });
+  await almacen.borrarVoto(d.dni);
+  res.json({ ok: true });
 }));
 
 app.delete('/api/admin/padron/:dni', soloAdmin, envolver(async (req, res) => {

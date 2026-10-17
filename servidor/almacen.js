@@ -117,6 +117,15 @@ function almacenArchivo(carpeta) {
         return { nombre: actual.nombre, apellido: actual.apellido, dni: actual.dni, voto: !!voto };
       });
     },
+    async borrarVoto(dni) {
+      return enCola(() => {
+        if (cerrada()) throw falla('cerrada');
+        const antes = datos.votos.length;
+        datos.votos = datos.votos.filter(v => v.dni !== dni);
+        if (datos.votos.length === antes) throw falla('sin_voto');
+        guardar();
+      });
+    },
     async quitarParticipante(dni) {
       return enCola(() => {
         if (!datos.padron.some(x => x.dni === dni)) throw falla('no_en_lista');
@@ -292,6 +301,11 @@ function almacenPostgres(url) {
       } finally {
         cliente.release();
       }
+    },
+    async borrarVoto(dni) {
+      await exigirAbierta();
+      const r = await pool.query('DELETE FROM vot_votos WHERE dni=$1', [dni]);
+      if (!r.rowCount) throw falla('sin_voto');
     },
     async quitarParticipante(dni) {
       const r = await pool.query(
