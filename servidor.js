@@ -1,8 +1,8 @@
 const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
-const { crearAlmacen } = require('./servidor/almacen');
-const { validarPersona, validarDni, validarCandidato, limpiar } = require('./servidor/validar');
+const { crearAlmacen, FILTROS_PADRON } = require('./servidor/almacen');
+const { validarVotante, validarDni, validarCandidato, limpiar, igualar } = require('./servidor/validar');
 
 const PUERTO = process.env.PORT || 3000;
 const CLAVE_ADMIN = process.env.ADMIN_CLAVE || '1234';
@@ -60,7 +60,11 @@ const MENSAJES = {
   cerrada: [409, 'La votación ya terminó.'],
   partido_repetido: [409, 'Ese partido ya está inscrito.'],
   no_existe: [404, 'Ese partido no existe.'],
-  dni_repetido: [409, 'Este DNI ya votó. Cada persona puede votar una sola vez.'],
+  dni_repetido: [409, 'Usted ya votó. Cada persona puede votar una sola vez.'],
+  dni_en_lista: [409, 'Ese DNI ya está en la lista.'],
+  no_en_lista: [404, 'Esa persona no está en la lista.'],
+  participante_voto: [409, 'Esta persona ya votó. No se puede quitar de la lista.'],
+  participante_voto_dni: [409, 'Esta persona ya votó. Se puede corregir su nombre, pero no su DNI.'],
 };
 
 function responderFalla(res, e) {
@@ -145,28 +149,53 @@ app.get('/api/candidatos', envolver(async (req, res) => {
   res.json(await almacen.listarCandidatos());
 }));
 
+// Revisa que la persona esté en la lista de participantes y que escribió bien su nombre y apellido.
+// Devuelve qué casillas están bien para avisar debajo de cada una.
+async function revisarParticipante(cuerpo) {
+  const persona = validarVotante(cuerpo);
+  if (persona.error) return { estado: 400, error: persona.error, campo: persona.campo };
+  const d = validarDni(cuerpo.dni);
+  if (d.error) return { estado: 400, error: d.error, campo: 'dni' };
+  const registrado = await almacen.buscarParticipante(d.dni);
+  if (!registrado) {
+    return { estado: 404, codigo: 'no_registrado', campos: { dni: false }, error: `No está registrado. El DNI ${d.dni} no está en la lista de votantes.` };
+  }
+  const campos = {
+    nombre: igualar(registrado.nombre) === igualar(persona.datos.nombre),
+    apellido: igualar(registrado.apellido) === igualar(persona.datos.apellido),
+    dni: true,
+  };
+  if (!campos.nombre || !campos.apellido) {
+    const cual = !campos.nombre && !campos.apellido ? 'El nombre y el apellido están mal escritos'
+      : !campos.nombre ? 'El nombre está mal escrito' : 'El apellido está mal escrito';
+    return { estado: 409, codigo: 'no_coincide', campos, error: `${cual}. Corrija la casilla marcada en rojo.` };
+  }
+  return { registrado, campos };
+}
+
+function responderRevision(res, r) {
+  const { estado, ...cuerpo } = r;
+  res.status(estado).json(cuerpo);
+}
+
 app.post('/api/ingresar', topePorIp, envolver(async (req, res) => {
   const estado = await almacen.estado();
   if (estado.publicado) return res.json({ publicado: true });
   if (estado.cerrada) return res.status(409).json({ error: 'La votación está cerrada. Los resultados todavía no se publican.', codigo: 'cerrada' });
-  const persona = validarPersona(req.body || {});
-  if (persona.error) return res.status(400).json({ error: persona.error });
-  const d = validarDni(req.body?.dni);
-  if (d.error) return res.status(400).json({ error: d.error, campo: 'dni' });
-  if (await almacen.yaVoto(d.dni)) {
-    return res.status(409).json({ error: `El DNI ${d.dni} ya votó. Cada persona puede votar una sola vez.`, codigo: 'dni_repetido', campo: 'dni' });
+  const r = await revisarParticipante(req.body || {});
+  if (r.estado) return responderRevision(res, r);
+  if (await almacen.yaVoto(r.registrado.dni)) {
+    return res.status(409).json({ error: 'Usted ya votó. Cada persona puede votar una sola vez.', codigo: 'dni_repetido', campos: r.campos });
   }
-  res.json({ publicado: false, ...persona.datos, dni: d.dni });
+  res.json({ publicado: false, ...r.registrado });
 }));
 
 app.post('/api/votar', topePorIp, envolver(async (req, res) => {
-  const persona = validarPersona(req.body || {});
-  if (persona.error) return res.status(400).json({ error: persona.error });
-  const d = validarDni(req.body?.dni);
-  if (d.error) return res.status(400).json({ error: d.error });
+  const r = await revisarParticipante(req.body || {});
+  if (r.estado) return responderRevision(res, r);
   const candidatoId = idValido(req.body?.candidatoId);
   if (!candidatoId) return res.status(400).json({ error: 'Elija un partido.' });
-  await almacen.votar({ ...persona.datos, dni: d.dni, candidatoId });
+  await almacen.votar({ ...r.registrado, candidatoId });
   res.json({ ok: true });
 }));
 
@@ -199,6 +228,41 @@ app.get('/api/admin/votantes/:id', soloAdmin, envolver(async (req, res) => {
   if (!id) return res.status(404).json({ error: 'Ese partido no existe.' });
   const r = await almacen.votantesDe(id, { buscar, desde: (pagina - 1) * porPagina, cuantos: porPagina });
   res.json({ ...r, pagina, paginas: Math.max(1, Math.ceil(r.total / porPagina)), porPagina });
+}));
+
+/* ---------- Lista de participantes (quiénes pueden votar) ---------- */
+app.get('/api/admin/padron', soloAdmin, envolver(async (req, res) => {
+  const porPagina = Math.min(25, Math.max(3, Math.floor(Number(req.query.por)) || 10));
+  const pagina = Math.max(1, Math.floor(Number(req.query.pagina)) || 1);
+  const filtro = FILTROS_PADRON.includes(req.query.filtro) ? req.query.filtro : 'todos';
+  const buscar = limpiar(req.query.buscar).slice(0, 80);
+  const r = await almacen.listarPadron({ filtro, buscar, desde: (pagina - 1) * porPagina, cuantos: porPagina });
+  res.json({ ...r, pagina, paginas: Math.max(1, Math.ceil(r.total / porPagina)), porPagina });
+}));
+
+app.post('/api/admin/padron', soloAdmin, envolver(async (req, res) => {
+  const persona = validarVotante(req.body || {});
+  if (persona.error) return res.status(400).json({ error: persona.error, campo: persona.campo });
+  const d = validarDni(req.body?.dni);
+  if (d.error) return res.status(400).json({ error: d.error, campo: 'dni' });
+  res.json(await almacen.agregarParticipante({ ...persona.datos, dni: d.dni }));
+}));
+
+app.put('/api/admin/padron/:dni', soloAdmin, envolver(async (req, res) => {
+  const anterior = validarDni(req.params.dni);
+  if (anterior.error) return res.status(404).json({ error: 'Esa persona no está en la lista.' });
+  const persona = validarVotante(req.body || {});
+  if (persona.error) return res.status(400).json({ error: persona.error, campo: persona.campo });
+  const d = validarDni(req.body?.dni);
+  if (d.error) return res.status(400).json({ error: d.error, campo: 'dni' });
+  res.json(await almacen.editarParticipante(anterior.dni, { ...persona.datos, dni: d.dni }));
+}));
+
+app.delete('/api/admin/padron/:dni', soloAdmin, envolver(async (req, res) => {
+  const d = validarDni(req.params.dni);
+  if (d.error) return res.status(404).json({ error: 'Esa persona no está en la lista.' });
+  await almacen.quitarParticipante(d.dni);
+  res.json({ ok: true });
 }));
 
 app.post('/api/admin/candidatos', soloAdmin, envolver(async (req, res) => {

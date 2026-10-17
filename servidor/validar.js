@@ -18,6 +18,21 @@ function validarPersona({ nombre, apellido }) {
   return { datos };
 }
 
+// Datos de quien vota o de quien se agrega a la lista de participantes: de 3 a 80 letras.
+function validarVotante({ nombre, apellido }) {
+  const datos = { nombre: limpiar(nombre), apellido: limpiar(apellido) };
+  if (!largo(datos.nombre, 3, 80)) return { error: 'El nombre debe tener entre 3 y 80 letras.', campo: 'nombre' };
+  if (!LETRAS.test(datos.nombre)) return { error: 'El nombre solo puede tener letras y espacios.', campo: 'nombre' };
+  if (!largo(datos.apellido, 3, 80)) return { error: 'El apellido debe tener entre 3 y 80 letras.', campo: 'apellido' };
+  if (!LETRAS.test(datos.apellido)) return { error: 'El apellido solo puede tener letras y espacios.', campo: 'apellido' };
+  return { datos };
+}
+
+// Para comparar nombres: sin importar mayúsculas, tildes ni espacios de más.
+function igualar(texto) {
+  return limpiar(texto).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
 function validarDni(dni) {
   const limpio = limpiar(dni);
   if (!/^\d{8}$/.test(limpio)) return { error: 'El DNI debe tener 8 números.' };
@@ -41,4 +56,4 @@ function validarCandidato(cuerpo) {
   return { datos: { ...persona.datos, partido, descripcion: descripcion || null, logo } };
 }
 
-module.exports = { validarPersona, validarDni, validarCandidato, limpiar };
+module.exports = { validarPersona, validarVotante, validarDni, validarCandidato, limpiar, igualar };

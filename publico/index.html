@@ -16,21 +16,21 @@
   <!-- Registro -->
   <section id="vista-registro" class="cuerpo" hidden>
     <div class="centro">
-      <h1 class="titulo-pant">Registro</h1>
-      <p class="bajada">Escriba sus datos para poder votar.</p>
+      <h1 class="titulo-pant">Ingrese a votar</h1>
+      <p class="bajada">Escriba su nombre, apellido y DNI como están en la lista de votantes.</p>
       <div id="registro-error" class="caja-error" hidden role="alert"></div>
       <form id="form-registro" novalidate>
         <section class="seccion">
           <h2 class="sec-tit"><span class="ic">1</span>Sus datos</h2>
           <div class="sec-cuerpo">
             <div class="campo">
-              <label for="r-nombre">Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10 a 30</small></label>
-              <input class="input" id="r-nombre" name="nombre" maxlength="30" autocomplete="given-name" required>
+              <label for="r-nombre">Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>3 a 80</small></label>
+              <input class="input" id="r-nombre" name="nombre" maxlength="80" autocomplete="given-name" required>
               <span class="contador"></span>
             </div>
             <div class="campo">
-              <label for="r-apellido">Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10 a 30</small></label>
-              <input class="input" id="r-apellido" name="apellido" maxlength="30" autocomplete="family-name" required>
+              <label for="r-apellido">Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>3 a 80</small></label>
+              <input class="input" id="r-apellido" name="apellido" maxlength="80" autocomplete="family-name" required>
               <span class="contador"></span>
             </div>
             <div class="campo">
@@ -39,7 +39,7 @@
             </div>
           </div>
         </section>
-        <button class="btn btn-pri" type="submit" id="btn-ingresar">Ingresar →</button>
+        <button class="btn btn-pri" type="submit" id="btn-ingresar">Verificar y votar →</button>
       </form>
       <a class="enlace" href="admin.html">Entrar como administrador</a>
     </div>

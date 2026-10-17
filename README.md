@@ -1,16 +1,17 @@
 # Votaciones
 
-Página de elecciones: los votantes se registran con nombre, apellido y DNI, eligen un partido y votan una sola vez. El administrador inscribe a los participantes, mira los resultados en vivo y los publica.
+Página de elecciones: solo votan las personas que el administrador agregó a la lista de participantes. Cada una ingresa con su nombre, apellido y DNI, elige un partido y vota una sola vez. El administrador inscribe los partidos, arma la lista de quiénes pueden votar, mira los resultados en vivo y los publica.
 
 ## Páginas
 
-- `/` — registro del votante, votación y, cuando el admin publica, la pantalla final con ganadores (1.º a 4.º) y gráfico de barras.
-- `/admin.html` — acceso del administrador (nombre y contraseña), inscribir participantes, resultados en vivo (general y por partido, con la tabla de quién votó) y botón para publicar.
+- `/` — «Ingrese a votar» (nombre, apellido y DNI), votación y, cuando el admin publica, la pantalla final con ganadores (1.º a 4.º) y gráfico de barras.
+- `/admin.html` — acceso del administrador (nombre y contraseña), inscribir partidos, «Participantes» (agregar, editar y quitar a quienes pueden votar, ver quién ya votó y quién falta), resultados en vivo (general y por partido, con la tabla de quién votó) y botón para publicar.
 
 ## Reglas
 
-- Votante: nombre y apellido de 10 a 30 letras, DNI de 8 números. Un DNI vota una sola vez.
-- Participante: nombre y apellido de 10 a 30, partido de 10 a 40 (no se repite). Logo y descripción (10 a 50) son opcionales.
+- Votante: tiene que estar en la lista de participantes. Nombre y apellido de 3 a 80 letras, DNI de 8 números. Al ingresar se revisa cada casilla: no importan mayúsculas, minúsculas ni tildes, pero el DNI debe ser exacto. Si algo está mal, avisa debajo de esa casilla sin mostrar el dato correcto. Un DNI vota una sola vez («Usted ya votó»).
+- Lista de participantes: mismas reglas (3 a 80 letras, DNI de 8 números, sin DNI repetido). A quien ya votó no se le puede quitar ni cambiar el DNI, solo corregir el nombre.
+- Partido: candidato con nombre y apellido de 10 a 30, partido de 10 a 40 (no se repite). Logo y descripción (10 a 50) son opcionales. Al editar se aplican las mismas reglas.
 - Los votantes no ven porcentajes hasta que el admin publica. Al publicar se cierra la votación.
 - No se puede quitar un partido que ya tiene votos.
 

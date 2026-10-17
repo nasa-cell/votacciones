@@ -29,19 +29,49 @@ const form = document.getElementById('form-registro');
 const campoNombre = document.getElementById('r-nombre');
 const campoApellido = document.getElementById('r-apellido');
 const campoDni = document.getElementById('r-dni');
-conectarContador(campoNombre, 10, 30);
-conectarContador(campoApellido, 10, 30);
+conectarContador(campoNombre, 3, 80);
+conectarContador(campoApellido, 3, 80);
 conectarContador(campoDni, 8, 8);
 
 const revisarRegistro = conectarValidacion([
-  { input: campoNombre, min: 10, max: 30, tipo: 'letras' },
-  { input: campoApellido, min: 10, max: 30, tipo: 'letras' },
+  { input: campoNombre, min: 3, max: 80, tipo: 'letras' },
+  { input: campoApellido, min: 3, max: 80, tipo: 'letras' },
   { input: campoDni, min: 8, max: 8, tipo: 'numeros', exacto: true },
 ]);
+
+const CAMPOS = { nombre: campoNombre, apellido: campoApellido, dni: campoDni };
+const TEXTO_CAMPO = {
+  nombre: ['Nombre correcto', 'El nombre está mal escrito. Corríjalo.'],
+  apellido: ['Apellido correcto', 'El apellido está mal escrito. Corríjalo.'],
+  dni: ['DNI correcto', 'Este DNI no está en la lista de votantes.'],
+};
+// Al corregir un cuadro se borra el aviso verde que tenía.
+for (const c of Object.values(CAMPOS)) c.addEventListener('input', () => mostrarCorrecto(c, null));
+
+function avisoArriba(error) {
+  const caja = document.getElementById('registro-error');
+  const punto = error.indexOf('. ');
+  caja.replaceChildren(punto > 0 ? el('b', {}, error.slice(0, punto + 1)) : error, punto > 0 ? error.slice(punto + 1) : '');
+  caja.hidden = false;
+}
+
+function marcarCampos(campos) {
+  let primero = null;
+  for (const [k, bien] of Object.entries(campos)) {
+    if (bien) mostrarCorrecto(CAMPOS[k], TEXTO_CAMPO[k][0]);
+    else {
+      mostrarCorrecto(CAMPOS[k], null);
+      mostrarMensaje(CAMPOS[k], TEXTO_CAMPO[k][1]);
+      primero ??= CAMPOS[k];
+    }
+  }
+  primero?.focus();
+}
 
 form.addEventListener('submit', async e => {
   e.preventDefault();
   errorEn('registro-error');
+  for (const c of Object.values(CAMPOS)) mostrarCorrecto(c, null);
   if (!revisarRegistro()) return;
   const boton = document.getElementById('btn-ingresar');
   try {
@@ -49,13 +79,16 @@ form.addEventListener('submit', async e => {
       cuerpo: { nombre: campoNombre.value, apellido: campoApellido.value, dni: campoDni.value },
     }));
     if (r.publicado) return mostrarFinal();
-    votante = { nombre: r.nombre, apellido: r.apellido, dni: r.dni };
+    votante = { nombre: campoNombre.value, apellido: campoApellido.value, dni: r.dni, nombreLista: r.nombre };
     await abrirVotar();
   } catch (err) {
     if (err.codigo === 'cerrada') return revisarEstado();
-    if (err.campo === 'dni') {
-      mostrarMensaje(campoDni, err.codigo === 'dni_repetido' ? `El DNI ${campoDni.value} ya votó. Cada persona vota una sola vez.` : err.error);
-      campoDni.focus();
+    if (err.campos) {
+      avisoArriba(err.message);
+      marcarCampos(err.campos);
+    } else if (err.campo && CAMPOS[err.campo]) {
+      mostrarMensaje(CAMPOS[err.campo], err.message);
+      CAMPOS[err.campo].focus();
     } else {
       errorEn('registro-error', err.message);
     }
@@ -85,7 +118,7 @@ async function abrirVotar() {
   buscarPartido.value = '';
   document.getElementById('campo-buscar-partido').hidden = candidatos.length <= 8;
   filtrarPartidos();
-  document.querySelector('header span').textContent = `Hola, ${votante.nombre}`;
+  document.querySelector('header span').textContent = `Hola, ${votante.nombreLista}`;
   mostrar('votar');
 }
 
@@ -125,7 +158,8 @@ document.getElementById('form-votar').addEventListener('submit', async e => {
   });
   if (!si) return;
   try {
-    await conCarga(botonVotar, 'Guardando voto…', () => pedir('/api/votar', { cuerpo: { ...votante, candidatoId: elegido.id } }));
+    const { nombre, apellido, dni } = votante;
+    await conCarga(botonVotar, 'Guardando voto…', () => pedir('/api/votar', { cuerpo: { nombre, apellido, dni, candidatoId: elegido.id } }));
     mostrar('gracias');
   } catch (err) {
     if (err.codigo === 'cerrada') return revisarEstado();
@@ -136,7 +170,7 @@ document.getElementById('form-votar').addEventListener('submit', async e => {
 function volverAlRegistro() {
   votante = null;
   form.reset();
-  for (const c of [campoNombre, campoApellido, campoDni]) { mostrarMensaje(c, null); c.dispatchEvent(new Event('input')); }
+  for (const c of [campoNombre, campoApellido, campoDni]) { mostrarMensaje(c, null); mostrarCorrecto(c, null); c.dispatchEvent(new Event('input')); }
   document.querySelector('header span').textContent = 'Elecciones 2026';
   errorEn('registro-error');
   mostrar('registro');
@@ -148,7 +182,7 @@ document.getElementById('btn-salir').addEventListener('click', async () => {
   if (await seguroDeSalir('Tu voto ya quedó guardado.')) volverAlRegistro();
 });
 document.getElementById('btn-cancelar-voto').addEventListener('click', async () => {
-  if (await seguroDeSalir('Todavía no votaste. Si sales, tendrás que registrarte otra vez para votar.')) volverAlRegistro();
+  if (await seguroDeSalir('Todavía no votaste. Si sales, tendrás que escribir tus datos otra vez para votar.')) volverAlRegistro();
 });
 
 /* ---------- Resultados finales ---------- */

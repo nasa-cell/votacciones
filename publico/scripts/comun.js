@@ -160,6 +160,20 @@ function mostrarMensaje(input, texto) {
   input.setAttribute('aria-invalid', texto ? 'true' : 'false');
 }
 
+// Aviso verde debajo de un cuadro que está bien escrito.
+function mostrarCorrecto(input, texto) {
+  const campo = input.closest('.campo');
+  let caja = campo.querySelector('.msg-bien');
+  if (!caja) {
+    caja = el('div', { class: 'msg-bien', hidden: true });
+    campo.append(caja);
+  }
+  caja.textContent = texto ? '✓ ' + texto : '';
+  caja.hidden = !texto;
+  input.classList.toggle('bien', !!texto);
+  if (texto) mostrarMensaje(input, null);
+}
+
 function conectarValidacion(reglas) {
   for (const r of reglas) {
     r.input.addEventListener('beforeinput', e => {

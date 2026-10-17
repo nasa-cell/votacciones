@@ -384,3 +384,64 @@ details.desplegable > summary:focus-visible{outline:3px solid #f2a900;outline-of
 .btn-borde-rojo{background:#fff;color:var(--acento);border-color:var(--acento)}
 .btn-borde-rojo:hover{background:#fff5f6}
 .btn-borde-rojo:active{transform:translateY(1px)}
+/* Participantes: lista de quiénes pueden votar (diseño M1) */
+.input.bien{border-color:var(--ok)}
+.msg-bien{color:var(--ok);font-size:13.5px;font-weight:700;margin-top:5px}
+.resumen-padron{color:var(--suave);font-size:13px;font-weight:600}
+.pestanas-padron{display:none}
+.padron{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:16px;align-items:start}
+.padron > .seccion{margin-bottom:0}
+.padron-panel[hidden]{display:block !important}
+.nota-padron{font-size:12.5px;color:var(--suave);margin:8px 0 0}
+.filtros-padron{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.filtros-padron button{border:2px solid var(--linea);background:#fff;border-radius:12px;padding:5px 2px;font:inherit;font-size:12px;color:var(--suave);cursor:pointer;line-height:1.2}
+.filtros-padron button b{display:block;font-size:18px;color:var(--tinta)}
+.filtros-padron button.on{border-color:var(--marca);background:var(--marca-claro);color:var(--marca)}
+.filtros-padron button:focus-visible{outline:3px solid #f2a900;outline-offset:2px}
+.buscar-padron{height:40px;min-height:0;padding:0 12px;margin-bottom:8px}
+.lista-padron{display:flex;flex-direction:column;gap:5px}
+.fila-padron{display:grid;grid-template-columns:32px minmax(0,1fr) auto 32px 32px;gap:8px;align-items:center;background:#f8faff;border:1px solid var(--linea);border-left:4px solid var(--marca);border-radius:12px;padding:6px 8px;min-height:48px}
+.fila-padron.voto{border-left-color:var(--ok)}
+.fila-padron .ini{width:32px;height:32px;border-radius:50%;background:var(--marca-claro);color:var(--marca);display:grid;place-items:center;font-size:11.5px;font-weight:800}
+.fila-padron.voto .ini{background:var(--verde-claro);color:#0b7a44}
+.fila-padron b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fila-padron small{display:block;font-size:12px;color:var(--suave)}
+.etiqueta-voto{font-size:12px;font-weight:800;padding:2px 9px;border-radius:99px;background:var(--marca-claro);color:var(--marca)}
+.fila-padron.voto .etiqueta-voto{background:var(--verde-claro);color:#0b7a44}
+.quitar-padron{border:none;background:#fff5f6;color:var(--acento);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:14px;font-weight:800}
+.quitar-padron:hover{background:#fde8eb}
+.editar-padron{border:none;background:var(--marca-claro);color:var(--marca);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:15px;font-weight:800}
+.editar-padron:hover{background:#d9e3ff}
+.editar-padron:focus-visible{outline:3px solid #f2a900;outline-offset:2px}
+.input:disabled{opacity:.6;cursor:not-allowed}
+.quitar-padron:focus-visible{outline:3px solid #f2a900;outline-offset:2px}
+.vacio-padron{text-align:center;color:var(--suave);font-size:14px;padding:16px}
+@media (max-width:900px){.padron{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .pestanas-padron{display:grid;grid-template-columns:1fr 1fr;background:#e4e9f6;border-radius:12px;padding:3px;gap:3px;margin-bottom:8px}
+  .pestanas-padron button{border:none;border-radius:9px;padding:8px 4px;font:inherit;font-size:13.5px;font-weight:800;color:var(--marca);background:none;cursor:pointer}
+  .pestanas-padron button.on{background:#fff;box-shadow:0 2px 6px rgba(14,27,61,.12)}
+  .padron-panel[hidden]{display:none !important}
+  .padron-panel .sec-tit{display:none}
+  .padron-panel .sec-cuerpo{padding:10px 12px}
+  .padron .campo{margin-bottom:8px}
+  .fila-padron{min-height:44px;padding:5px 6px;gap:6px;grid-template-columns:30px minmax(0,1fr) auto 30px 30px}
+  .fila-padron .ini{width:30px;height:30px}
+  .editar-padron,.quitar-padron{width:30px;height:30px}
+  .fila-padron b{font-size:13px}
+  .paginas{margin-top:6px}
+}
+
+/* Menú del admin en celular: una sola fila con las 4 secciones y Salir (solo ícono) */
+@media (max-width:640px){
+  .menu{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) 42px;gap:3px;padding:5px}
+  .menu button,.menu button.salir{flex-direction:column;justify-content:center;gap:2px;padding:5px 2px;font-size:11.5px;min-width:0}
+  .menu button .rotulo{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  .menu button i{width:22px;height:22px;font-size:12px}
+  .menu button.salir .texto-largo,.menu button.salir .texto-corto{display:none}
+  .resumen-padron{display:none}
+}
+@media (max-width:400px){
+  .menu{grid-template-columns:repeat(4,minmax(0,1fr)) 38px}
+  .menu button,.menu button.salir{font-size:10.5px;padding:5px 1px}
+}

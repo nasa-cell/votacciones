@@ -36,9 +36,10 @@
   <!-- Panel -->
   <div id="vista-panel" class="panel" hidden>
     <nav class="menu" aria-label="Secciones">
-      <button type="button" data-ir="inscribir" class="on"><i aria-hidden="true">➕</i>Inscribir</button>
-      <button type="button" data-ir="resultados"><i aria-hidden="true">📊</i>Resultados</button>
-      <button type="button" data-ir="publicar"><i aria-hidden="true">📢</i>Publicar</button>
+      <button type="button" data-ir="inscribir" class="on"><i aria-hidden="true">➕</i><span class="rotulo">Inscribir</span></button>
+      <button type="button" data-ir="participantes"><i aria-hidden="true">👥</i><span class="rotulo">Participantes</span></button>
+      <button type="button" data-ir="resultados"><i aria-hidden="true">📊</i><span class="rotulo">Resultados</span></button>
+      <button type="button" data-ir="publicar"><i aria-hidden="true">📢</i><span class="rotulo">Publicar</span></button>
       <div class="menu-pie">
         <div class="quien-admin"><i aria-hidden="true">👤</i><span><b id="nombre-admin"></b><small>Sesión abierta</small></span></div>
         <button type="button" class="salir" id="btn-salir-admin" aria-label="Cerrar sesión"><i aria-hidden="true">🚪</i><span class="texto-largo">Cerrar sesión</span><span class="texto-corto">Salir</span></button>
@@ -129,6 +130,51 @@
                 <button type="button" class="btn btn-sec btn-chico" id="pag-anterior">← Anterior</button>
                 <span id="pag-texto"></span>
                 <button type="button" class="btn btn-sec btn-chico" id="pag-siguiente">Siguiente →</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- Participantes: quiénes pueden votar -->
+      <section id="sec-participantes" hidden>
+        <div class="fila-tit"><h1 id="tit-padron">Agregar participante</h1><small class="resumen-padron" id="resumen-padron"></small></div>
+        <div class="pestanas-padron" role="tablist" aria-label="Participantes">
+          <button type="button" role="tab" data-pestana="agregar" class="on" aria-selected="true">➕ Agregar</button>
+          <button type="button" role="tab" data-pestana="lista" aria-selected="false">📋 Lista (<span id="cuenta-padron">0</span>)</button>
+        </div>
+        <div class="padron">
+          <section class="seccion padron-panel" data-panel="agregar">
+            <h2 class="sec-tit"><span class="ic">➕</span><span id="sec-tit-padron">Agregar a la lista</span></h2>
+            <div class="sec-cuerpo">
+              <div id="padron-ok" class="caja-ok" hidden role="status"></div>
+              <div id="padron-error" class="caja-error" hidden role="alert"></div>
+              <form id="form-padron" novalidate>
+                <div class="campo"><label for="p-nombre">Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>3 a 80</small></label><input class="input" id="p-nombre" maxlength="80" autocomplete="off" required></div>
+                <div class="campo"><label for="p-apellido">Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>3 a 80</small></label><input class="input" id="p-apellido" maxlength="80" autocomplete="off" required></div>
+                <div class="campo"><label for="p-dni">DNI <span class="req">*</span><span class="pista numeros">123 Solo números</span><small>8</small></label><input class="input" id="p-dni" inputmode="numeric" maxlength="8" placeholder="Ej.: 45879123" autocomplete="off" required></div>
+                <div class="fila-botones">
+                  <button class="btn btn-pri" type="submit" id="btn-agregar-participante">➕ Agregar a la lista</button>
+                  <button class="btn btn-sec" type="button" id="btn-cancelar-participante" hidden>Cancelar edición</button>
+                </div>
+                <p class="nota-padron">Al votar no importan las mayúsculas ni las tildes. El DNI debe ser exacto.</p>
+              </form>
+            </div>
+          </section>
+          <section class="seccion s-lista padron-panel" data-panel="lista" hidden>
+            <h2 class="sec-tit"><span class="ic">≡</span>Quiénes votaron y quiénes faltan</h2>
+            <div class="sec-cuerpo">
+              <div class="filtros-padron" role="group" aria-label="Filtrar">
+                <button type="button" data-filtro="todos" class="on"><b id="n-todos">0</b>Todos</button>
+                <button type="button" data-filtro="votaron"><b id="n-votaron">0</b>✓ Votaron</button>
+                <button type="button" data-filtro="faltan"><b id="n-faltan">0</b>⏳ Faltan</button>
+              </div>
+              <input class="input buscar-padron" id="buscar-padron" placeholder="🔍 Buscar nombre o DNI" aria-label="Buscar participante" maxlength="80">
+              <div class="lista-padron" id="lista-padron"></div>
+              <div class="paginas">
+                <button type="button" class="btn btn-sec btn-chico" id="padron-anterior">← Anterior</button>
+                <span id="padron-pagina">Página 1 de 1</span>
+                <button type="button" class="btn btn-sec btn-chico" id="padron-siguiente">Siguiente →</button>
               </div>
             </div>
           </section>

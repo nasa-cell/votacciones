@@ -60,12 +60,13 @@ async function abrirPanel(nombre) {
 }
 
 function irA(seccion) {
-  for (const s of ['inscribir', 'resultados', 'publicar']) $('sec-' + s).hidden = s !== seccion;
+  for (const s of ['inscribir', 'participantes', 'resultados', 'publicar']) $('sec-' + s).hidden = s !== seccion;
   document.querySelectorAll('.menu button[data-ir]').forEach(b => {
     b.classList.toggle('on', b.dataset.ir === seccion);
     b.setAttribute('aria-current', b.dataset.ir === seccion ? 'page' : 'false');
   });
   clearInterval(reloj);
+  if (seccion === 'participantes') cargarPadron();
   if (seccion === 'resultados') {
     actualizarResultados();
     reloj = setInterval(actualizarResultados, 3000);
@@ -601,6 +602,154 @@ $('buscar').addEventListener('input', () => {
 });
 $('pag-anterior').addEventListener('click', () => { paginaVotantes--; cargarVotantes(); });
 $('pag-siguiente').addEventListener('click', () => { paginaVotantes++; cargarVotantes(); });
+
+/* ---------- Participantes: quiénes pueden votar ---------- */
+let paginaPadron = 1;
+let filtroPadron = 'todos';
+let esperaPadron = null;
+let editandoDni = null;
+// En celular entran tantas filas como quepan en la pantalla (entre 3 y 8) para no hacer scroll.
+const porPaginaPadron = () => (esCelular() ? Math.min(8, Math.max(3, Math.floor((window.innerHeight - 475) / 53))) : 10);
+const camposPadron = { nombre: $('p-nombre'), apellido: $('p-apellido'), dni: $('p-dni') };
+const contadoresPadron = [
+  conectarContador(camposPadron.nombre, 3, 80),
+  conectarContador(camposPadron.apellido, 3, 80),
+  conectarContador(camposPadron.dni, 8, 8),
+];
+const revisarPadron = conectarValidacion([
+  { input: camposPadron.nombre, min: 3, max: 80, tipo: 'letras' },
+  { input: camposPadron.apellido, min: 3, max: 80, tipo: 'letras' },
+  { input: camposPadron.dni, min: 8, max: 8, tipo: 'numeros', exacto: true },
+]);
+
+function elegirPestana(nombre) {
+  document.querySelectorAll('.pestanas-padron button').forEach(b => {
+    b.classList.toggle('on', b.dataset.pestana === nombre);
+    b.setAttribute('aria-selected', b.dataset.pestana === nombre ? 'true' : 'false');
+  });
+  document.querySelectorAll('.padron-panel').forEach(p => { p.hidden = p.dataset.panel !== nombre; });
+}
+document.querySelector('.pestanas-padron').addEventListener('click', e => {
+  const b = e.target.closest('button[data-pestana]');
+  if (b) elegirPestana(b.dataset.pestana);
+});
+
+const inicialesPersona = p => ((p.nombre[0] || '') + (p.apellido[0] || '')).toUpperCase();
+
+async function cargarPadron() {
+  const q = $('buscar-padron').value.trim();
+  let r;
+  try {
+    r = await pedir(`/api/admin/padron?pagina=${paginaPadron}&por=${porPaginaPadron()}&filtro=${filtroPadron}&buscar=${encodeURIComponent(q)}`);
+  } catch (err) {
+    $('lista-padron').replaceChildren(el('p', { class: 'vacio-padron' }, err.message));
+    return;
+  }
+  paginaPadron = r.pagina;
+  $('n-todos').textContent = r.conteo.todos;
+  $('n-votaron').textContent = r.conteo.votaron;
+  $('n-faltan').textContent = r.conteo.faltan;
+  $('cuenta-padron').textContent = r.conteo.todos;
+  $('resumen-padron').textContent = `${r.conteo.todos} en la lista · ${r.conteo.votaron} votaron`;
+  document.querySelectorAll('.filtros-padron button').forEach(b => b.classList.toggle('on', b.dataset.filtro === filtroPadron));
+  const vacio = !r.conteo.todos ? 'Todavía no hay nadie en la lista. Agregue a los participantes que pueden votar.'
+    : q ? 'No hay nadie con esa búsqueda.' : 'No hay nadie en este grupo.';
+  $('lista-padron').replaceChildren(...(r.filas.length ? r.filas.map(p => el('div', { class: 'fila-padron' + (p.voto ? ' voto' : '') },
+    el('span', { class: 'ini', 'aria-hidden': 'true' }, inicialesPersona(p)),
+    el('span', {}, el('b', { title: `${p.nombre} ${p.apellido}` }, `${p.nombre} ${p.apellido}`), el('small', {}, `DNI ${p.dni}`)),
+    el('span', { class: 'etiqueta-voto' }, p.voto ? 'Votó' : 'Falta'),
+    el('button', { type: 'button', class: 'editar-padron', title: 'Editar', 'aria-label': `Editar a ${p.nombre} ${p.apellido}`, onclick: () => editarParticipante(p) }, '✎'),
+    p.voto ? el('span') : el('button', { type: 'button', class: 'quitar-padron', title: 'Quitar de la lista', 'aria-label': `Quitar a ${p.nombre} ${p.apellido}`, onclick: () => quitarParticipante(p) }, '✕'),
+  )) : [el('p', { class: 'vacio-padron' }, vacio)]));
+  $('padron-pagina').textContent = `Página ${r.pagina} de ${r.paginas}`;
+  $('padron-anterior').disabled = r.pagina <= 1;
+  $('padron-siguiente').disabled = r.pagina >= r.paginas;
+}
+
+function modoAgregar() {
+  editandoDni = null;
+  $('form-padron').reset();
+  camposPadron.dni.disabled = false;
+  contadoresPadron.forEach(f => f());
+  Object.values(camposPadron).forEach(c => mostrarMensaje(c, null));
+  $('tit-padron').textContent = 'Agregar participante';
+  $('sec-tit-padron').textContent = 'Agregar a la lista';
+  $('btn-agregar-participante').textContent = '➕ Agregar a la lista';
+  $('btn-cancelar-participante').hidden = true;
+}
+
+function editarParticipante(p) {
+  errorEn('padron-error');
+  errorEn('padron-ok');
+  editandoDni = p.dni;
+  camposPadron.nombre.value = p.nombre;
+  camposPadron.apellido.value = p.apellido;
+  camposPadron.dni.value = p.dni;
+  // Quien ya votó puede corregir su nombre, pero su DNI queda fijo.
+  camposPadron.dni.disabled = p.voto;
+  Object.values(camposPadron).forEach(c => mostrarMensaje(c, null));
+  contadoresPadron.forEach(f => f());
+  $('tit-padron').textContent = 'Editar participante';
+  $('sec-tit-padron').textContent = p.voto ? 'Editar datos (ya votó: el DNI no cambia)' : 'Editar datos';
+  $('btn-agregar-participante').textContent = '💾 Guardar cambios';
+  $('btn-cancelar-participante').hidden = false;
+  if (esCelular()) elegirPestana('agregar');
+  camposPadron.nombre.focus();
+}
+$('btn-cancelar-participante').addEventListener('click', () => { modoAgregar(); errorEn('padron-error'); });
+
+$('form-padron').addEventListener('submit', async e => {
+  e.preventDefault();
+  errorEn('padron-error');
+  errorEn('padron-ok');
+  if (!revisarPadron()) return;
+  const cuerpo = { nombre: camposPadron.nombre.value, apellido: camposPadron.apellido.value, dni: camposPadron.dni.value };
+  const editando = editandoDni;
+  try {
+    const p = await conCarga($('btn-agregar-participante'), 'Guardando…', () => editando
+      ? pedir('/api/admin/padron/' + editando, { method: 'PUT', cuerpo })
+      : pedir('/api/admin/padron', { cuerpo }));
+    modoAgregar();
+    errorEn('padron-ok', editando ? `✓ Cambios guardados: ${p.nombre} ${p.apellido}.` : `✓ ${p.nombre} ${p.apellido} quedó en la lista.`);
+    camposPadron.nombre.focus();
+    if (!editando) paginaPadron = 1;
+    await cargarPadron();
+  } catch (err) {
+    if (err.codigo === 'dni_en_lista') mostrarMensaje(camposPadron.dni, 'Ese DNI ya está en la lista.');
+    else if (err.campo && camposPadron[err.campo]) mostrarMensaje(camposPadron[err.campo], err.message);
+    else errorEn('padron-error', err.message);
+  }
+});
+
+async function quitarParticipante(p) {
+  const si = await preguntar({
+    titulo: '¿Quitar de la lista?',
+    texto: el('p', {}, el('b', {}, `${p.nombre} ${p.apellido}`), ` (DNI ${p.dni}) ya no podrá votar.`),
+    si: 'Sí, quitar', claseSi: 'btn-rojo', no: 'Cancelar',
+  });
+  if (!si) return;
+  try {
+    await pedir('/api/admin/padron/' + p.dni, { method: 'DELETE' });
+    if (editandoDni === p.dni) modoAgregar();
+  } catch (err) {
+    await preguntar({ titulo: 'No se pudo quitar', texto: el('p', {}, err.message), si: 'Entendido', no: 'Cerrar' });
+  }
+  await cargarPadron();
+}
+
+document.querySelector('.filtros-padron').addEventListener('click', e => {
+  const b = e.target.closest('button[data-filtro]');
+  if (!b) return;
+  filtroPadron = b.dataset.filtro;
+  paginaPadron = 1;
+  cargarPadron();
+});
+$('buscar-padron').addEventListener('input', () => {
+  clearTimeout(esperaPadron);
+  esperaPadron = setTimeout(() => { paginaPadron = 1; cargarPadron(); }, 250);
+});
+$('padron-anterior').addEventListener('click', () => { paginaPadron--; cargarPadron(); });
+$('padron-siguiente').addEventListener('click', () => { paginaPadron++; cargarPadron(); });
 
 /* ---------- Publicar ---------- */
 $('btn-publicar').addEventListener('click', async () => {
