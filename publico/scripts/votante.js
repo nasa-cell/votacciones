@@ -3,8 +3,14 @@ const pill = document.getElementById('pill-estado');
 let votante = null;
 let candidatos = [];
 
+// Resultados en vivo: al lado del formulario (pestaña en el celular) y después de votar.
+const vivoIngreso = montarEnVivo(document.getElementById('panel-resultados'));
+const vivoGracias = montarEnVivo(document.getElementById('vivo-gracias'));
+
 function mostrar(nombre) {
   for (const v of vistas) document.getElementById('vista-' + v).hidden = v !== nombre;
+  if (nombre === 'registro') { vivoIngreso.empezar(); } else vivoIngreso.detener();
+  if (nombre === 'gracias') { vivoGracias.empezar(); vivoGracias.actualizar(); } else vivoGracias.detener();
   pill.textContent = {
     registro: 'Votación abierta',
     votar: votante ? `Tel. ${telefonoBonito(votante.telefono)}` : 'Votación abierta',
@@ -23,6 +29,19 @@ function errorEn(id, texto) {
   caja.textContent = texto || '';
   caja.hidden = !texto;
 }
+
+/* ---------- Pestañas «Votar» y «Resultados» (solo en el celular) ---------- */
+const tabs = { votar: document.getElementById('tab-votar'), resultados: document.getElementById('tab-resultados') };
+const paneles = { votar: document.getElementById('panel-votar'), resultados: document.getElementById('panel-resultados') };
+function elegirPestana(cual) {
+  for (const k of Object.keys(tabs)) {
+    tabs[k].setAttribute('aria-selected', k === cual);
+    paneles[k].hidden = k !== cual;
+  }
+  if (cual === 'resultados') vivoIngreso.actualizar();
+}
+tabs.votar.addEventListener('click', () => elegirPestana('votar'));
+tabs.resultados.addEventListener('click', () => elegirPestana('resultados'));
 
 /* ---------- Registro ---------- */
 const form = document.getElementById('form-registro');

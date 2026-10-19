@@ -15,7 +15,12 @@
 <main>
   <!-- Registro -->
   <section id="vista-registro" class="cuerpo" hidden>
-    <div class="centro">
+    <div class="ingreso-dos">
+    <div class="tabs-ingreso" role="tablist" aria-label="Votar o ver resultados">
+      <button type="button" role="tab" id="tab-votar" aria-selected="true" aria-controls="panel-votar">🗳 Votar</button>
+      <button type="button" role="tab" id="tab-resultados" aria-selected="false" aria-controls="panel-resultados">📊 Resultados <span class="vivo mini">VIVO</span></button>
+    </div>
+    <div class="centro panel-ingreso" id="panel-votar" role="tabpanel" aria-labelledby="tab-votar">
       <h1 class="titulo-pant">Ingrese a votar</h1>
       <p class="bajada">Escriba su nombre, apellido y teléfono como están en la lista de votantes.</p>
       <div id="registro-error" class="caja-error" hidden role="alert"></div>
@@ -42,6 +47,8 @@
         <button class="btn btn-pri" type="submit" id="btn-ingresar">Verificar y votar →</button>
       </form>
       <a class="enlace" href="admin.html">Entrar como administrador</a>
+    </div>
+    <div class="panel-ingreso" id="panel-resultados" role="tabpanel" aria-labelledby="tab-resultados" hidden></div>
     </div>
   </section>
 
@@ -71,8 +78,9 @@
       <section class="seccion s-res"><div class="sec-cuerpo">
         <div class="grande" style="color:var(--ok)" aria-hidden="true">✓</div>
         <h1 style="font-size:26px;margin:8px 0">¡Gracias por votar!</h1>
-        <p style="color:var(--suave);font-size:15px;margin:0">Su voto quedó guardado. Los resultados se verán cuando el administrador los publique.</p>
+        <p style="color:var(--suave);font-size:15px;margin:0">Su voto quedó guardado. Así van los resultados ahora mismo:</p>
       </div></section>
+      <div id="vivo-gracias" style="text-align:left"></div>
       <button class="btn btn-sec" type="button" id="btn-salir">Salir</button>
     </div>
   </section>
@@ -118,6 +126,7 @@
 
 <script src="scripts/paises.js"></script>
 <script src="scripts/comun.js"></script>
+<script src="scripts/en-vivo.js"></script>
 <script src="scripts/votante.js"></script>
 </body>
 </html>

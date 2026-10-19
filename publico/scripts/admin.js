@@ -67,9 +67,13 @@ function irA(seccion) {
   });
   clearInterval(reloj);
   if (seccion === 'participantes') cargarPadron();
+  // Resultados: se actualizan solos cada minuto y con el botón «Actualizar» cuando quiera.
   if (seccion === 'resultados') {
     actualizarResultados();
-    reloj = setInterval(actualizarResultados, 3000);
+    reloj = setInterval(() => {
+      if (Date.now() - horaResultados >= 60000) actualizarResultados();
+      pintarHace();
+    }, 1000);
   }
 }
 document.querySelector('.menu').addEventListener('click', e => {
@@ -487,18 +491,38 @@ $('btn-quitar-logo').addEventListener('click', () => { logoOriginal = null; pone
 
 /* ---------- Resultados en vivo ---------- */
 let ultimo = null;
+let anterior = null;
+let horaResultados = 0;
+let nuevosTexto = '';
 let verTodos = false;
 let paginaVotantes = 1;
 let claveOpciones = '';
 const primeros = () => (esCelular() ? 5 : 10);
 
-async function actualizarResultados() {
+function pintarHace() {
+  const seg = Math.round((Date.now() - horaResultados) / 1000);
+  const falta = Math.max(0, 60 - seg);
+  $('hace-resultados').textContent = (seg < 3 ? 'Actualizado ahora' : `Actualizado hace ${seg} s`) + (nuevosTexto && seg < 6 ? ` · ${nuevosTexto}` : ` · sola en ${falta} s`);
+}
+
+async function actualizarResultados(manual = false) {
+  const boton = $('btn-actualizar');
+  boton.classList.add('girando');
+  const totalAntes = ultimo ? ultimo.total : null;
   try {
-    ultimo = await pedir('/api/admin/resultados');
+    const nuevo = await pedir('/api/admin/resultados');
+    anterior = ultimo;
+    ultimo = nuevo;
   } catch (err) {
     if (err.estado === 401) location.reload();
     return;
+  } finally {
+    setTimeout(() => boton.classList.remove('girando'), 500);
   }
+  horaResultados = Date.now();
+  const n = totalAntes === null ? 0 : ultimo.total - totalAntes;
+  nuevosTexto = n > 0 ? `+${votosTexto(n)} ${n === 1 ? 'nuevo' : 'nuevos'}` : (manual ? 'sin votos nuevos' : '');
+  pintarHace();
   if (vistaResultados !== 'general' && !ultimo.partidos.some(p => p.id === vistaResultados)) vistaResultados = 'general';
   llenarDesplegable();
   if (vistaResultados === 'general') dibujarGeneral();
@@ -545,12 +569,13 @@ function dibujarGeneral() {
     return;
   }
   const total = ultimo.partidos.length;
-  barrasDePartidos($('barras-general'), verTodos ? ultimo.partidos : ultimo.partidos.slice(0, primeros()));
+  pintarBarrasVivo($('barras-general'), verTodos ? ultimo.partidos : ultimo.partidos.slice(0, primeros()), anterior && anterior.partidos);
   $('btn-ver-todos').hidden = total <= primeros();
   $('btn-ver-todos').textContent = verTodos ? `Ver solo los ${primeros()} primeros ▴` : `Ver los ${total} partidos ▾`;
   dibujarPuestos($('puestos'), ultimo.partidos.slice(0, 4));
 }
 $('btn-ver-todos').addEventListener('click', () => { verTodos = !verTodos; dibujarGeneral(); });
+$('btn-actualizar').addEventListener('click', () => actualizarResultados(true));
 
 async function dibujarPartido(id) {
   const p = conPuestos(ultimo.partidos).find(x => x.id === id);
@@ -571,6 +596,8 @@ async function dibujarPartido(id) {
 }
 
 let pedidoVotantes = 0;
+const vistoHasta = {};
+const horaDe = fecha => new Date(fecha).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false });
 async function cargarVotantes() {
   const id = vistaResultados;
   const numero = ++pedidoVotantes;
@@ -582,15 +609,24 @@ async function cargarVotantes() {
     return cargarVotantes();
   }
   $('tit-votantes').textContent = `Quiénes votaron (${r.total})`;
+  // Las filas que llegaron desde la última vez que se miró este partido se marcan «Nuevo».
+  const visto = vistoHasta[id];
+  const nuevaFila = v => visto !== undefined && v.fecha > visto;
+  for (const v of r.filas) if (vistoHasta[id] === undefined || v.fecha > vistoHasta[id]) vistoHasta[id] = v.fecha;
+  if (vistoHasta[id] === undefined) vistoHasta[id] = '';
   if (!r.filas.length) {
-    $('tabla-votantes').replaceChildren(el('tr', {}, el('td', { colspan: '4', style: 'color:var(--suave)' }, q ? 'Nadie coincide con la búsqueda.' : 'Todavía nadie votó por este partido.')));
+    $('tabla-votantes').replaceChildren(el('tr', {}, el('td', { colspan: '5', style: 'color:var(--suave)' }, q ? 'Nadie coincide con la búsqueda.' : 'Todavía nadie votó por este partido.')));
   } else {
     const desde = (r.pagina - 1) * r.porPagina;
-    $('tabla-votantes').replaceChildren(...r.filas.map((v, i) => el('tr', {},
-      el('td', { class: 'num-fila' }, String(desde + i + 1)), el('td', {}, v.nombre), el('td', {}, v.apellido), el('td', {}, telefonoBonito(v.telefono)))));
+    $('tabla-votantes').replaceChildren(...r.filas.map((v, i) => el('tr', { class: nuevaFila(v) ? 'nuevo' : null },
+      el('td', { class: 'num-fila' }, String(desde + i + 1)),
+      el('td', {}, v.nombre, nuevaFila(v) ? el('span', { class: 'eti-nuevo' }, 'Nuevo') : null),
+      el('td', {}, v.apellido), el('td', {}, telefonoBonito(v.telefono)), el('td', {}, horaDe(v.fecha)))));
   }
-  $('paginas').hidden = r.paginas <= 1;
-  $('pag-texto').textContent = `Página ${r.pagina} de ${r.paginas} · ${r.total} ${r.total === 1 ? 'votante' : 'votantes'}`;
+  // Arriba de la tabla, siempre a la vista: «1–25 de 40» con ‹ Atrás y Siguiente ›.
+  const desdeN = r.total ? (r.pagina - 1) * r.porPagina + 1 : 0;
+  const hastaN = (r.pagina - 1) * r.porPagina + r.filas.length;
+  $('pag-texto').textContent = `${desdeN}–${hastaN} de ${r.total}`;
   $('pag-anterior').disabled = r.pagina <= 1;
   $('pag-siguiente').disabled = r.pagina >= r.paginas;
 }

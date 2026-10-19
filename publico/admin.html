@@ -92,7 +92,7 @@
 
       <!-- Resultados -->
       <section id="sec-resultados" hidden>
-        <div class="fila-tit"><h1 id="tit-resultados">Resultados</h1><span class="vivo" id="vivo">EN VIVO</span></div>
+        <div class="fila-tit"><h1 id="tit-resultados">Resultados</h1><div class="acciones-vivo"><span class="vivo" id="vivo">EN VIVO</span><span class="hace" id="hace-resultados" aria-live="polite"></span><button class="btn btn-pri btn-chico btn-actualizar" type="button" id="btn-actualizar"><span class="giro" aria-hidden="true">↻</span> Actualizar</button></div></div>
         <div class="campo elegir-vista"><label for="elegir-partido">Ver resultados de</label><select class="input" id="elegir-partido"></select></div>
 
         <div id="res-general">
@@ -119,17 +119,19 @@
           <section class="seccion s-lista">
             <h2 class="sec-tit"><span class="ic">≡</span><span id="tit-votantes">Quiénes votaron</span></h2>
             <div class="sec-cuerpo">
-              <div class="campo"><input class="input" id="buscar" placeholder="🔍 Buscar por teléfono o nombre" aria-label="Buscar votante"></div>
+              <div class="campo campo-lupa"><span class="lupa" aria-hidden="true">🔍</span><input class="input" id="buscar" placeholder="Buscar por nombre o teléfono" aria-label="Buscar votante"></div>
+              <div class="paginas paginas-arriba" id="paginas">
+                <span id="pag-texto"></span>
+                <span class="pag-botones">
+                  <button type="button" class="btn btn-sec btn-chico" id="pag-anterior">‹ Atrás</button>
+                  <button type="button" class="btn btn-pri btn-chico" id="pag-siguiente">Siguiente ›</button>
+                </span>
+              </div>
               <div class="tabla-caja">
                 <table>
-                  <thead><tr><th>N.º</th><th>Nombre</th><th>Apellido</th><th>Teléfono</th></tr></thead>
+                  <thead><tr><th>N.º</th><th>Nombre</th><th>Apellido</th><th>Teléfono</th><th>Hora</th></tr></thead>
                   <tbody id="tabla-votantes"></tbody>
                 </table>
-              </div>
-              <div class="paginas" id="paginas">
-                <button type="button" class="btn btn-sec btn-chico" id="pag-anterior">← Anterior</button>
-                <span id="pag-texto"></span>
-                <button type="button" class="btn btn-sec btn-chico" id="pag-siguiente">Siguiente →</button>
               </div>
             </div>
           </section>
@@ -209,6 +211,7 @@
 
 <script src="scripts/paises.js"></script>
 <script src="scripts/comun.js"></script>
+<script src="scripts/en-vivo.js"></script>
 <script src="scripts/admin.js"></script>
 </body>
 </html>

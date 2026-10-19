@@ -145,6 +145,10 @@ async function principal() {
   revisar(r.total === 41, `total de votos 41 (dio ${r.total})`);
   revisar(r.partidos[0].partido === 'Renovación Verde' && r.partidos[0].votos === 16, 'Renovación Verde va primero con 16');
   revisar(Math.abs(r.partidos.reduce((s, p) => s + p.porcentaje, 0) - 100) < 0.5, 'porcentajes suman 100');
+  // Resultados en vivo para todos mientras se vota
+  const vivo = await api('/api/en-vivo');
+  revisar(vivo.estado === 200 && vivo.datos.total === 41 && vivo.datos.partidos[0].votos === 16, 'en vivo: todos ven los porcentajes mientras se vota (41 votos)');
+  revisar(!/telefono|"fecha"/.test(JSON.stringify(vivo.datos)), 'en vivo: no muestra teléfonos ni datos de votantes');
   const v = (await api(`/api/admin/votantes/${a.datos.id}`, { admin: true })).datos;
   revisar(v.total === 16 && v.filas.length === 16 && v.filas[0].telefono && v.filas[0].nombre && v.paginas === 1, 'tabla de votantes de un partido con teléfono');
   const busca = (await api(`/api/admin/votantes/${a.datos.id}?buscar=${telefono(1)}`, { admin: true })).datos;
@@ -182,10 +186,13 @@ async function principal() {
   revisar((await api('/api/admin/ocultar', { cuerpo: {} })).estado === 401, 'ocultar sin sesión rechazado');
   revisar((await api('/api/admin/ocultar', { cuerpo: {}, admin: true })).estado === 200, 'admin oculta resultados');
   revisar((await api('/api/resultados')).estado === 403, 'ocultos: nadie ve resultados');
+  const vivoOculto = await api('/api/en-vivo');
+  revisar(vivoOculto.estado === 403 && vivoOculto.datos.codigo === 'oculto', 'ocultos: tampoco se ven en vivo');
   revisar((await api('/api/ingresar', { cuerpo: votante(80) })).datos.codigo === 'cerrada', 'ocultos: la votación sigue cerrada al ingresar');
   revisar((await api('/api/votar', { cuerpo: { ...votante(80), candidatoId: b.datos.id } })).estado === 409, 'ocultos: no se puede votar');
   revisar((await api('/api/admin/reabrir', { cuerpo: {}, admin: true })).estado === 200, 'admin reabre la votación');
   revisar((await api('/api/estado')).datos.cerrada === false, 'reabierta: estado abierto');
+  revisar((await api('/api/en-vivo')).estado === 200, 'reabierta: en vivo se ve otra vez');
   revisar((await api('/api/votar', { cuerpo: { ...votante(80), candidatoId: b.datos.id } })).estado === 200, 'reabierta: se puede votar');
   revisar((await api('/api/admin/resultados', { admin: true })).datos.total === 39, 'reabierta: los votos anteriores se mantienen (39)');
   revisar((await api('/api/resultados')).estado === 403, 'reabierta: resultados ocultos');

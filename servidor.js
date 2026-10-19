@@ -206,6 +206,17 @@ app.get('/api/resultados', envolver(async (req, res) => {
   res.json(await resumen());
 }));
 
+// Resultados en vivo para todos mientras se vota: solo conteos, sin datos de los votantes.
+// Si el administrador cerró sin publicar (resultados ocultos), no se muestran.
+// La respuesta se guarda 5 s para que muchos celulares a la vez no carguen la base.
+let enVivoGuardado = { hasta: 0, datos: null };
+app.get('/api/en-vivo', envolver(async (req, res) => {
+  if (Date.now() > enVivoGuardado.hasta) enVivoGuardado = { hasta: Date.now() + 5000, datos: await resumen() };
+  const r = enVivoGuardado.datos;
+  if (r.cerrada && !r.publicado) return res.status(403).json({ error: 'Los resultados se verán cuando el administrador los publique.', codigo: 'oculto' });
+  res.json(r);
+}));
+
 async function resumen() {
   const conteo = await almacen.conteo();
   const total = conteo.reduce((s, c) => s + c.votos, 0);
@@ -217,6 +228,9 @@ async function resumen() {
 }
 
 /* ---------- Administrador ---------- */
+// Cualquier cambio del administrador (publicar, ocultar, quitar votos o partidos) se ve enseguida en vivo.
+app.use('/api/admin', (req, res, next) => { if (req.method !== 'GET') enVivoGuardado.hasta = 0; next(); });
+
 app.get('/api/admin/resultados', soloAdmin, envolver(async (req, res) => {
   res.json(await resumen());
 }));
