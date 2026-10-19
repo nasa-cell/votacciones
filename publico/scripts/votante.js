@@ -7,7 +7,7 @@ function mostrar(nombre) {
   for (const v of vistas) document.getElementById('vista-' + v).hidden = v !== nombre;
   pill.textContent = {
     registro: 'Votación abierta',
-    votar: votante ? `DNI ${votante.dni}` : 'Votación abierta',
+    votar: votante ? `Tel. ${telefonoBonito(votante.telefono)}` : 'Votación abierta',
     gracias: 'Voto guardado',
     final: 'Resultados oficiales',
     despedida: 'Votación terminada',
@@ -28,22 +28,23 @@ function errorEn(id, texto) {
 const form = document.getElementById('form-registro');
 const campoNombre = document.getElementById('r-nombre');
 const campoApellido = document.getElementById('r-apellido');
-const campoDni = document.getElementById('r-dni');
+const campoTelefono = document.getElementById('r-telefono');
+const reglaTelefono = campoTelefonoConPais(campoTelefono);
 conectarContador(campoNombre, 3, 80);
 conectarContador(campoApellido, 3, 80);
-conectarContador(campoDni, 8, 8);
+conectarContador(campoTelefono, 9, 9);
 
 const revisarRegistro = conectarValidacion([
   { input: campoNombre, min: 3, max: 80, tipo: 'letras' },
   { input: campoApellido, min: 3, max: 80, tipo: 'letras' },
-  { input: campoDni, min: 8, max: 8, tipo: 'numeros', exacto: true },
+  reglaTelefono,
 ]);
 
-const CAMPOS = { nombre: campoNombre, apellido: campoApellido, dni: campoDni };
+const CAMPOS = { nombre: campoNombre, apellido: campoApellido, telefono: campoTelefono };
 const TEXTO_CAMPO = {
   nombre: ['Nombre correcto', 'El nombre está mal escrito. Corríjalo.'],
   apellido: ['Apellido correcto', 'El apellido está mal escrito. Corríjalo.'],
-  dni: ['DNI correcto', 'Este DNI no está en la lista de votantes.'],
+  telefono: ['Teléfono correcto', 'Este teléfono no está en la lista de votantes.'],
 };
 // Al corregir un cuadro se borra el aviso verde que tenía.
 for (const c of Object.values(CAMPOS)) c.addEventListener('input', () => mostrarCorrecto(c, null));
@@ -76,10 +77,10 @@ form.addEventListener('submit', async e => {
   const boton = document.getElementById('btn-ingresar');
   try {
     const r = await conCarga(boton, 'Revisando…', () => pedir('/api/ingresar', {
-      cuerpo: { nombre: campoNombre.value, apellido: campoApellido.value, dni: campoDni.value },
+      cuerpo: { nombre: campoNombre.value, apellido: campoApellido.value, telefono: campoTelefono.telefono.valor() },
     }));
     if (r.publicado) return mostrarFinal();
-    votante = { nombre: campoNombre.value, apellido: campoApellido.value, dni: r.dni, nombreLista: r.nombre };
+    votante = { nombre: campoNombre.value, apellido: campoApellido.value, telefono: r.telefono, nombreLista: r.nombre };
     await abrirVotar();
   } catch (err) {
     if (err.codigo === 'cerrada') return revisarEstado();
@@ -110,8 +111,8 @@ async function abrirVotar() {
     lista.replaceChildren(...candidatos.map(c => el('label', { class: 'partido' },
       el('input', { type: 'radio', name: 'partido', value: c.id }),
       logoDe(c),
-      el('b', {}, c.partido),
-      el('span', { class: 'quien' }, `${c.nombre} ${c.apellido}`),
+      el('b', {}, nombreDe(c)),
+      el('span', { class: 'quien' }, c.partido ? `${c.nombre} ${c.apellido}` : 'Sin partido'),
       c.descripcion ? el('em', {}, c.descripcion) : null,
     )));
   }
@@ -128,7 +129,7 @@ function filtrarPartidos() {
   let visibles = 0;
   lista.querySelectorAll('.partido').forEach((tarjeta, i) => {
     const c = candidatos[i];
-    const ve = !q || `${c.partido} ${c.nombre} ${c.apellido}`.toLowerCase().includes(q);
+    const ve = !q || `${c.partido || ''} ${c.nombre} ${c.apellido}`.toLowerCase().includes(q);
     tarjeta.hidden = !ve;
     if (ve) visibles++;
   });
@@ -139,7 +140,7 @@ buscarPartido.addEventListener('input', filtrarPartidos);
 lista.addEventListener('change', () => {
   const elegido = elegidoActual();
   botonVotar.disabled = !elegido;
-  botonVotar.textContent = elegido ? `Votar por ${elegido.partido}` : 'Elija un partido para votar';
+  botonVotar.textContent = elegido ? `Votar por ${nombreDe(elegido)}` : 'Elija un partido para votar';
 });
 
 function elegidoActual() {
@@ -153,13 +154,13 @@ document.getElementById('form-votar').addEventListener('submit', async e => {
   if (!elegido) return;
   const si = await preguntar({
     titulo: '¿Estás seguro?',
-    texto: el('p', {}, 'Vas a votar por ', el('b', {}, elegido.partido), '. Después no se puede cambiar.'),
+    texto: el('p', {}, 'Vas a votar por ', el('b', {}, nombreDe(elegido)), '. Después no se puede cambiar.'),
     si: 'Sí, votar', claseSi: 'btn-verde', no: 'Cancelar',
   });
   if (!si) return;
   try {
-    const { nombre, apellido, dni } = votante;
-    await conCarga(botonVotar, 'Guardando voto…', () => pedir('/api/votar', { cuerpo: { nombre, apellido, dni, candidatoId: elegido.id } }));
+    const { nombre, apellido, telefono } = votante;
+    await conCarga(botonVotar, 'Guardando voto…', () => pedir('/api/votar', { cuerpo: { nombre, apellido, telefono, candidatoId: elegido.id } }));
     mostrar('gracias');
   } catch (err) {
     if (err.codigo === 'cerrada') return revisarEstado();
@@ -170,7 +171,7 @@ document.getElementById('form-votar').addEventListener('submit', async e => {
 function volverAlRegistro() {
   votante = null;
   form.reset();
-  for (const c of [campoNombre, campoApellido, campoDni]) { mostrarMensaje(c, null); mostrarCorrecto(c, null); c.dispatchEvent(new Event('input')); }
+  for (const c of [campoNombre, campoApellido, campoTelefono]) { mostrarMensaje(c, null); mostrarCorrecto(c, null); c.dispatchEvent(new Event('input')); }
   document.querySelector('header span').textContent = 'Elecciones 2026';
   errorEn('registro-error');
   mostrar('registro');
@@ -196,18 +197,18 @@ async function mostrarFinal() {
     titulo.textContent = 'No hubo votos';
     detalle.textContent = '';
   } else if (ganadores.length > 1) {
-    titulo.textContent = 'Empate: ' + ganadores.map(g => g.partido).join(' y ');
+    titulo.textContent = 'Empate: ' + ganadores.map(g => nombreDe(g)).join(' y ');
     detalle.textContent = `${formatoPorc(ganadores[0].porcentaje)} cada uno · ${votosTexto(r.total)} en total`;
   } else {
     const g = ganadores[0];
-    titulo.textContent = `Ganó ${g.partido}`;
+    titulo.textContent = `Ganó ${nombreDe(g)}`;
     detalle.textContent = `${g.nombre} ${g.apellido} · ${formatoPorc(g.porcentaje)} de ${votosTexto(r.total)}`;
   }
   const cuatro = partidos.slice(0, 4);
   const orden = [1, 0, 2, 3].map(i => cuatro[i]).filter(Boolean);
   const alturas = esCelular() ? { 1: 84, 2: 60, 3: 44, 4: 30 } : { 1: 140, 2: 100, 3: 72, 4: 48 };
   document.getElementById('final-podio').replaceChildren(...orden.map(p => el('div', { class: 'escalon' + (p.puesto === 1 && r.total ? ' e1' : '') },
-    el('b', {}, p.partido),
+    el('b', {}, nombreDe(p)),
     el('small', {}, votosTexto(p.votos)),
     el('div', { class: 'caja', style: `height:${alturas[Math.min(p.puesto, 4)]}px` }, String(p.puesto)),
   )));

@@ -2,7 +2,7 @@ const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
 const { crearAlmacen, FILTROS_PADRON } = require('./servidor/almacen');
-const { validarVotante, validarDni, validarCandidato, limpiar, igualar } = require('./servidor/validar');
+const { validarVotante, validarTelefono, validarCandidato, limpiar, igualar, telefonoBonito } = require('./servidor/validar');
 
 const PUERTO = process.env.PORT || 3000;
 const CLAVE_ADMIN = process.env.ADMIN_CLAVE || '1234';
@@ -60,12 +60,12 @@ const MENSAJES = {
   cerrada: [409, 'La votación ya terminó.'],
   partido_repetido: [409, 'Ese partido ya está inscrito.'],
   no_existe: [404, 'Ese partido no existe.'],
-  dni_repetido: [409, 'Usted ya votó. Cada persona puede votar una sola vez.'],
-  dni_en_lista: [409, 'Ese DNI ya está en la lista.'],
+  telefono_repetido: [409, 'Usted ya votó. Cada persona puede votar una sola vez.'],
+  telefono_en_lista: [409, 'Ese teléfono ya está en la lista.'],
   no_en_lista: [404, 'Esa persona no está en la lista.'],
   participante_voto: [409, 'Esta persona ya votó. No se puede quitar de la lista.'],
   sin_voto: [404, 'Esta persona todavía no votó.'],
-  participante_voto_dni: [409, 'Esta persona ya votó. Se puede corregir su nombre, pero no su DNI.'],
+  participante_voto_telefono: [409, 'Esta persona ya votó. Se puede corregir su nombre, pero no su teléfono.'],
 };
 
 function responderFalla(res, e) {
@@ -155,16 +155,16 @@ app.get('/api/candidatos', envolver(async (req, res) => {
 async function revisarParticipante(cuerpo) {
   const persona = validarVotante(cuerpo);
   if (persona.error) return { estado: 400, error: persona.error, campo: persona.campo };
-  const d = validarDni(cuerpo.dni);
-  if (d.error) return { estado: 400, error: d.error, campo: 'dni' };
-  const registrado = await almacen.buscarParticipante(d.dni);
+  const d = validarTelefono(cuerpo.telefono);
+  if (d.error) return { estado: 400, error: d.error, campo: 'telefono' };
+  const registrado = await almacen.buscarParticipante(d.telefono);
   if (!registrado) {
-    return { estado: 404, codigo: 'no_registrado', campos: { dni: false }, error: `No está registrado. El DNI ${d.dni} no está en la lista de votantes.` };
+    return { estado: 404, codigo: 'no_registrado', campos: { telefono: false }, error: `No está registrado. El teléfono ${telefonoBonito(d.telefono)} no está en la lista de votantes.` };
   }
   const campos = {
     nombre: igualar(registrado.nombre) === igualar(persona.datos.nombre),
     apellido: igualar(registrado.apellido) === igualar(persona.datos.apellido),
-    dni: true,
+    telefono: true,
   };
   if (!campos.nombre || !campos.apellido) {
     const cual = !campos.nombre && !campos.apellido ? 'El nombre y el apellido están mal escritos'
@@ -185,8 +185,8 @@ app.post('/api/ingresar', topePorIp, envolver(async (req, res) => {
   if (estado.cerrada) return res.status(409).json({ error: 'La votación está cerrada. Los resultados todavía no se publican.', codigo: 'cerrada' });
   const r = await revisarParticipante(req.body || {});
   if (r.estado) return responderRevision(res, r);
-  if (await almacen.yaVoto(r.registrado.dni)) {
-    return res.status(409).json({ error: 'Usted ya votó. Cada persona puede votar una sola vez.', codigo: 'dni_repetido', campos: r.campos });
+  if (await almacen.yaVoto(r.registrado.telefono)) {
+    return res.status(409).json({ error: 'Usted ya votó. Cada persona puede votar una sola vez.', codigo: 'telefono_repetido', campos: r.campos });
   }
   res.json({ publicado: false, ...r.registrado });
 }));
@@ -244,33 +244,33 @@ app.get('/api/admin/padron', soloAdmin, envolver(async (req, res) => {
 app.post('/api/admin/padron', soloAdmin, envolver(async (req, res) => {
   const persona = validarVotante(req.body || {});
   if (persona.error) return res.status(400).json({ error: persona.error, campo: persona.campo });
-  const d = validarDni(req.body?.dni);
-  if (d.error) return res.status(400).json({ error: d.error, campo: 'dni' });
-  res.json(await almacen.agregarParticipante({ ...persona.datos, dni: d.dni }));
+  const d = validarTelefono(req.body?.telefono);
+  if (d.error) return res.status(400).json({ error: d.error, campo: 'telefono' });
+  res.json(await almacen.agregarParticipante({ ...persona.datos, telefono: d.telefono }));
 }));
 
-app.put('/api/admin/padron/:dni', soloAdmin, envolver(async (req, res) => {
-  const anterior = validarDni(req.params.dni);
+app.put('/api/admin/padron/:telefono', soloAdmin, envolver(async (req, res) => {
+  const anterior = validarTelefono(req.params.telefono);
   if (anterior.error) return res.status(404).json({ error: 'Esa persona no está en la lista.' });
   const persona = validarVotante(req.body || {});
   if (persona.error) return res.status(400).json({ error: persona.error, campo: persona.campo });
-  const d = validarDni(req.body?.dni);
-  if (d.error) return res.status(400).json({ error: d.error, campo: 'dni' });
-  res.json(await almacen.editarParticipante(anterior.dni, { ...persona.datos, dni: d.dni }));
+  const d = validarTelefono(req.body?.telefono);
+  if (d.error) return res.status(400).json({ error: d.error, campo: 'telefono' });
+  res.json(await almacen.editarParticipante(anterior.telefono, { ...persona.datos, telefono: d.telefono }));
 }));
 
 // Borra el voto de una persona: los resultados bajan en 1 y puede votar de nuevo.
-app.delete('/api/admin/votos/:dni', soloAdmin, envolver(async (req, res) => {
-  const d = validarDni(req.params.dni);
+app.delete('/api/admin/votos/:telefono', soloAdmin, envolver(async (req, res) => {
+  const d = validarTelefono(req.params.telefono);
   if (d.error) return res.status(404).json({ error: 'Esta persona todavía no votó.' });
-  await almacen.borrarVoto(d.dni);
+  await almacen.borrarVoto(d.telefono);
   res.json({ ok: true });
 }));
 
-app.delete('/api/admin/padron/:dni', soloAdmin, envolver(async (req, res) => {
-  const d = validarDni(req.params.dni);
+app.delete('/api/admin/padron/:telefono', soloAdmin, envolver(async (req, res) => {
+  const d = validarTelefono(req.params.telefono);
   if (d.error) return res.status(404).json({ error: 'Esa persona no está en la lista.' });
-  await almacen.quitarParticipante(d.dni);
+  await almacen.quitarParticipante(d.telefono);
   res.json({ ok: true });
 }));
 

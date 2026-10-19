@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maquetas: teléfono con bandera</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--azul:#1f4fd1;--azul2:#163a9c;--borde:#c9d5ee;--suave:#5b6b8c;--oro:#e0a526;--fondo:#f3f6fc}
+*{box-sizing:border-box;margin:0}
+body{font-family:Sora,sans-serif;background:var(--fondo);color:#13224a;padding:28px 16px 60px}
+h1{text-align:center;font-size:24px;margin-bottom:6px}
+.sub{text-align:center;color:var(--suave);margin-bottom:26px}
+.opciones{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;max-width:1150px;margin:auto}
+.opcion{background:#fff;border:1px solid var(--borde);border-radius:18px;padding:20px;box-shadow:0 6px 20px rgba(20,40,90,.06)}
+.opcion h2{font-size:18px;color:var(--azul2);margin-bottom:4px}
+.nota{color:var(--suave);font-size:14px;line-height:1.45;margin-bottom:16px}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+.req{color:#d33}
+.fila{display:flex;gap:8px}
+.input{height:48px;border:2px solid #9fb2dd;border-radius:12px;padding:0 14px;font:inherit;font-size:16px;background:#fff;width:100%}
+.band{width:26px;height:18px;border-radius:3px;object-fit:cover;box-shadow:0 0 0 1px rgba(0,0,0,.12);flex:none}
+.pais{display:flex;align-items:center;gap:8px;height:48px;padding:0 12px;border:2px solid #9fb2dd;border-radius:12px;background:#fff;font:inherit;font-size:16px;font-weight:600;cursor:pointer;flex:none}
+.pais::after{content:'▾';color:var(--suave);font-size:13px;margin-left:2px}
+/* A: lista con buscador */
+.caja-a{display:flex;align-items:center;border:2px solid #9fb2dd;border-radius:12px;background:#fff;overflow:hidden}
+.caja-a .pais{border:0;border-right:2px solid #e3e9f6;border-radius:0}
+.caja-a .input{border:0;border-radius:0}
+.lista{margin-top:8px;border:1px solid var(--borde);border-radius:12px;box-shadow:0 12px 28px rgba(20,40,90,.14);overflow:hidden}
+.lista input{width:100%;border:0;border-bottom:1px solid #e3e9f6;padding:12px 14px;font:inherit}
+.lista div{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:15px}
+.lista div b{margin-left:auto;color:var(--suave);font-weight:600}
+.lista div.sel{background:#eaf0ff}
+/* B: país arriba */
+.select{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235b6b8c' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center}
+.con-band{position:relative}.con-band .band{position:absolute;left:14px;top:15px}.con-band .select{padding-left:50px}
+.prefijo{display:flex;align-items:center;padding:0 12px;height:48px;border-radius:12px;background:#eef3ff;font-weight:700;color:var(--azul2);flex:none}
+/* C: Perú fijo + otro país */
+.chips{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:2px solid var(--borde);background:#fff;font:inherit;font-weight:600;cursor:pointer}
+.chip.si{border-color:var(--azul);background:#eaf0ff;color:var(--azul2)}
+.ayuda{font-size:13px;color:var(--suave);margin-top:6px}
+.pros{margin-top:16px;font-size:13px;color:var(--suave);line-height:1.5}.pros b{color:#13224a}
+</style></head><body>
+<h1>¿Cómo quieres elegir el país del teléfono?</h1>
+<p class="sub">Perú (+51) viene elegido. Se ve igual en «Participantes» y en «Ingrese a votar».</p>
+<div class="opciones">
+
+<section class="opcion">
+ <h2>A · Bandera dentro del cuadro</h2>
+ <p class="nota">La bandera y el código van pegados al número, como en WhatsApp. Al tocarla se abre una lista con buscador.</p>
+ <label>Teléfono <span class="req">*</span></label>
+ <div class="caja-a"><button class="pais"><img class="band" src="https://flagcdn.com/w40/pe.png" alt="">+51</button><input class="input" placeholder="987 654 321"></div>
+ <div class="lista">
+  <input placeholder="🔍 Buscar país">
+  <div class="sel"><img class="band" src="https://flagcdn.com/w40/pe.png" alt="">Perú<b>+51</b></div>
+  <div><img class="band" src="https://flagcdn.com/w40/ar.png" alt="">Argentina<b>+54</b></div>
+  <div><img class="band" src="https://flagcdn.com/w40/bo.png" alt="">Bolivia<b>+591</b></div>
+  <div><img class="band" src="https://flagcdn.com/w40/cl.png" alt="">Chile<b>+56</b></div>
+ </div>
+ <p class="pros"><b>Bien:</b> ocupa poco y todos lo conocen. <b>Ojo:</b> la lista tapa un poco el formulario mientras está abierta.</p>
+</section>
+
+<section class="opcion">
+ <h2>B · País arriba, número abajo</h2>
+ <p class="nota">Primero un desplegable «País» con su bandera; debajo el número con el código delante.</p>
+ <label>País</label>
+ <div class="con-band"><img class="band" src="https://flagcdn.com/w40/pe.png" alt=""><select class="input select"><option>Perú</option><option>Argentina</option><option>Bolivia</option></select></div>
+ <label style="margin-top:12px">Teléfono <span class="req">*</span></label>
+ <div class="fila"><span class="prefijo">+51</span><input class="input" placeholder="987 654 321"></div>
+ <p class="pros"><b>Bien:</b> muy claro para personas mayores. <b>Ojo:</b> ocupa una fila más.</p>
+</section>
+
+<section class="opcion">
+ <h2>C · Perú directo y «Otro país»</h2>
+ <p class="nota">Casi todos son de Perú: aparece Perú elegido y un botón «Otro país» que abre la lista.</p>
+ <label>Teléfono <span class="req">*</span></label>
+ <div class="chips"><button class="chip si"><img class="band" src="https://flagcdn.com/w40/pe.png" alt="">Perú +51</button><button class="chip">🌎 Otro país</button></div>
+ <input class="input" placeholder="987 654 321">
+ <p class="ayuda">Celular de 9 números que empieza con 9.</p>
+ <p class="pros"><b>Bien:</b> lo más rápido para Perú. <b>Ojo:</b> para otro país hay un paso más.</p>
+</section>
+
+</div></body></html>

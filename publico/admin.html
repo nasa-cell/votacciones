@@ -61,14 +61,14 @@
               <div class="sec-cuerpo">
                 <div class="campo"><label for="c-nombre">Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10–30</small></label><input class="input" id="c-nombre" maxlength="30" required><span class="contador"></span></div>
                 <div class="campo"><label for="c-apellido">Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10–30</small></label><input class="input" id="c-apellido" maxlength="30" required><span class="contador"></span></div>
-                <div class="campo"><label for="c-partido">Partido <span class="req">*</span><span class="pista texto">Aa 1 Letras y números</span><small>10–40</small></label><input class="input" id="c-partido" maxlength="40" required><span class="contador"></span></div>
               </div>
             </section>
             <details class="seccion s-opc desplegable" id="det-opcional" open>
-              <summary class="sec-tit"><span class="ic">+</span>Opcional: logo y descripción<span class="flecha-desp" aria-hidden="true">▾</span></summary>
+              <summary class="sec-tit"><span class="ic">+</span>Opcional: partido, foto y descripción<span class="flecha-desp" aria-hidden="true">▾</span></summary>
               <div class="sec-cuerpo">
+                <div class="campo"><label for="c-partido">Nombre del partido <span class="pista texto">Aa 1 Letras y números</span><small>10–40</small></label><input class="input" id="c-partido" maxlength="40"><span class="contador"></span></div>
                 <div class="campo">
-                  <label>Logo</label>
+                  <label>Foto o logo</label>
                   <div class="soltar" id="zona-logo"><b aria-hidden="true">⬆</b>Suelte la imagen aquí<br>o toque para elegirla<input type="file" id="c-logo" accept="image/png,image/jpeg,image/webp" aria-label="Elegir logo"></div>
                   <div class="vista-logo" id="vista-logo" hidden><img id="img-logo" alt="Logo elegido"><span>Logo listo</span><button type="button" class="btn btn-sec btn-chico" id="btn-acomodar-logo">✋ Acomodar</button><button type="button" class="btn btn-rojo btn-chico" id="btn-quitar-logo">Quitar</button></div>
                 </div>
@@ -119,10 +119,10 @@
           <section class="seccion s-lista">
             <h2 class="sec-tit"><span class="ic">≡</span><span id="tit-votantes">Quiénes votaron</span></h2>
             <div class="sec-cuerpo">
-              <div class="campo"><input class="input" id="buscar" placeholder="🔍 Buscar por DNI o nombre" aria-label="Buscar votante"></div>
+              <div class="campo"><input class="input" id="buscar" placeholder="🔍 Buscar por teléfono o nombre" aria-label="Buscar votante"></div>
               <div class="tabla-caja">
                 <table>
-                  <thead><tr><th>N.º</th><th>Nombre</th><th>Apellido</th><th>DNI</th></tr></thead>
+                  <thead><tr><th>N.º</th><th>Nombre</th><th>Apellido</th><th>Teléfono</th></tr></thead>
                   <tbody id="tabla-votantes"></tbody>
                 </table>
               </div>
@@ -152,12 +152,12 @@
               <form id="form-padron" novalidate>
                 <div class="campo"><label for="p-nombre">Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>3 a 80</small></label><input class="input" id="p-nombre" maxlength="80" autocomplete="off" required></div>
                 <div class="campo"><label for="p-apellido">Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>3 a 80</small></label><input class="input" id="p-apellido" maxlength="80" autocomplete="off" required></div>
-                <div class="campo"><label for="p-dni">DNI <span class="req">*</span><span class="pista numeros">123 Solo números</span><small>8</small></label><input class="input" id="p-dni" inputmode="numeric" maxlength="8" placeholder="Ej.: 45879123" autocomplete="off" required></div>
+                <div class="campo"><label for="p-telefono">Teléfono <span class="req">*</span><span class="pista numeros">123 Solo números</span><small>9</small></label><input class="input" id="p-telefono" inputmode="numeric" maxlength="9" placeholder="Ej.: 987654321" autocomplete="off" required></div>
                 <div class="fila-botones">
                   <button class="btn btn-pri" type="submit" id="btn-agregar-participante">➕ Agregar a la lista</button>
                   <button class="btn btn-sec" type="button" id="btn-cancelar-participante" hidden>Cancelar edición</button>
                 </div>
-                <p class="nota-padron">Al votar no importan las mayúsculas ni las tildes. El DNI debe ser exacto.</p>
+                <p class="nota-padron">Al votar no importan las mayúsculas ni las tildes. El teléfono debe ser exacto.</p>
               </form>
             </div>
           </section>
@@ -169,7 +169,7 @@
                 <button type="button" data-filtro="votaron"><b id="n-votaron">0</b>✓ Votaron</button>
                 <button type="button" data-filtro="faltan"><b id="n-faltan">0</b>⏳ Faltan</button>
               </div>
-              <input class="input buscar-padron" id="buscar-padron" placeholder="🔍 Buscar nombre o DNI" aria-label="Buscar participante" maxlength="80">
+              <input class="input buscar-padron" id="buscar-padron" placeholder="🔍 Buscar nombre o teléfono" aria-label="Buscar participante" maxlength="80">
               <div class="lista-padron" id="lista-padron"></div>
               <div class="paginas">
                 <button type="button" class="btn btn-sec btn-chico" id="padron-anterior">← Anterior</button>
@@ -207,6 +207,7 @@
   </div>
 </main>
 
+<script src="scripts/paises.js"></script>
 <script src="scripts/comun.js"></script>
 <script src="scripts/admin.js"></script>
 </body>

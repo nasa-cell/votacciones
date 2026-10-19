@@ -11,9 +11,15 @@ function falla(codigo) {
 
 const FILTROS_PADRON = ['todos', 'votaron', 'faltan'];
 
+// Nombre con que se muestra: el del partido o, si no tiene, el de la persona.
+const nombreVisible = c => c.partido || `${c.nombre} ${c.apellido}`;
+
 function ordenarConteo(lista) {
-  return lista.sort((a, b) => b.votos - a.votos || a.partido.localeCompare(b.partido, 'es'));
+  return lista.sort((a, b) => b.votos - a.votos || nombreVisible(a).localeCompare(nombreVisible(b), 'es'));
 }
+
+// Dos partidos no pueden llamarse igual; los que no tienen nombre de partido no chocan.
+const mismoPartido = (a, b) => !!a.partido && !!b.partido && a.partido.toLowerCase() === b.partido.toLowerCase();
 
 /* ---------- Archivo JSON ---------- */
 function almacenArchivo(carpeta) {
@@ -51,6 +57,12 @@ function almacenArchivo(carpeta) {
       fs.mkdirSync(carpeta, { recursive: true });
       if (fs.existsSync(archivo)) datos = JSON.parse(fs.readFileSync(archivo, 'utf8'));
       datos.padron ??= [];
+      // Antes se votaba con DNI: esas personas y sus votos ya no sirven (ahora es con teléfono).
+      if (datos.padron.some(p => !p.telefono) || datos.votos.some(v => !v.telefono)) {
+        datos.padron = datos.padron.filter(p => p.telefono);
+        datos.votos = datos.votos.filter(v => v.telefono);
+        escribir();
+      }
     },
     async estado() { return { publicado: !!datos.publicado, cerrada: !!cerrada() }; },
     async ponerEstado(e) { return enCola(() => { datos.publicado = e.publicado; datos.cerrada = e.cerrada; guardar(); }); },
@@ -58,7 +70,7 @@ function almacenArchivo(carpeta) {
     async crearCandidato(c) {
       return enCola(() => {
         if (cerrada()) throw falla('cerrada');
-        if (datos.candidatos.some(x => x.partido.toLowerCase() === c.partido.toLowerCase())) throw falla('partido_repetido');
+        if (datos.candidatos.some(x => mismoPartido(x, c))) throw falla('partido_repetido');
         const nuevo = { id: datos.siguienteId++, ...c };
         datos.candidatos.push(nuevo);
         guardar();
@@ -70,7 +82,7 @@ function almacenArchivo(carpeta) {
         if (cerrada()) throw falla('cerrada');
         const actual = datos.candidatos.find(x => x.id === id);
         if (!actual) throw falla('no_existe');
-        if (datos.candidatos.some(x => x.id !== id && x.partido.toLowerCase() === c.partido.toLowerCase())) throw falla('partido_repetido');
+        if (datos.candidatos.some(x => x.id !== id && mismoPartido(x, c))) throw falla('partido_repetido');
         Object.assign(actual, c);
         guardar();
         return actual;
@@ -88,72 +100,72 @@ function almacenArchivo(carpeta) {
         return { votosLiberados: antes - datos.votos.length };
       });
     },
-    async yaVoto(dni) { return datos.votos.some(v => v.dni === dni); },
-    async buscarParticipante(dni) {
-      const p = datos.padron.find(x => x.dni === dni);
-      return p ? { nombre: p.nombre, apellido: p.apellido, dni: p.dni } : null;
+    async yaVoto(telefono) { return datos.votos.some(v => v.telefono === telefono); },
+    async buscarParticipante(telefono) {
+      const p = datos.padron.find(x => x.telefono === telefono);
+      return p ? { nombre: p.nombre, apellido: p.apellido, telefono: p.telefono } : null;
     },
     async agregarParticipante(p) {
       return enCola(() => {
-        if (datos.padron.some(x => x.dni === p.dni)) throw falla('dni_en_lista');
-        const nuevo = { nombre: p.nombre, apellido: p.apellido, dni: p.dni, creado: new Date().toISOString() };
+        if (datos.padron.some(x => x.telefono === p.telefono)) throw falla('telefono_en_lista');
+        const nuevo = { nombre: p.nombre, apellido: p.apellido, telefono: p.telefono, creado: new Date().toISOString() };
         datos.padron.push(nuevo);
         guardar();
-        return { nombre: nuevo.nombre, apellido: nuevo.apellido, dni: nuevo.dni, voto: false };
+        return { nombre: nuevo.nombre, apellido: nuevo.apellido, telefono: nuevo.telefono, voto: false };
       });
     },
-    async editarParticipante(dniAnterior, p) {
+    async editarParticipante(telefonoAnterior, p) {
       return enCola(() => {
-        const actual = datos.padron.find(x => x.dni === dniAnterior);
+        const actual = datos.padron.find(x => x.telefono === telefonoAnterior);
         if (!actual) throw falla('no_en_lista');
-        const voto = datos.votos.find(v => v.dni === dniAnterior);
-        if (p.dni !== dniAnterior) {
-          if (voto) throw falla('participante_voto_dni');
-          if (datos.padron.some(x => x.dni === p.dni)) throw falla('dni_en_lista');
+        const voto = datos.votos.find(v => v.telefono === telefonoAnterior);
+        if (p.telefono !== telefonoAnterior) {
+          if (voto) throw falla('participante_voto_telefono');
+          if (datos.padron.some(x => x.telefono === p.telefono)) throw falla('telefono_en_lista');
         }
-        Object.assign(actual, { nombre: p.nombre, apellido: p.apellido, dni: p.dni });
+        Object.assign(actual, { nombre: p.nombre, apellido: p.apellido, telefono: p.telefono });
         if (voto) Object.assign(voto, { nombre: p.nombre, apellido: p.apellido });
         guardar();
-        return { nombre: actual.nombre, apellido: actual.apellido, dni: actual.dni, voto: !!voto };
+        return { nombre: actual.nombre, apellido: actual.apellido, telefono: actual.telefono, voto: !!voto };
       });
     },
-    async borrarVoto(dni) {
+    async borrarVoto(telefono) {
       return enCola(() => {
         if (cerrada()) throw falla('cerrada');
         const antes = datos.votos.length;
-        datos.votos = datos.votos.filter(v => v.dni !== dni);
+        datos.votos = datos.votos.filter(v => v.telefono !== telefono);
         if (datos.votos.length === antes) throw falla('sin_voto');
         guardar();
       });
     },
-    async quitarParticipante(dni) {
+    async quitarParticipante(telefono) {
       return enCola(() => {
-        if (!datos.padron.some(x => x.dni === dni)) throw falla('no_en_lista');
-        if (datos.votos.some(v => v.dni === dni)) throw falla('participante_voto');
-        datos.padron = datos.padron.filter(x => x.dni !== dni);
+        if (!datos.padron.some(x => x.telefono === telefono)) throw falla('no_en_lista');
+        if (datos.votos.some(v => v.telefono === telefono)) throw falla('participante_voto');
+        datos.padron = datos.padron.filter(x => x.telefono !== telefono);
         guardar();
       });
     },
     async listarPadron({ filtro = 'todos', buscar = '', desde = 0, cuantos = 10 } = {}) {
-      const votaron = new Set(datos.votos.map(v => v.dni));
-      const todos = datos.padron.map(p => ({ nombre: p.nombre, apellido: p.apellido, dni: p.dni, creado: p.creado, voto: votaron.has(p.dni) }));
-      const q = igualar(buscar);
+      const votaron = new Set(datos.votos.map(v => v.telefono));
+      const todos = datos.padron.map(p => ({ nombre: p.nombre, apellido: p.apellido, telefono: p.telefono, creado: p.creado, voto: votaron.has(p.telefono) }));
+      const q = igualar(buscar), cifras = String(buscar).replace(/\D/g, '');
       const lista = todos
         .filter(p => filtro === 'todos' || (filtro === 'votaron') === p.voto)
-        .filter(p => !q || p.dni.includes(q) || igualar(`${p.nombre} ${p.apellido}`).includes(q))
-        .sort((a, b) => b.creado.localeCompare(a.creado) || a.dni.localeCompare(b.dni));
+        .filter(p => !q || (cifras && p.telefono.includes(cifras)) || igualar(`${p.nombre} ${p.apellido}`).includes(q))
+        .sort((a, b) => b.creado.localeCompare(a.creado) || a.telefono.localeCompare(b.telefono));
       const n = todos.filter(p => p.voto).length;
       return {
         total: lista.length,
         conteo: { todos: todos.length, votaron: n, faltan: todos.length - n },
-        filas: lista.slice(desde, desde + cuantos).map(({ nombre, apellido, dni, voto }) => ({ nombre, apellido, dni, voto })),
+        filas: lista.slice(desde, desde + cuantos).map(({ nombre, apellido, telefono, voto }) => ({ nombre, apellido, telefono, voto })),
       };
     },
     async votar(v) {
       return enCola(() => {
         if (cerrada()) throw falla('cerrada');
         if (!datos.candidatos.some(x => x.id === v.candidatoId)) throw falla('no_existe');
-        if (datos.votos.some(x => x.dni === v.dni)) throw falla('dni_repetido');
+        if (datos.votos.some(x => x.telefono === v.telefono)) throw falla('telefono_repetido');
         datos.votos.push({ ...v, fecha: new Date().toISOString() });
         guardar();
       });
@@ -168,11 +180,11 @@ function almacenArchivo(carpeta) {
     async votantesDe(id, { buscar = '', desde = 0, cuantos = 25 } = {}) {
       const q = buscar.toLowerCase();
       const lista = datos.votos
-        .filter(v => v.candidatoId === id && (!q || v.dni.includes(q) || `${v.nombre} ${v.apellido}`.toLowerCase().includes(q)))
+        .filter(v => v.candidatoId === id && (!q || (q.replace(/\D/g, '') && v.telefono.includes(q.replace(/\D/g, ''))) || `${v.nombre} ${v.apellido}`.toLowerCase().includes(q)))
         .sort((a, b) => b.fecha.localeCompare(a.fecha));
       return {
         total: lista.length,
-        filas: lista.slice(desde, desde + cuantos).map(({ nombre, apellido, dni, fecha }) => ({ nombre, apellido, dni, fecha })),
+        filas: lista.slice(desde, desde + cuantos).map(({ nombre, apellido, telefono, fecha }) => ({ nombre, apellido, telefono, fecha })),
       };
     },
   };
@@ -202,16 +214,41 @@ function almacenPostgres(url) {
           descripcion TEXT, logo TEXT, creado TIMESTAMPTZ DEFAULT now());
         CREATE UNIQUE INDEX IF NOT EXISTS vot_partido_unico ON vot_candidatos (lower(partido));
         CREATE TABLE IF NOT EXISTS vot_votos (
-          dni CHAR(8) PRIMARY KEY,
+          telefono VARCHAR(20) PRIMARY KEY,
           nombre TEXT NOT NULL, apellido TEXT NOT NULL,
           candidato_id INTEGER NOT NULL REFERENCES vot_candidatos(id),
           fecha TIMESTAMPTZ DEFAULT now());
         CREATE INDEX IF NOT EXISTS vot_votos_candidato ON vot_votos (candidato_id);
         CREATE TABLE IF NOT EXISTS vot_ajustes (clave TEXT PRIMARY KEY, valor TEXT);
         CREATE TABLE IF NOT EXISTS vot_padron (
-          dni CHAR(8) PRIMARY KEY,
+          telefono VARCHAR(20) PRIMARY KEY,
           nombre TEXT NOT NULL, apellido TEXT NOT NULL,
-          creado TIMESTAMPTZ DEFAULT clock_timestamp());`);
+          creado TIMESTAMPTZ DEFAULT clock_timestamp());
+        ALTER TABLE vot_candidatos ALTER COLUMN partido DROP NOT NULL;`);
+      // Antes se votaba con DNI: se borran esas personas y sus votos y la columna pasa a ser el teléfono.
+      const viejas = await pool.query(
+        "SELECT table_name FROM information_schema.columns WHERE table_name IN ('vot_votos', 'vot_padron') AND column_name = 'dni'");
+      if (viejas.rowCount) {
+        const cliente = await pool.connect();
+        try {
+          await cliente.query('BEGIN');
+          for (const { table_name: tabla } of viejas.rows) {
+            await cliente.query(`DELETE FROM ${tabla}`);
+            await cliente.query(`ALTER TABLE ${tabla} RENAME COLUMN dni TO telefono`);
+            await cliente.query(`ALTER TABLE ${tabla} ALTER COLUMN telefono TYPE VARCHAR(20)`);
+          }
+          await cliente.query('COMMIT');
+        } catch (e) {
+          await cliente.query('ROLLBACK');
+          throw e;
+        } finally {
+          cliente.release();
+        }
+      }
+      // El teléfono lleva el código del país («+51…»): la columna debe ser más larga.
+      const cortas = await pool.query(
+        "SELECT table_name FROM information_schema.columns WHERE table_name IN ('vot_votos', 'vot_padron') AND column_name = 'telefono' AND character_maximum_length < 20");
+      for (const { table_name: tabla } of cortas.rows) await pool.query(`ALTER TABLE ${tabla} ALTER COLUMN telefono TYPE VARCHAR(20)`);
     },
     estado,
     async ponerEstado(e) {
@@ -266,108 +303,109 @@ function almacenPostgres(url) {
         cliente.release();
       }
     },
-    async yaVoto(dni) {
-      const r = await pool.query('SELECT 1 FROM vot_votos WHERE dni=$1', [dni]);
+    async yaVoto(telefono) {
+      const r = await pool.query('SELECT 1 FROM vot_votos WHERE telefono=$1', [telefono]);
       return r.rows.length > 0;
     },
-    async buscarParticipante(dni) {
-      const r = await pool.query('SELECT nombre, apellido, dni FROM vot_padron WHERE dni=$1', [dni]);
-      return r.rows[0] ? { ...r.rows[0], dni: r.rows[0].dni.trim() } : null;
+    async buscarParticipante(telefono) {
+      const r = await pool.query('SELECT nombre, apellido, telefono FROM vot_padron WHERE telefono=$1', [telefono]);
+      return r.rows[0] ? { ...r.rows[0], telefono: r.rows[0].telefono.trim() } : null;
     },
     async agregarParticipante(p) {
       try {
-        await pool.query('INSERT INTO vot_padron (dni, nombre, apellido) VALUES ($1,$2,$3)', [p.dni, p.nombre, p.apellido]);
-        return { nombre: p.nombre, apellido: p.apellido, dni: p.dni, voto: false };
+        await pool.query('INSERT INTO vot_padron (telefono, nombre, apellido) VALUES ($1,$2,$3)', [p.telefono, p.nombre, p.apellido]);
+        return { nombre: p.nombre, apellido: p.apellido, telefono: p.telefono, voto: false };
       } catch (e) {
-        if (e.code === '23505') throw falla('dni_en_lista');
+        if (e.code === '23505') throw falla('telefono_en_lista');
         throw e;
       }
     },
-    async editarParticipante(dniAnterior, p) {
+    async editarParticipante(telefonoAnterior, p) {
       const cliente = await pool.connect();
       try {
         await cliente.query('BEGIN');
-        const voto = (await cliente.query('SELECT 1 FROM vot_votos WHERE dni=$1 FOR UPDATE', [dniAnterior])).rowCount > 0;
-        if (voto && p.dni !== dniAnterior) throw falla('participante_voto_dni');
-        const r = await cliente.query('UPDATE vot_padron SET dni=$1, nombre=$2, apellido=$3 WHERE dni=$4', [p.dni, p.nombre, p.apellido, dniAnterior]);
+        const voto = (await cliente.query('SELECT 1 FROM vot_votos WHERE telefono=$1 FOR UPDATE', [telefonoAnterior])).rowCount > 0;
+        if (voto && p.telefono !== telefonoAnterior) throw falla('participante_voto_telefono');
+        const r = await cliente.query('UPDATE vot_padron SET telefono=$1, nombre=$2, apellido=$3 WHERE telefono=$4', [p.telefono, p.nombre, p.apellido, telefonoAnterior]);
         if (!r.rowCount) throw falla('no_en_lista');
-        if (voto) await cliente.query('UPDATE vot_votos SET nombre=$1, apellido=$2 WHERE dni=$3', [p.nombre, p.apellido, dniAnterior]);
+        if (voto) await cliente.query('UPDATE vot_votos SET nombre=$1, apellido=$2 WHERE telefono=$3', [p.nombre, p.apellido, telefonoAnterior]);
         await cliente.query('COMMIT');
-        return { nombre: p.nombre, apellido: p.apellido, dni: p.dni, voto };
+        return { nombre: p.nombre, apellido: p.apellido, telefono: p.telefono, voto };
       } catch (e) {
         await cliente.query('ROLLBACK');
-        if (e.code === '23505') throw falla('dni_en_lista');
+        if (e.code === '23505') throw falla('telefono_en_lista');
         throw e;
       } finally {
         cliente.release();
       }
     },
-    async borrarVoto(dni) {
+    async borrarVoto(telefono) {
       await exigirAbierta();
-      const r = await pool.query('DELETE FROM vot_votos WHERE dni=$1', [dni]);
+      const r = await pool.query('DELETE FROM vot_votos WHERE telefono=$1', [telefono]);
       if (!r.rowCount) throw falla('sin_voto');
     },
-    async quitarParticipante(dni) {
+    async quitarParticipante(telefono) {
       const r = await pool.query(
-        'DELETE FROM vot_padron WHERE dni=$1 AND NOT EXISTS (SELECT 1 FROM vot_votos WHERE dni=$1) RETURNING dni', [dni]);
+        'DELETE FROM vot_padron WHERE telefono=$1 AND NOT EXISTS (SELECT 1 FROM vot_votos WHERE telefono=$1) RETURNING telefono', [telefono]);
       if (r.rowCount) return;
-      if (await this.buscarParticipante(dni)) throw falla('participante_voto');
+      if (await this.buscarParticipante(telefono)) throw falla('participante_voto');
       throw falla('no_en_lista');
     },
     async listarPadron({ filtro = 'todos', buscar = '', desde = 0, cuantos = 10 } = {}) {
       const condiciones = [];
       const valores = [];
-      if (filtro === 'votaron') condiciones.push('v.dni IS NOT NULL');
-      if (filtro === 'faltan') condiciones.push('v.dni IS NULL');
+      if (filtro === 'votaron') condiciones.push('v.telefono IS NOT NULL');
+      if (filtro === 'faltan') condiciones.push('v.telefono IS NULL');
       const q = igualar(buscar);
       if (q) {
         valores.push(`%${q.replace(/[%_\\]/g, '\\$&')}%`);
-        condiciones.push(`(p.dni LIKE $1 OR translate(lower(p.nombre || ' ' || p.apellido), 'áéíóúüàèìòùñ', 'aeiouuaeioun') LIKE $1)`);
+        valores.push(`%${String(buscar).replace(/\D/g, '') || '-'}%`);
+        condiciones.push(`(p.telefono LIKE $2 OR translate(lower(p.nombre || ' ' || p.apellido), 'áéíóúüàèìòùñ', 'aeiouuaeioun') LIKE $1)`);
       }
       const donde = condiciones.length ? 'WHERE ' + condiciones.join(' AND ') : '';
-      const desdeTabla = 'FROM vot_padron p LEFT JOIN vot_votos v ON v.dni = p.dni';
+      const desdeTabla = 'FROM vot_padron p LEFT JOIN vot_votos v ON v.telefono = p.telefono';
       const [total, conteo, filas] = await Promise.all([
         pool.query(`SELECT COUNT(*)::int AS n ${desdeTabla} ${donde}`, valores),
-        pool.query(`SELECT COUNT(*)::int AS todos, COUNT(v.dni)::int AS votaron ${desdeTabla}`),
+        pool.query(`SELECT COUNT(*)::int AS todos, COUNT(v.telefono)::int AS votaron ${desdeTabla}`),
         pool.query(
-          `SELECT p.nombre, p.apellido, p.dni, (v.dni IS NOT NULL) AS voto ${desdeTabla} ${donde}
-           ORDER BY p.creado DESC, p.dni LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
+          `SELECT p.nombre, p.apellido, p.telefono, (v.telefono IS NOT NULL) AS voto ${desdeTabla} ${donde}
+           ORDER BY p.creado DESC, p.telefono LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
           [...valores, cuantos, desde]),
       ]);
       const c = conteo.rows[0];
       return {
         total: total.rows[0].n,
         conteo: { todos: c.todos, votaron: c.votaron, faltan: c.todos - c.votaron },
-        filas: filas.rows.map(x => ({ ...x, dni: x.dni.trim() })),
+        filas: filas.rows.map(x => ({ ...x, telefono: x.telefono.trim() })),
       };
     },
     async votar(v) {
       await exigirAbierta();
       try {
-        await pool.query('INSERT INTO vot_votos (dni, nombre, apellido, candidato_id) VALUES ($1,$2,$3,$4)',
-          [v.dni, v.nombre, v.apellido, v.candidatoId]);
+        await pool.query('INSERT INTO vot_votos (telefono, nombre, apellido, candidato_id) VALUES ($1,$2,$3,$4)',
+          [v.telefono, v.nombre, v.apellido, v.candidatoId]);
       } catch (e) {
-        if (e.code === '23505') throw falla('dni_repetido');
+        if (e.code === '23505') throw falla('telefono_repetido');
         if (e.code === '23503') throw falla('no_existe');
         throw e;
       }
     },
     async conteo() {
       const r = await pool.query(`
-        SELECT c.id, c.partido, c.nombre, c.apellido, COUNT(v.dni)::int AS votos
+        SELECT c.id, c.partido, c.nombre, c.apellido, COUNT(v.telefono)::int AS votos
         FROM vot_candidatos c LEFT JOIN vot_votos v ON v.candidato_id = c.id
         GROUP BY c.id`);
       return ordenarConteo(r.rows);
     },
     async votantesDe(id, { buscar = '', desde = 0, cuantos = 25 } = {}) {
-      const filtro = buscar ? "AND (dni LIKE $2 OR lower(nombre || ' ' || apellido) LIKE $2)" : '';
-      const datosFiltro = buscar ? [id, `%${buscar.toLowerCase().replace(/[%_\\]/g, '\\$&')}%`] : [id];
+      const filtro = buscar ? "AND (telefono LIKE $3 OR lower(nombre || ' ' || apellido) LIKE $2)" : '';
+      const datosFiltro = buscar ? [id, `%${buscar.toLowerCase().replace(/[%_\\]/g, '\\$&')}%`, `%${buscar.replace(/\D/g, '') || '-'}%`] : [id];
       const total = await pool.query(`SELECT COUNT(*)::int AS n FROM vot_votos WHERE candidato_id=$1 ${filtro}`, datosFiltro);
       const n = datosFiltro.length;
       const r = await pool.query(
-        `SELECT nombre, apellido, dni, fecha FROM vot_votos WHERE candidato_id=$1 ${filtro} ORDER BY fecha DESC LIMIT $${n + 1} OFFSET $${n + 2}`,
+        `SELECT nombre, apellido, telefono, fecha FROM vot_votos WHERE candidato_id=$1 ${filtro} ORDER BY fecha DESC LIMIT $${n + 1} OFFSET $${n + 2}`,
         [...datosFiltro, cuantos, desde]);
-      return { total: total.rows[0].n, filas: r.rows.map(x => ({ ...x, dni: x.dni.trim(), fecha: new Date(x.fecha).toISOString() })) };
+      return { total: total.rows[0].n, filas: r.rows.map(x => ({ ...x, telefono: x.telefono.trim(), fecha: new Date(x.fecha).toISOString() })) };
     },
   };
 }

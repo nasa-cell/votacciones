@@ -25,8 +25,8 @@ async function api(ruta, { metodo = 'GET', cuerpo, admin = false } = {}) {
   return { estado: r.status, datos: await r.json().catch(() => ({})) };
 }
 
-const dni = n => String(10000000 + n);
-const votante = n => ({ nombre: 'Votante Prueba', apellido: 'Apellido Numero', dni: dni(n) });
+const telefono = n => '+51' + (900000000 + n);
+const votante = n => ({ nombre: 'Votante Prueba', apellido: 'Apellido Numero', telefono: telefono(n) });
 
 async function principal() {
   console.log('Votaciones · prueba completa');
@@ -41,29 +41,37 @@ async function principal() {
 
   // Lista de participantes (quiénes pueden votar)
   revisar((await api('/api/admin/padron', { cuerpo: votante(1) })).estado === 401, 'agregar participante sin sesión rechazado');
-  revisar((await api('/api/ingresar', { cuerpo: votante(1) })).datos.codigo === 'no_registrado', 'DNI que no está en la lista: no está registrado');
+  revisar((await api('/api/ingresar', { cuerpo: votante(1) })).datos.codigo === 'no_registrado', 'Teléfono que no está en la lista: no está registrado');
   revisar((await api('/api/votar', { cuerpo: { ...votante(1), candidatoId: 1 } })).estado === 404, 'quien no está en la lista no puede votar');
   revisar((await api('/api/admin/padron', { cuerpo: { ...votante(1), nombre: 'Lu' }, admin: true })).estado === 400, 'participante con nombre de 2 letras rechazado');
   revisar((await api('/api/admin/padron', { cuerpo: { ...votante(1), apellido: 'x'.repeat(81) }, admin: true })).estado === 400, 'participante con apellido de 81 letras rechazado');
-  revisar((await api('/api/admin/padron', { cuerpo: { ...votante(1), dni: '1234' }, admin: true })).estado === 400, 'participante con DNI de 4 números rechazado');
+  revisar((await api('/api/admin/padron', { cuerpo: { ...votante(1), telefono: '1234' }, admin: true })).estado === 400, 'participante con teléfono de 4 números rechazado');
+  revisar((await api('/api/admin/padron', { cuerpo: { ...votante(1), telefono: '812345678' }, admin: true })).estado === 400, 'teléfono que no empieza con 9 rechazado');
+  const argentino = await api('/api/admin/padron', { cuerpo: { nombre: 'Lucía', apellido: 'Gómez', telefono: '+54 911 2345 6789' }, admin: true });
+  revisar(argentino.estado === 200 && argentino.datos.telefono === '+5491123456789', 'acepta un teléfono de Argentina (+54) y lo guarda sin espacios');
+  revisar((await api('/api/admin/padron', { cuerpo: { nombre: 'Lucía', apellido: 'Gómez', telefono: '+999123456' }, admin: true })).estado === 400, 'código de país desconocido rechazado');
+  revisar((await api('/api/admin/padron', { cuerpo: { nombre: 'Lucía', apellido: 'Gómez', telefono: '+5412' }, admin: true })).estado === 400, 'teléfono de otro país muy corto rechazado');
+  revisar((await api('/api/ingresar', { cuerpo: { nombre: 'Lucía', apellido: 'Gómez', telefono: '+51911234567' } })).datos.codigo === 'no_registrado', 'mismo número con otro país (+51) no entra');
+  revisar((await api('/api/ingresar', { cuerpo: { nombre: 'Lucía', apellido: 'Gómez', telefono: '+5491123456789' } })).estado === 200, 'con el mismo país y número sí entra');
+  revisar((await api('/api/admin/padron/' + encodeURIComponent('+5491123456789'), { metodo: 'DELETE', admin: true })).estado === 200, 'quita al participante de Argentina');
   const numeros = [...Array.from({ length: 90 }, (_, i) => i + 1), 500, 900];
   const agregados = [];
   for (const n of numeros) agregados.push(await api('/api/admin/padron', { cuerpo: votante(n), admin: true }));
   revisar(agregados.every(a => a.estado === 200), `agrega ${numeros.length} participantes`);
-  revisar((await api('/api/admin/padron', { cuerpo: votante(1), admin: true })).datos.codigo === 'dni_en_lista', 'DNI repetido en la lista rechazado');
-  const largo = { nombre: 'María de los Ángeles ' + 'a'.repeat(55), apellido: 'Fernández', dni: '30000001' };
+  revisar((await api('/api/admin/padron', { cuerpo: votante(1), admin: true })).datos.codigo === 'telefono_en_lista', 'teléfono repetido en la lista rechazado');
+  const largo = { nombre: 'María de los Ángeles ' + 'a'.repeat(55), apellido: 'Fernández', telefono: '930000001' };
   revisar((await api('/api/admin/padron', { cuerpo: largo, admin: true })).estado === 200, 'acepta un nombre de 76 letras');
   const pag = (await api('/api/admin/padron?pagina=2&por=5', { admin: true })).datos;
   revisar(pag.conteo.todos === 93 && pag.filas.length === 5 && pag.paginas === 19, `lista en páginas de 5 (${pag.conteo.todos} personas, ${pag.paginas} páginas)`);
   revisar((await api('/api/admin/padron?buscar=angeles', { admin: true })).datos.total === 1, 'buscar sin tilde encuentra «Ángeles»');
-  revisar((await api('/api/admin/padron/30000001', { metodo: 'PUT', cuerpo: { ...largo, nombre: 'Ma' }, admin: true })).estado === 400, 'editar participante: nombre de 2 letras rechazado');
-  revisar((await api('/api/admin/padron/30000001', { metodo: 'PUT', cuerpo: { ...largo, apellido: 'y'.repeat(81) }, admin: true })).estado === 400, 'editar participante: apellido de 81 letras rechazado');
-  revisar((await api('/api/admin/padron/30000001', { metodo: 'PUT', cuerpo: { ...largo, dni: '123' }, admin: true })).estado === 400, 'editar participante: DNI de 3 números rechazado');
-  revisar((await api('/api/admin/padron/30000001', { metodo: 'PUT', cuerpo: { ...largo, dni: dni(2) }, admin: true })).datos.codigo === 'dni_en_lista', 'editar participante: DNI de otra persona rechazado');
-  const editado = await api('/api/admin/padron/30000001', { metodo: 'PUT', cuerpo: { nombre: 'María', apellido: 'Fernández Ruiz', dni: '30000002' }, admin: true });
-  revisar(editado.estado === 200 && editado.datos.dni === '30000002', 'editar participante: cambia nombre, apellido y DNI');
-  revisar((await api('/api/ingresar', { cuerpo: { nombre: 'maria', apellido: 'fernandez ruiz', dni: '30000002' } })).estado === 200, 'con los datos editados puede ingresar');
-  revisar((await api('/api/ingresar', { cuerpo: { nombre: 'María', apellido: 'Fernández Ruiz', dni: '30000001' } })).datos.codigo === 'no_registrado', 'el DNI anterior ya no está');
+  revisar((await api('/api/admin/padron/930000001', { metodo: 'PUT', cuerpo: { ...largo, nombre: 'Ma' }, admin: true })).estado === 400, 'editar participante: nombre de 2 letras rechazado');
+  revisar((await api('/api/admin/padron/930000001', { metodo: 'PUT', cuerpo: { ...largo, apellido: 'y'.repeat(81) }, admin: true })).estado === 400, 'editar participante: apellido de 81 letras rechazado');
+  revisar((await api('/api/admin/padron/930000001', { metodo: 'PUT', cuerpo: { ...largo, telefono: '123' }, admin: true })).estado === 400, 'editar participante: teléfono de 3 números rechazado');
+  revisar((await api('/api/admin/padron/930000001', { metodo: 'PUT', cuerpo: { ...largo, telefono: telefono(2) }, admin: true })).datos.codigo === 'telefono_en_lista', 'editar participante: teléfono de otra persona rechazado');
+  const editado = await api('/api/admin/padron/930000001', { metodo: 'PUT', cuerpo: { nombre: 'María', apellido: 'Fernández Ruiz', telefono: '930000002' }, admin: true });
+  revisar(editado.estado === 200 && editado.datos.telefono === '+51930000002', 'editar participante: cambia nombre, apellido y teléfono');
+  revisar((await api('/api/ingresar', { cuerpo: { nombre: 'maria', apellido: 'fernandez ruiz', telefono: '930000002' } })).estado === 200, 'con los datos editados puede ingresar');
+  revisar((await api('/api/ingresar', { cuerpo: { nombre: 'María', apellido: 'Fernández Ruiz', telefono: '930000001' } })).datos.codigo === 'no_registrado', 'el teléfono anterior ya no está');
 
   // Validaciones al inscribir
   const base = { nombre: 'Rosa Elena', apellido: 'Paredes Salas', partido: 'Renovación Verde' };
@@ -80,6 +88,11 @@ async function principal() {
   const c = await api('/api/admin/candidatos', { cuerpo: { nombre: 'Luis Alberto', apellido: 'Torres Vega', partido: 'Unidad del Pueblo' }, admin: true });
   const d = await api('/api/admin/candidatos', { cuerpo: { nombre: 'Carmen Lucía', apellido: 'Rojas Flores', partido: 'Fuerza Andina Unida' }, admin: true });
   revisar(b.estado === 200 && c.estado === 200 && d.estado === 200, 'inscribe 3 partidos más sin logo');
+  const sinPartido1 = await api('/api/admin/candidatos', { cuerpo: { nombre: 'Andrea Sofía', apellido: 'Quispe Mamani' }, admin: true });
+  const sinPartido2 = await api('/api/admin/candidatos', { cuerpo: { nombre: 'Miguel Ángel', apellido: 'Huamán Torres', partido: '', descripcion: '' }, admin: true });
+  revisar(sinPartido1.estado === 200 && sinPartido1.datos.partido === null && sinPartido2.estado === 200, 'inscribe sin nombre de partido, descripción ni foto (dos a la vez)');
+  revisar((await api(`/api/admin/candidatos/${sinPartido1.datos.id}`, { metodo: 'DELETE', admin: true })).estado === 200
+    && (await api(`/api/admin/candidatos/${sinPartido2.datos.id}`, { metodo: 'DELETE', admin: true })).estado === 200, 'quita a los inscritos sin partido');
   revisar((await api('/api/admin/candidatos', { cuerpo: { ...base, partido: 'renovación verde' }, admin: true })).estado === 409, 'partido repetido rechazado');
   const e = await api(`/api/admin/candidatos/${d.datos.id}`, { metodo: 'PUT', cuerpo: { nombre: 'Carmen Lucía', apellido: 'Rojas Flores', partido: 'Fuerza Andina Unida', descripcion: 'Agua para todos los pueblos' }, admin: true });
   revisar(e.estado === 200 && e.datos.descripcion === 'Agua para todos los pueblos', 'edita un participante');
@@ -92,12 +105,12 @@ async function principal() {
   revisar((await editarPartido({ nombre: 'Carmen 123 Lucía' })).estado === 400, 'editar partido: nombre con números rechazado');
 
   // Registro del votante
-  revisar((await api('/api/ingresar', { cuerpo: { ...votante(1), dni: '123' } })).estado === 400, 'DNI de 3 números rechazado');
+  revisar((await api('/api/ingresar', { cuerpo: { ...votante(1), telefono: '123' } })).estado === 400, 'teléfono de 3 números rechazado');
   revisar((await api('/api/ingresar', { cuerpo: { ...votante(1), nombre: 'An' } })).estado === 400, 'nombre de votante de 2 letras rechazado');
   revisar((await api('/api/ingresar', { cuerpo: votante(1) })).estado === 200, 'votante de la lista ingresa');
-  revisar((await api('/api/ingresar', { cuerpo: { nombre: 'VOTANTE PRUEBA', apellido: 'apellido número', dni: dni(1) } })).estado === 200, 'acepta mayúsculas, minúsculas y tilde de más');
+  revisar((await api('/api/ingresar', { cuerpo: { nombre: 'VOTANTE PRUEBA', apellido: 'apellido número', telefono: telefono(1) } })).estado === 200, 'acepta mayúsculas, minúsculas y tilde de más');
   const malNombre = (await api('/api/ingresar', { cuerpo: { ...votante(1), nombre: 'Votante Pruebo' } })).datos;
-  revisar(malNombre.codigo === 'no_coincide' && malNombre.campos.nombre === false && malNombre.campos.apellido === true && malNombre.campos.dni === true, 'nombre mal escrito: marca solo el nombre');
+  revisar(malNombre.codigo === 'no_coincide' && malNombre.campos.nombre === false && malNombre.campos.apellido === true && malNombre.campos.telefono === true, 'nombre mal escrito: marca solo el nombre');
   const malApellido = (await api('/api/ingresar', { cuerpo: { ...votante(1), apellido: 'Apellido Numerito' } })).datos;
   revisar(malApellido.campos.nombre === true && malApellido.campos.apellido === false, 'apellido mal escrito: marca solo el apellido');
   revisar((await api('/api/votar', { cuerpo: { ...votante(1), nombre: 'Votante Pruebo', candidatoId: 1 } })).estado === 409, 'con el nombre mal escrito no puede votar');
@@ -109,22 +122,22 @@ async function principal() {
   const tandas = await Promise.all(Array.from({ length: 40 }, (_, i) => api('/api/votar', { cuerpo: { ...votante(i + 1), candidatoId: ids[i % 10] } })));
   revisar(tandas.every(t => t.estado === 200), '40 votos a la vez guardados');
 
-  // Mismo DNI 20 veces a la vez: solo se acepta una
+  // Mismo teléfono 20 veces a la vez: solo se acepta una
   const repetidos = await Promise.all(Array.from({ length: 20 }, () => api('/api/votar', { cuerpo: { ...votante(500), candidatoId: b.datos.id } })));
-  revisar(repetidos.filter(t => t.estado === 200).length === 1, 'mismo DNI 20 veces a la vez: solo 1 voto');
+  revisar(repetidos.filter(t => t.estado === 200).length === 1, 'mismo teléfono 20 veces a la vez: solo 1 voto');
   const yaVoto = (await api('/api/ingresar', { cuerpo: votante(1) })).datos;
-  revisar(yaVoto.codigo === 'dni_repetido' && /ya votó/.test(yaVoto.error), 'quien ya votó ve «Usted ya votó»');
+  revisar(yaVoto.codigo === 'telefono_repetido' && /ya votó/.test(yaVoto.error), 'quien ya votó ve «Usted ya votó»');
   const conVotos = (await api('/api/admin/padron?filtro=votaron&por=25', { admin: true })).datos;
   revisar(conVotos.conteo.votaron === 41 && conVotos.total === 41 && conVotos.filas.every(f => f.voto), `filtro «Ya votaron» (${conVotos.conteo.votaron})`);
   const faltan = (await api('/api/admin/padron?filtro=faltan', { admin: true })).datos;
   revisar(faltan.total === 52 && faltan.filas.every(f => !f.voto), `filtro «Faltan» (${faltan.total})`);
-  revisar((await api('/api/admin/padron/' + dni(1), { metodo: 'DELETE', admin: true })).datos.codigo === 'participante_voto', 'no se quita a quien ya votó');
-  revisar((await api('/api/admin/padron/' + dni(1), { metodo: 'PUT', cuerpo: { ...votante(1), dni: dni(95) }, admin: true })).datos.codigo === 'participante_voto_dni', 'quien ya votó no puede cambiar su DNI');
-  revisar((await api('/api/admin/padron/' + dni(1), { metodo: 'PUT', cuerpo: { ...votante(1), nombre: 'Votante Corregido' }, admin: true })).estado === 200, 'quien ya votó sí puede corregir su nombre');
-  await api('/api/admin/padron/' + dni(1), { metodo: 'PUT', cuerpo: votante(1), admin: true });
-  revisar((await api('/api/admin/padron/' + dni(90), { metodo: 'DELETE', admin: true })).estado === 200, 'quita a quien no votó');
+  revisar((await api('/api/admin/padron/' + telefono(1), { metodo: 'DELETE', admin: true })).datos.codigo === 'participante_voto', 'no se quita a quien ya votó');
+  revisar((await api('/api/admin/padron/' + telefono(1), { metodo: 'PUT', cuerpo: { ...votante(1), telefono: telefono(95) }, admin: true })).datos.codigo === 'participante_voto_telefono', 'quien ya votó no puede cambiar su teléfono');
+  revisar((await api('/api/admin/padron/' + telefono(1), { metodo: 'PUT', cuerpo: { ...votante(1), nombre: 'Votante Corregido' }, admin: true })).estado === 200, 'quien ya votó sí puede corregir su nombre');
+  await api('/api/admin/padron/' + telefono(1), { metodo: 'PUT', cuerpo: votante(1), admin: true });
+  revisar((await api('/api/admin/padron/' + telefono(90), { metodo: 'DELETE', admin: true })).estado === 200, 'quita a quien no votó');
   revisar((await api('/api/ingresar', { cuerpo: votante(90) })).datos.codigo === 'no_registrado', 'quien fue quitado ya no puede votar');
-  revisar((await api('/api/votar', { cuerpo: { ...votante(1), candidatoId: b.datos.id } })).estado === 409, 'DNI que ya votó no puede votar de nuevo');
+  revisar((await api('/api/votar', { cuerpo: { ...votante(1), candidatoId: b.datos.id } })).estado === 409, 'Teléfono que ya votó no puede votar de nuevo');
   revisar((await api('/api/votar', { cuerpo: { ...votante(900), candidatoId: 9999 } })).estado === 404, 'voto a partido que no existe rechazado');
 
   // Resultados del admin
@@ -133,9 +146,9 @@ async function principal() {
   revisar(r.partidos[0].partido === 'Renovación Verde' && r.partidos[0].votos === 16, 'Renovación Verde va primero con 16');
   revisar(Math.abs(r.partidos.reduce((s, p) => s + p.porcentaje, 0) - 100) < 0.5, 'porcentajes suman 100');
   const v = (await api(`/api/admin/votantes/${a.datos.id}`, { admin: true })).datos;
-  revisar(v.total === 16 && v.filas.length === 16 && v.filas[0].dni && v.filas[0].nombre && v.paginas === 1, 'tabla de votantes de un partido con DNI');
-  const busca = (await api(`/api/admin/votantes/${a.datos.id}?buscar=${dni(1)}`, { admin: true })).datos;
-  revisar(busca.total === 1 && busca.filas[0].dni === dni(1), 'buscar votante por DNI');
+  revisar(v.total === 16 && v.filas.length === 16 && v.filas[0].telefono && v.filas[0].nombre && v.paginas === 1, 'tabla de votantes de un partido con teléfono');
+  const busca = (await api(`/api/admin/votantes/${a.datos.id}?buscar=${telefono(1)}`, { admin: true })).datos;
+  revisar(busca.total === 1 && busca.filas[0].telefono === telefono(1), 'buscar votante por teléfono');
   const quita = await api(`/api/admin/candidatos/${d.datos.id}`, { metodo: 'DELETE', admin: true });
   revisar(quita.estado === 200 && quita.datos.votosLiberados === 4, `quitar partido con 4 votos los libera (${quita.datos.votosLiberados})`);
   revisar((await api('/api/ingresar', { cuerpo: votante(10) })).estado === 200, 'quien votó por el partido quitado puede registrarse otra vez');
@@ -145,11 +158,11 @@ async function principal() {
   revisar((await api(`/api/admin/candidatos/${sinVotos.datos.id}`, { metodo: 'DELETE', admin: true })).estado === 200, 'quita partido sin votos');
 
   // Eliminar el voto de una persona: puede votar de nuevo
-  revisar((await api('/api/admin/votos/' + dni(1), { metodo: 'DELETE' })).estado === 401, 'eliminar voto sin sesión rechazado');
-  revisar((await api('/api/admin/votos/' + dni(85), { metodo: 'DELETE', admin: true })).datos.codigo === 'sin_voto', 'eliminar voto de quien no votó: avisa');
-  revisar((await api('/api/admin/votos/' + dni(1), { metodo: 'DELETE', admin: true })).estado === 200, 'admin elimina el voto de una persona');
+  revisar((await api('/api/admin/votos/' + telefono(1), { metodo: 'DELETE' })).estado === 401, 'eliminar voto sin sesión rechazado');
+  revisar((await api('/api/admin/votos/' + telefono(85), { metodo: 'DELETE', admin: true })).datos.codigo === 'sin_voto', 'eliminar voto de quien no votó: avisa');
+  revisar((await api('/api/admin/votos/' + telefono(1), { metodo: 'DELETE', admin: true })).estado === 200, 'admin elimina el voto de una persona');
   revisar((await api('/api/admin/resultados', { admin: true })).datos.total === 37, 'los resultados bajan en 1 voto (37)');
-  revisar((await api('/api/admin/padron?filtro=votaron&buscar=' + dni(1), { admin: true })).datos.total === 0, 'en la lista vuelve a «Falta»');
+  revisar((await api('/api/admin/padron?filtro=votaron&buscar=' + telefono(1), { admin: true })).datos.total === 0, 'en la lista vuelve a «Falta»');
   revisar((await api('/api/ingresar', { cuerpo: votante(1) })).estado === 200, 'con el voto eliminado puede ingresar otra vez');
   revisar((await api('/api/votar', { cuerpo: { ...votante(1), candidatoId: c.datos.id } })).estado === 200, 'y vuelve a votar');
   revisar((await api('/api/admin/resultados', { admin: true })).datos.total === 38, 'total vuelve a 38');
@@ -161,9 +174,9 @@ async function principal() {
   revisar((await api('/api/votar', { cuerpo: { ...votante(78), candidatoId: b.datos.id } })).estado === 409, 'tras publicar no se puede votar');
   const pub = await api('/api/resultados');
   revisar(pub.estado === 200 && pub.datos.partidos.length === 3, 'resultados públicos visibles');
-  revisar(!JSON.stringify(pub.datos).includes(dni(1)), 'resultados públicos sin DNI de votantes');
+  revisar(!JSON.stringify(pub.datos).includes(telefono(1)), 'resultados públicos sin teléfono de votantes');
   revisar((await api('/api/admin/candidatos', { cuerpo: { nombre: 'Pedro Pablo', apellido: 'Gutiérrez Paz', partido: 'Partido de Prueba Dos' }, admin: true })).estado === 409, 'tras publicar no se inscribe');
-  revisar((await api('/api/admin/votos/' + dni(1), { metodo: 'DELETE', admin: true })).estado === 409, 'tras publicar no se elimina ningún voto');
+  revisar((await api('/api/admin/votos/' + telefono(1), { metodo: 'DELETE', admin: true })).estado === 409, 'tras publicar no se elimina ningún voto');
 
   // Ocultar y reabrir
   revisar((await api('/api/admin/ocultar', { cuerpo: {} })).estado === 401, 'ocultar sin sesión rechazado');

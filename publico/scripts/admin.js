@@ -99,13 +99,13 @@ const campos = { nombre: $('c-nombre'), apellido: $('c-apellido'), partido: $('c
 const contadores = [
   conectarContador(campos.nombre, 10, 30),
   conectarContador(campos.apellido, 10, 30),
-  conectarContador(campos.partido, 10, 40),
+  conectarContador(campos.partido, 10, 40, true),
   conectarContador(campos.descripcion, 10, 50, true),
 ];
 const revisarCandidato = conectarValidacion([
   { input: campos.nombre, min: 10, max: 30, tipo: 'letras' },
   { input: campos.apellido, min: 10, max: 30, tipo: 'letras' },
-  { input: campos.partido, min: 10, max: 40, tipo: 'texto' },
+  { input: campos.partido, min: 10, max: 40, tipo: 'texto', opcional: true },
   { input: campos.descripcion, min: 10, max: 50, tipo: 'texto', opcional: true },
 ]);
 
@@ -142,7 +142,7 @@ function abrirInscripciones() {
     const q = buscar.value.trim().toLowerCase();
     const filas = candidatos
       .map((c, i) => ({ c, n: i + 1 }))
-      .filter(({ c }) => !q || `${c.partido} ${c.nombre} ${c.apellido} ${c.descripcion || ''}`.toLowerCase().includes(q));
+      .filter(({ c }) => !q || `${c.partido || ''} ${c.nombre} ${c.apellido} ${c.descripcion || ''}`.toLowerCase().includes(q));
     cuenta.textContent = q ? `${filas.length} de ${candidatos.length} participantes` : `${candidatos.length} ${candidatos.length === 1 ? 'participante' : 'participantes'}`;
     if (!filas.length) {
       cuerpo.replaceChildren(el('tr', { class: 'vacia' }, el('td', { colspan: '6' }, candidatos.length ? 'Ninguna inscripción coincide con la búsqueda.' : 'Todavía no hay participantes inscritos.')));
@@ -151,7 +151,7 @@ function abrirInscripciones() {
     cuerpo.replaceChildren(...filas.map(({ c, n }) => el('tr', {},
       el('td', { class: 'c-num' }, String(n)),
       el('td', { class: 'c-logo' }, logoDe(c)),
-      el('td', { class: 'c-partido' }, el('b', {}, el('span', { class: 'solo-cel' }, `${n} · `), c.partido)),
+      el('td', { class: 'c-partido' }, el('b', {}, el('span', { class: 'solo-cel' }, `${n} · `), c.partido || 'Sin partido')),
       el('td', { class: 'c-nombre', 'data-dato': 'Nombre' }, c.nombre),
       el('td', { class: 'c-apellido', 'data-dato': 'Apellido' }, c.apellido),
       el('td', { class: 'c-desc' + (c.descripcion ? '' : ' sin') }, c.descripcion || 'Sin descripción'),
@@ -183,14 +183,14 @@ function dibujarInscritos() {
     return;
   }
   const q = $('buscar-inscrito').value.trim().toLowerCase();
-  const lista = candidatos.filter(c => !q || `${c.partido} ${c.nombre} ${c.apellido}`.toLowerCase().includes(q));
+  const lista = candidatos.filter(c => !q || `${c.partido || ''} ${c.nombre} ${c.apellido}`.toLowerCase().includes(q));
   if (!lista.length) {
     $('lista-inscritos').replaceChildren(el('p', { class: 'vacio' }, 'Ningún inscrito coincide con la búsqueda.'));
     return;
   }
   $('lista-inscritos').replaceChildren(...lista.map(c => el('div', { class: 'cand' },
     logoDe(c),
-    el('div', { class: 'datos' }, el('b', {}, c.partido), el('br'), el('small', {}, `${c.nombre} ${c.apellido}` + (votosPor[c.id] ? ` · ${votosTexto(votosPor[c.id])}` : ''))),
+    el('div', { class: 'datos' }, el('b', {}, nombreDe(c)), el('br'), el('small', {}, (c.partido ? `${c.nombre} ${c.apellido}` : 'Sin partido') + (votosPor[c.id] ? ` · ${votosTexto(votosPor[c.id])}` : ''))),
     cerrada ? null : el('span', { class: 'acc' },
       el('button', { class: 'btn btn-sec btn-chico', type: 'button', onclick: () => editar(c) }, '✎ Editar'),
       el('button', { class: 'btn btn-rojo btn-chico', type: 'button', onclick: () => quitar(c) }, 'Quitar')),
@@ -203,7 +203,7 @@ $('form-candidato').addEventListener('submit', async e => {
   errorEn('inscribir-ok');
   if (!revisarCandidato()) return;
   const lineas = [
-    ['Nombre', campos.nombre.value], ['Apellido', campos.apellido.value], ['Partido', campos.partido.value],
+    ['Nombre', campos.nombre.value], ['Apellido', campos.apellido.value], ['Partido', campos.partido.value || '(sin partido)'],
     ['Descripción', campos.descripcion.value || '(sin descripción)'], ['Logo', logoActual ? 'sí' : '(sin logo)'],
   ];
   const si = await preguntar({
@@ -220,7 +220,7 @@ $('form-candidato').addEventListener('submit', async e => {
     const guardado = await conCarga($('btn-inscribir'), 'Guardando…', () => editando
       ? pedir('/api/admin/candidatos/' + editando, { method: 'PUT', cuerpo })
       : pedir('/api/admin/candidatos', { cuerpo }));
-    errorEn('inscribir-ok', (editando ? 'Cambios guardados: ' : 'Inscrito: ') + guardado.partido);
+    errorEn('inscribir-ok', (editando ? 'Cambios guardados: ' : 'Inscrito: ') + nombreDe(guardado));
     limpiarFormulario();
     await cargarCandidatos();
   } catch (err) {
@@ -251,7 +251,7 @@ function editar(c) {
   editando = c.id;
   campos.nombre.value = c.nombre;
   campos.apellido.value = c.apellido;
-  campos.partido.value = c.partido;
+  campos.partido.value = c.partido || '';
   campos.descripcion.value = c.descripcion || '';
   logoOriginal = c.logo;
   ponerLogo(c.logo);
@@ -273,16 +273,16 @@ async function quitar(c) {
   const si = await preguntar({
     titulo: '¿Estás seguro de quitar este participante?',
     texto: votos
-      ? el('p', {}, 'Se quitará ', el('b', {}, c.partido), '. Tiene ', el('b', {}, votosTexto(votos)), ': esos votos se borran y ',
+      ? el('p', {}, 'Se quitará ', el('b', {}, nombreDe(c)), '. Tiene ', el('b', {}, votosTexto(votos)), ': esos votos se borran y ',
         votos === 1 ? 'esa persona podrá' : `esas ${votos} personas podrán`, ' registrarse y votar de nuevo.')
-      : el('p', {}, 'Se quitará ', el('b', {}, c.partido), ' de la lista.'),
+      : el('p', {}, 'Se quitará ', el('b', {}, nombreDe(c)), ' de la lista.'),
     si: 'Sí, quitar', claseSi: 'btn-rojo', no: 'Cancelar',
   });
   if (!si) return;
   errorEn('inscribir-ok');
   try {
     const r = await pedir('/api/admin/candidatos/' + c.id, { method: 'DELETE' });
-    errorEn('inscribir-ok', `Se quitó ${c.partido}.` + (r.votosLiberados ? ` ${votosTexto(r.votosLiberados)} borrados: esas personas pueden votar de nuevo.` : ''));
+    errorEn('inscribir-ok', `Se quitó ${nombreDe(c)}.` + (r.votosLiberados ? ` ${votosTexto(r.votosLiberados)} borrados: esas personas pueden votar de nuevo.` : ''));
     if (editando === c.id) limpiarFormulario();
     errorEn('inscribir-error');
     await cargarCandidatos();
@@ -507,14 +507,14 @@ async function actualizarResultados() {
 
 // El desplegable se rehace solo si cambian los partidos, para no cerrarlo mientras se usa.
 function llenarDesplegable() {
-  const ordenados = [...ultimo.partidos].sort((a, b) => a.partido.localeCompare(b.partido, 'es'));
-  const clave = ordenados.map(p => p.id + ':' + p.partido).join('|');
+  const ordenados = [...ultimo.partidos].sort((a, b) => nombreDe(a).localeCompare(nombreDe(b), 'es'));
+  const clave = ordenados.map(p => p.id + ':' + nombreDe(p)).join('|');
   const sel = $('elegir-partido');
   if (clave !== claveOpciones) {
     claveOpciones = clave;
     sel.replaceChildren(
       el('option', { value: 'general' }, `📊 General (${ultimo.partidos.length} ${ultimo.partidos.length === 1 ? 'partido' : 'partidos'})`),
-      ...ordenados.map(p => el('option', { value: String(p.id) }, p.partido)),
+      ...ordenados.map(p => el('option', { value: String(p.id) }, nombreDe(p))),
     );
   }
   sel.value = String(vistaResultados);
@@ -556,8 +556,8 @@ async function dibujarPartido(id) {
   const p = conPuestos(ultimo.partidos).find(x => x.id === id);
   $('res-general').hidden = true;
   $('res-partido').hidden = false;
-  $('tit-resultados').textContent = p.partido;
-  $('tit-partido-sec').textContent = p.partido;
+  $('tit-resultados').textContent = nombreDe(p);
+  $('tit-partido-sec').textContent = nombreDe(p);
   $('vivo').textContent = cerrada ? 'CERRADA' : 'EN VIVO';
   $('porc-partido').textContent = formatoPorc(p.porcentaje);
   $('porc-partido').style.color = colorDe(p.id);
@@ -587,7 +587,7 @@ async function cargarVotantes() {
   } else {
     const desde = (r.pagina - 1) * r.porPagina;
     $('tabla-votantes').replaceChildren(...r.filas.map((v, i) => el('tr', {},
-      el('td', { class: 'num-fila' }, String(desde + i + 1)), el('td', {}, v.nombre), el('td', {}, v.apellido), el('td', {}, v.dni))));
+      el('td', { class: 'num-fila' }, String(desde + i + 1)), el('td', {}, v.nombre), el('td', {}, v.apellido), el('td', {}, telefonoBonito(v.telefono)))));
   }
   $('paginas').hidden = r.paginas <= 1;
   $('pag-texto').textContent = `Página ${r.pagina} de ${r.paginas} · ${r.total} ${r.total === 1 ? 'votante' : 'votantes'}`;
@@ -607,19 +607,20 @@ $('pag-siguiente').addEventListener('click', () => { paginaVotantes++; cargarVot
 let paginaPadron = 1;
 let filtroPadron = 'todos';
 let esperaPadron = null;
-let editandoDni = null;
+let editandoTelefono = null;
 // En celular entran tantas filas como quepan en la pantalla (entre 3 y 8) para no hacer scroll.
 const porPaginaPadron = () => (esCelular() ? Math.min(8, Math.max(3, Math.floor((window.innerHeight - 475) / 53))) : 10);
-const camposPadron = { nombre: $('p-nombre'), apellido: $('p-apellido'), dni: $('p-dni') };
+const camposPadron = { nombre: $('p-nombre'), apellido: $('p-apellido'), telefono: $('p-telefono') };
+const reglaTelPadron = campoTelefonoConPais(camposPadron.telefono);
 const contadoresPadron = [
   conectarContador(camposPadron.nombre, 3, 80),
   conectarContador(camposPadron.apellido, 3, 80),
-  conectarContador(camposPadron.dni, 8, 8),
+  conectarContador(camposPadron.telefono, 9, 9),
 ];
 const revisarPadron = conectarValidacion([
   { input: camposPadron.nombre, min: 3, max: 80, tipo: 'letras' },
   { input: camposPadron.apellido, min: 3, max: 80, tipo: 'letras' },
-  { input: camposPadron.dni, min: 8, max: 8, tipo: 'numeros', exacto: true },
+  reglaTelPadron,
 ]);
 
 function elegirPestana(nombre) {
@@ -656,7 +657,7 @@ async function cargarPadron() {
     : q ? 'No hay nadie con esa búsqueda.' : 'No hay nadie en este grupo.';
   $('lista-padron').replaceChildren(...(r.filas.length ? r.filas.map(p => el('div', { class: 'fila-padron' + (p.voto ? ' voto' : '') },
     el('span', { class: 'ini', 'aria-hidden': 'true' }, inicialesPersona(p)),
-    el('span', {}, el('b', { title: `${p.nombre} ${p.apellido}` }, `${p.nombre} ${p.apellido}`), el('small', {}, `DNI ${p.dni}`)),
+    el('span', {}, el('b', { title: `${p.nombre} ${p.apellido}` }, `${p.nombre} ${p.apellido}`), el('small', {}, `Tel. ${telefonoBonito(p.telefono)}`)),
     el('span', { class: 'etiqueta-voto' }, p.voto ? 'Votó' : 'Falta'),
     el('button', { type: 'button', class: 'editar-padron', title: 'Editar', 'aria-label': `Editar a ${p.nombre} ${p.apellido}`, onclick: () => editarParticipante(p) }, '✎'),
     p.voto
@@ -669,9 +670,10 @@ async function cargarPadron() {
 }
 
 function modoAgregar() {
-  editandoDni = null;
+  editandoTelefono = null;
   $('form-padron').reset();
-  camposPadron.dni.disabled = false;
+  camposPadron.telefono.telefono.reiniciar();
+  camposPadron.telefono.telefono.desactivar(false);
   contadoresPadron.forEach(f => f());
   Object.values(camposPadron).forEach(c => mostrarMensaje(c, null));
   $('tit-padron').textContent = 'Agregar participante';
@@ -683,16 +685,16 @@ function modoAgregar() {
 function editarParticipante(p) {
   errorEn('padron-error');
   errorEn('padron-ok');
-  editandoDni = p.dni;
+  editandoTelefono = p.telefono;
   camposPadron.nombre.value = p.nombre;
   camposPadron.apellido.value = p.apellido;
-  camposPadron.dni.value = p.dni;
-  // Quien ya votó puede corregir su nombre, pero su DNI queda fijo.
-  camposPadron.dni.disabled = p.voto;
+  camposPadron.telefono.telefono.poner(p.telefono);
+  // Quien ya votó puede corregir su nombre, pero su teléfono queda fijo.
+  camposPadron.telefono.telefono.desactivar(p.voto);
   Object.values(camposPadron).forEach(c => mostrarMensaje(c, null));
   contadoresPadron.forEach(f => f());
   $('tit-padron').textContent = 'Editar participante';
-  $('sec-tit-padron').textContent = p.voto ? 'Editar datos (ya votó: el DNI no cambia)' : 'Editar datos';
+  $('sec-tit-padron').textContent = p.voto ? 'Editar datos (ya votó: el teléfono no cambia)' : 'Editar datos';
   $('btn-agregar-participante').textContent = '💾 Guardar cambios';
   $('btn-cancelar-participante').hidden = false;
   if (esCelular()) elegirPestana('agregar');
@@ -705,21 +707,21 @@ $('form-padron').addEventListener('submit', async e => {
   errorEn('padron-error');
   errorEn('padron-ok');
   if (!revisarPadron()) return;
-  const cuerpo = { nombre: camposPadron.nombre.value, apellido: camposPadron.apellido.value, dni: camposPadron.dni.value };
-  const editando = editandoDni;
+  const cuerpo = { nombre: camposPadron.nombre.value, apellido: camposPadron.apellido.value, telefono: camposPadron.telefono.telefono.valor() };
+  const editando = editandoTelefono;
   const limpio = t => t.replace(/\s+/g, ' ').trim();
   const si = await preguntar({
     titulo: editando ? '¿Estás seguro de guardar los cambios?' : '¿Estás seguro o quieres corregir algo?',
     texto: el('div', {},
       el('p', {}, editando ? 'Así quedará en la lista:' : 'Se agregará a la lista de votantes:'),
-      el('div', { class: 'resumen-datos' }, ...[['Nombre', cuerpo.nombre], ['Apellido', cuerpo.apellido], ['DNI', cuerpo.dni]]
+      el('div', { class: 'resumen-datos' }, ...[['Nombre', cuerpo.nombre], ['Apellido', cuerpo.apellido], ['Teléfono', telefonoBonito(cuerpo.telefono)]]
         .map(([k, v]) => el('p', {}, el('span', {}, k + ': '), el('b', {}, limpio(v)))))),
     si: editando ? 'Sí, guardar' : 'Sí, agregar', claseSi: 'btn-pri', no: 'Corregir',
   });
   if (!si) return;
   try {
     const p = await conCarga($('btn-agregar-participante'), 'Guardando…', () => editando
-      ? pedir('/api/admin/padron/' + editando, { method: 'PUT', cuerpo })
+      ? pedir('/api/admin/padron/' + encodeURIComponent(editando), { method: 'PUT', cuerpo })
       : pedir('/api/admin/padron', { cuerpo }));
     modoAgregar();
     errorEn('padron-ok', editando ? `✓ Cambios guardados: ${p.nombre} ${p.apellido}.` : `✓ ${p.nombre} ${p.apellido} quedó en la lista.`);
@@ -727,7 +729,7 @@ $('form-padron').addEventListener('submit', async e => {
     if (!editando) paginaPadron = 1;
     await cargarPadron();
   } catch (err) {
-    if (err.codigo === 'dni_en_lista') mostrarMensaje(camposPadron.dni, 'Ese DNI ya está en la lista.');
+    if (err.codigo === 'telefono_en_lista') mostrarMensaje(camposPadron.telefono, 'Ese teléfono ya está en la lista.');
     else if (err.campo && camposPadron[err.campo]) mostrarMensaje(camposPadron[err.campo], err.message);
     else errorEn('padron-error', err.message);
   }
@@ -737,7 +739,7 @@ async function borrarVoto(p) {
   const si = await preguntar({
     titulo: '¿Estás seguro de eliminar el voto?',
     texto: el('div', {},
-      el('p', {}, 'Se borrará el voto de ', el('b', {}, `${p.nombre} ${p.apellido}`), ` (DNI ${p.dni}).`),
+      el('p', {}, 'Se borrará el voto de ', el('b', {}, `${p.nombre} ${p.apellido}`), ` (teléfono ${telefonoBonito(p.telefono)}).`),
       el('p', { class: 'aviso-voto' }, 'Los resultados bajarán en 1 voto y esta persona ', el('b', {}, 'podrá votar de nuevo'), '.')),
     si: 'Sí, eliminar voto', claseSi: 'btn-rojo', no: 'Cancelar',
   });
@@ -745,7 +747,7 @@ async function borrarVoto(p) {
   errorEn('padron-error');
   errorEn('padron-ok');
   try {
-    await pedir('/api/admin/votos/' + p.dni, { method: 'DELETE' });
+    await pedir('/api/admin/votos/' + encodeURIComponent(p.telefono), { method: 'DELETE' });
     errorEn('padron-ok', `✓ Se eliminó el voto de ${p.nombre} ${p.apellido}. Ya puede votar de nuevo.`);
   } catch (err) {
     await preguntar({ titulo: 'No se pudo eliminar el voto', texto: el('p', {}, err.message), si: 'Entendido', no: 'Cerrar' });
@@ -756,13 +758,13 @@ async function borrarVoto(p) {
 async function quitarParticipante(p) {
   const si = await preguntar({
     titulo: '¿Estás seguro de eliminar?',
-    texto: el('p', {}, el('b', {}, `${p.nombre} ${p.apellido}`), ` (DNI ${p.dni}) saldrá de la lista y ya no podrá votar.`),
+    texto: el('p', {}, el('b', {}, `${p.nombre} ${p.apellido}`), ` (teléfono ${telefonoBonito(p.telefono)}) saldrá de la lista y ya no podrá votar.`),
     si: 'Sí, eliminar', claseSi: 'btn-rojo', no: 'Cancelar',
   });
   if (!si) return;
   try {
-    await pedir('/api/admin/padron/' + p.dni, { method: 'DELETE' });
-    if (editandoDni === p.dni) modoAgregar();
+    await pedir('/api/admin/padron/' + encodeURIComponent(p.telefono), { method: 'DELETE' });
+    if (editandoTelefono === p.telefono) modoAgregar();
   } catch (err) {
     await preguntar({ titulo: 'No se pudo quitar', texto: el('p', {}, err.message), si: 'Entendido', no: 'Cerrar' });
   }

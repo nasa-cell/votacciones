@@ -41,10 +41,15 @@ function iniciales(partido) {
   return letras || (palabras[0] || '?')[0].toUpperCase();
 }
 
+// Nombre que se muestra: el del partido o, si no tiene, el de la persona.
+function nombreDe(c) {
+  return c.partido || `${c.nombre} ${c.apellido}`;
+}
+
 function logoDe(c) {
   const caja = el('div', { class: 'logo', style: `background:${colorDe(c.id)}`, 'aria-hidden': 'true' });
   if (c.logo) caja.append(el('img', { src: c.logo, alt: '' }));
-  else caja.textContent = iniciales(c.partido);
+  else caja.textContent = iniciales(nombreDe(c));
   return caja;
 }
 
@@ -58,7 +63,7 @@ function dibujarBarras(contenedor, filas) {
 
 function barrasDePartidos(contenedor, partidos) {
   dibujarBarras(contenedor, partidos.map(p => ({
-    nombre: p.partido, ancho: p.porcentaje, color: colorDe(p.id), texto: formatoPorc(p.porcentaje),
+    nombre: nombreDe(p), ancho: p.porcentaje, color: colorDe(p.id), texto: formatoPorc(p.porcentaje),
   })));
 }
 
@@ -82,7 +87,7 @@ function conPuestos(partidos) {
 function dibujarPuestos(contenedor, partidos) {
   contenedor.replaceChildren(...conPuestos(partidos).map(p => el('div', { class: 'puesto' + (p.puesto === 1 && p.votos > 0 ? ' p1' : '') },
     el('div', { class: 'n' }, `${p.puesto}.º`),
-    el('b', {}, p.partido),
+    el('b', {}, nombreDe(p)),
     el('small', {}, votosTexto(p.votos)),
   )));
 }
@@ -94,6 +99,8 @@ function conectarContador(input, min, max, opcional = false) {
   campo.querySelector('span.contador')?.remove();
   const contador = campo.querySelector('label small');
   const actualizar = () => {
+    // El teléfono cambia de largo según el país elegido.
+    if (input.reglaTel) ({ min, max } = input.reglaTel);
     const n = [...input.value.replace(/\s+/g, ' ').trim()].length;
     const bien = n >= min && n <= max;
     if (opcional && n === 0) contador.textContent = `opcional · ${min} a ${max}`;
@@ -118,7 +125,7 @@ function textoLimpio(input) {
   return input.value.replace(/\s+/g, ' ').trim();
 }
 
-// regla: { input, min, max, tipo: 'letras' | 'numeros' | 'texto', opcional, exacto }
+// regla: { input, min, max, tipo: 'letras' | 'numeros' | 'texto', opcional, exacto, empiezaCon }
 function mensajeDe(regla) {
   const v = textoLimpio(regla.input);
   const n = [...v].length;
@@ -138,6 +145,7 @@ function mensajeDe(regla) {
     return `${verbo} ${plural(faltan, unidad[0], unidad[1])}. Mínimo ${regla.min}, ahora tiene ${n}.`;
   }
   if (n > regla.max) return `Sobran ${plural(n - regla.max, unidad[0], unidad[1])}. Máximo ${regla.max}.`;
+  if (regla.empiezaCon && !v.startsWith(regla.empiezaCon)) return `El celular debe empezar con ${regla.empiezaCon}.`;
   return null;
 }
 
@@ -250,3 +258,73 @@ async function conCarga(boton, textoCarga, tarea) {
 }
 
 const esCelular = () => window.matchMedia('(max-width: 640px)').matches;
+/* Teléfono con bandera y código de país (opción A): Perú viene elegido. */
+const sinTildes = t => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+function campoTelefonoConPais(input) {
+  // La regla se actualiza al cambiar de país; la usan los avisos y el contador.
+  const regla = { input, tipo: 'numeros', min: 9, max: 9, exacto: true, empiezaCon: '9' };
+  input.reglaTel = regla;
+  const fila = el('div', { class: 'tel-fila' });
+  input.before(fila);
+  const boton = el('button', { type: 'button', class: 'tel-pais', 'aria-haspopup': 'listbox', 'aria-expanded': 'false' });
+  fila.append(boton, input);
+  const buscar = el('input', { class: 'tel-buscar', type: 'search', placeholder: '🔍 Buscar país', 'aria-label': 'Buscar país', autocomplete: 'off' });
+  const opciones = el('div', { class: 'tel-opciones', role: 'listbox', 'aria-label': 'Países' });
+  const lista = el('div', { class: 'tel-lista', hidden: true }, buscar, opciones);
+  fila.after(lista);
+  let pais = PAISES[0];
+  const bandera = p => el('img', { class: 'tel-bandera', src: `banderas/${p.iso}.png`, alt: '', width: '26', height: '18' });
+
+  function cerrar() { lista.hidden = true; boton.setAttribute('aria-expanded', 'false'); }
+  function elegir(p, enfocar) {
+    pais = p;
+    Object.assign(regla, reglaPais(p));
+    boton.replaceChildren(bandera(p), el('span', {}, '+' + p.codigo));
+    boton.setAttribute('aria-label', `País: ${p.nombre}, +${p.codigo}. Tocar para cambiar`);
+    boton.title = p.nombre;
+    input.maxLength = regla.max;
+    input.placeholder = p.iso === 'pe' ? 'Ej.: 987654321' : `De ${regla.min} a ${regla.max} números`;
+    input.value = input.value.replace(/\D/g, '').slice(0, regla.max);
+    cerrar();
+    input.dispatchEvent(new Event('input'));
+    if (enfocar) input.focus();
+  }
+  function pintar() {
+    const q = sinTildes(buscar.value).replace(/^\+/, '');
+    const vistos = PAISES.filter(p => !q || sinTildes(p.nombre).includes(q) || p.codigo.startsWith(q));
+    opciones.replaceChildren(...(vistos.length ? vistos.map(p => el('button', {
+      type: 'button', class: 'tel-opcion' + (p === pais ? ' sel' : ''), role: 'option', 'aria-selected': String(p === pais),
+      onclick: () => elegir(p, true),
+    }, bandera(p), el('span', {}, p.nombre), el('b', {}, '+' + p.codigo))) : [el('p', { class: 'tel-nada' }, 'No hay ningún país con ese nombre.')]));
+  }
+  boton.addEventListener('click', () => {
+    if (!lista.hidden) return cerrar();
+    lista.hidden = false;
+    boton.setAttribute('aria-expanded', 'true');
+    buscar.value = '';
+    pintar();
+    if (!esCelular()) buscar.focus();
+  });
+  buscar.addEventListener('input', pintar);
+  buscar.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { cerrar(); boton.focus(); }
+    if (e.key === 'Enter') { e.preventDefault(); opciones.querySelector('.tel-opcion')?.click(); }
+  });
+  lista.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrar(); boton.focus(); } });
+  document.addEventListener('click', e => { if (!lista.hidden && !lista.contains(e.target) && !boton.contains(e.target)) cerrar(); });
+  elegir(PAISES[0]);
+  input.telefono = {
+    // «+51987654321», como lo guarda el servidor.
+    valor: () => '+' + pais.codigo + input.value.replace(/\D/g, ''),
+    poner(texto) {
+      const t = separarTelefono(texto);
+      elegir(t ? t.pais : PAISES[0]);
+      input.value = t ? t.numero : '';
+      input.dispatchEvent(new Event('input'));
+    },
+    desactivar(si) { input.disabled = si; boton.disabled = si; if (si) cerrar(); },
+    reiniciar() { input.value = ''; elegir(PAISES[0]); },
+  };
+  return regla;
+}

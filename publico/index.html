@@ -17,7 +17,7 @@
   <section id="vista-registro" class="cuerpo" hidden>
     <div class="centro">
       <h1 class="titulo-pant">Ingrese a votar</h1>
-      <p class="bajada">Escriba su nombre, apellido y DNI como están en la lista de votantes.</p>
+      <p class="bajada">Escriba su nombre, apellido y teléfono como están en la lista de votantes.</p>
       <div id="registro-error" class="caja-error" hidden role="alert"></div>
       <form id="form-registro" novalidate>
         <section class="seccion">
@@ -34,8 +34,8 @@
               <span class="contador"></span>
             </div>
             <div class="campo">
-              <label for="r-dni">DNI <span class="req">*</span><span class="pista numeros">123 Solo números</span><small>8</small></label>
-              <input class="input" id="r-dni" name="dni" inputmode="numeric" maxlength="8" placeholder="Ej.: 45879123" autocomplete="off" required>
+              <label for="r-telefono">Teléfono <span class="req">*</span><span class="pista numeros">123 Solo números</span><small>9</small></label>
+              <input class="input" id="r-telefono" name="telefono" inputmode="numeric" maxlength="9" placeholder="Ej.: 987654321" autocomplete="off" required>
             </div>
           </div>
         </section>
@@ -116,6 +116,7 @@
   </section>
 </main>
 
+<script src="scripts/paises.js"></script>
 <script src="scripts/comun.js"></script>
 <script src="scripts/votante.js"></script>
 </body>
