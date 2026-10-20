@@ -21,6 +21,8 @@ function mostrar(nombre) {
   }[nombre];
   pill.hidden = nombre === 'final';
   document.getElementById('btn-salir-final').hidden = nombre !== 'final';
+  // Al terminar la votación queda a mano la entrada del administrador.
+  document.getElementById('btn-admin-final').hidden = !['final', 'despedida', 'cerrada'].includes(nombre);
   window.scrollTo(0, 0);
 }
 

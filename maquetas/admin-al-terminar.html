@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin al terminar</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../publico/estilos/estilos.css">
+<link rel="stylesheet" href="../publico/estilos/urna.css">
+<style>
+body{display:block;padding:24px 16px 60px;background:#dfe6f5}
+.hoja{max-width:1400px;margin:0 auto}
+.hoja>h1{font-size:26px}.hoja>p{color:var(--suave);margin:8px 0 20px;max-width:900px;line-height:1.5}
+.opcion{background:#fff;border-radius:22px;padding:20px;margin-bottom:24px;box-shadow:var(--sombra)}
+.opcion h2{font-size:20px}.opcion h2 b{color:var(--marca)}.opcion>p{color:var(--suave);margin:6px 0 16px;line-height:1.5;max-width:900px}
+.marcos{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+.marco{width:360px;max-width:100%;background:var(--fondo);border:8px solid #1b2440;border-radius:30px;overflow:hidden}
+.marco .cabeza{position:static}
+.marco .cuerpo{padding:14px;display:block}
+.cap{font-size:12px;font-weight:800;color:var(--suave);text-transform:uppercase;letter-spacing:.05em;margin:0 0 6px}
+.sello{display:inline-block}
+.mini-barras{display:grid;gap:6px;margin:12px 0;text-align:left}
+.mini-barras div{background:#fff;border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;display:flex;justify-content:space-between}
+.botones-cab{display:flex;gap:6px;margin-left:auto}
+.btn-cabeza.sec{background:#fff;color:var(--marca);border:2px solid var(--marca)}
+.nuevo{outline:3px dashed var(--dorado);outline-offset:3px}
+.fin{text-align:center}
+.modal{background:#fff;border-radius:18px;padding:16px;box-shadow:var(--sombra);text-align:left}
+.modal h3{margin:0 0 6px;font-size:18px}.modal p{color:var(--suave);font-size:14px;margin:0 0 12px}
+.modal .fila{display:grid;gap:8px}
+</style>
+</head>
+<body>
+<div class="hoja">
+<h1>Botón «Ingresar como admin» cuando termina la votación</h1>
+<p>Hoy, cuando la votación termina, el votante solo ve «← Salir» y ya no hay cómo entrar como administrador. Lo nuevo está marcado con borde dorado punteado. Elige una opción.</p>
+
+<section class="opcion">
+<h2><b>A</b> · Dos botones arriba</h2>
+<p>En la cabecera, al lado de «← Salir», aparece «🔑 Admin». Siempre a la vista, no agrega scroll.</p>
+<div class="marcos">
+  <div class="marco">
+    <header class="cabeza"><span>Elecciones 2026</span><span class="botones-cab"><button class="btn-cabeza sec nuevo">🔑 Admin</button><button class="btn-cabeza">← Salir</button></span></header>
+    <div class="cuerpo fin"><div class="sello">FINALIZÓ</div><h1 style="font-size:22px">Ganó Partido Azul</h1>
+      <div class="mini-barras"><div>Partido Azul<span>52 %</span></div><div>Partido Verde<span>31 %</span></div><div>Partido Sol<span>17 %</span></div></div></div>
+  </div>
+</div>
+</section>
+
+<section class="opcion">
+<h2><b>B</b> · Enlace abajo, como en la entrada</h2>
+<p>Debajo de los resultados, el mismo enlace «Entrar como administrador» que ya existe en la pantalla de ingreso. También en «Votación cerrada» y en «Gracias».</p>
+<div class="marcos">
+  <div class="marco">
+    <header class="cabeza"><span>Elecciones 2026</span><button class="btn-cabeza" style="margin-left:auto">← Salir</button></header>
+    <div class="cuerpo fin"><div class="sello">FINALIZÓ</div><h1 style="font-size:22px">Ganó Partido Azul</h1>
+      <div class="mini-barras"><div>Partido Azul<span>52 %</span></div><div>Partido Verde<span>31 %</span></div><div>Partido Sol<span>17 %</span></div></div>
+      <a class="enlace nuevo" href="#">Entrar como administrador</a></div>
+  </div>
+</div>
+</section>
+
+<section class="opcion">
+<h2><b>C</b> · Al tocar «Salir» se elige</h2>
+<p>«← Salir» abre la pregunta con dos caminos: salir de la votación o ingresar como administrador. La pantalla queda igual que hoy.</p>
+<div class="marcos">
+  <div class="marco">
+    <header class="cabeza"><span>Elecciones 2026</span><button class="btn-cabeza" style="margin-left:auto">← Salir</button></header>
+    <div class="cuerpo"><div class="modal"><h3>¿Estás seguro de salir?</h3><p>Ya viste los resultados de la votación.</p>
+      <div class="fila"><button class="btn btn-rojo">Sí, salir</button><button class="btn btn-pri nuevo">🔑 Ingresar como administrador</button><button class="btn btn-sec">No</button></div></div></div>
+  </div>
+</div>
+</section>
+</div>
+</body>
+</html>

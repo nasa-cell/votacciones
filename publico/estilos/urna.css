@@ -19,6 +19,12 @@ body{font-family:Sora,'Public Sans',system-ui,sans-serif;background:var(--fondo)
 .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
 .btn-cabeza{border-radius:10px;background:var(--marca);color:#fff}
 .btn-cabeza:hover{background:var(--marca-hover)}
+a.btn-cabeza{display:inline-flex;align-items:center;gap:4px;text-decoration:none}
+.btn-cabeza-sec{background:#fff;color:var(--marca);border:2px solid var(--marca);padding:5px 12px}
+.btn-cabeza-sec:hover{background:var(--marca-claro)}
+/* Celular chico: con «Admin» visible el cartel de estado sobra (la pantalla ya dice que terminó) y los botones se achican para que el título quepa. */
+@media (max-width:480px){.cabeza:has(#btn-admin-final:not([hidden])) .pill{display:none}}
+@media (max-width:400px){.cabeza:has(#btn-admin-final:not([hidden])) .btn-cabeza{font-size:13px;padding:6px 9px}.cabeza:has(#btn-admin-final:not([hidden])) .btn-cabeza-sec{padding:4px 8px}}
 
 /* Títulos */
 .titulo-pant,.fila-tit h1,.fila-tit h2{color:var(--tinta);letter-spacing:-.02em}
