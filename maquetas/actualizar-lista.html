@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquetas actualizar lista</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--fondo:#f5f7fc;--tinta:#0e1b3d;--suave:#6a7594;--linea:#e3e8f4;--marca:#1d3fa0;--marca-claro:#eaf0ff;--rojo:#e0383e;--ok:#0f9d58;--ambar:#e0a100;--ambar-claro:#fff6dc;--verde-claro:#e5f7ee;--dorado:#ffc83d;--sombra:0 10px 30px rgba(14,27,61,.10)}
+*{box-sizing:border-box;margin:0}
+body{font-family:Sora,system-ui,sans-serif;background:#dfe6f5;color:var(--tinta);padding:24px 16px 60px}
+button{font:inherit;color:inherit;cursor:pointer}
+.hoja{max-width:1500px;margin:0 auto}
+.hoja>h1{font-size:28px}.hoja>p{color:var(--suave);margin:8px 0 18px;max-width:860px;line-height:1.55}
+.opcion{background:#fff;border-radius:24px;padding:22px;margin:18px 0 28px;box-shadow:var(--sombra)}
+.opcion h3{font-size:20px}.opcion h3 b{color:var(--marca)}
+.opcion>p{color:var(--suave);margin:6px 0 16px;line-height:1.5;max-width:900px}
+.marcos{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.marco-caja{display:flex;flex-direction:column;gap:8px}.marco-caja>span{font-weight:700;font-size:13px;color:var(--suave)}
+.cel{width:390px;height:700px;border:9px solid #1b2440;border-radius:40px;overflow:hidden;background:var(--fondo);flex:none}
+.pc{width:min(900px,100%);height:560px;border:9px solid #1b2440;border-radius:14px;overflow:hidden;background:var(--fondo)}
+@media (max-width:440px){.cel{width:100%}}
+.cuerpo{padding:16px}
+.pc .cuerpo{padding:24px 40px}
+.tit{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tit h1{font-size:20px}.tit small{color:var(--suave);font-size:12px}
+.pest{display:flex;gap:6px;margin-bottom:12px}.pest span{flex:1;text-align:center;padding:9px;border-radius:12px;background:#fff;font-weight:700;font-size:13px;color:var(--suave)}.pest span.on{background:var(--marca);color:#fff}
+.sec{background:#fff;border-radius:18px;box-shadow:var(--sombra);padding:14px}
+.sec-tit{font-size:12px;letter-spacing:.07em;font-weight:800;text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.sec-tit .ic{width:24px;height:24px;border-radius:8px;background:linear-gradient(120deg,#1d3fa0,#3563e9);color:#fff;display:grid;place-items:center;font-size:12px}
+.filtros{display:flex;gap:6px;margin-bottom:10px}.filtros span{flex:1;border:2px solid var(--linea);border-radius:12px;padding:6px;text-align:center;font-size:12px;font-weight:700;color:var(--suave)}
+.filtros span b{display:block;font-size:18px;color:var(--tinta)}.filtros span.on{border-color:var(--marca);background:var(--marca-claro)}
+.buscar{border:2px solid var(--linea);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--suave);margin-bottom:10px;flex:1}
+.fila{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--linea);font-size:13px}
+.fila .ini{width:32px;height:32px;border-radius:50%;background:var(--marca-claro);color:var(--marca);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none}
+.fila .n{flex:1;min-width:0}.fila .n b{display:block}.fila .n small{color:var(--suave)}
+.et{font-size:11px;font-weight:800;border-radius:20px;padding:3px 9px;background:var(--ambar-claro);color:#8a6200}
+.fila.voto .et{background:var(--verde-claro);color:var(--ok)}
+.fila.nuevo{background:#f2fbf6;animation:luz 2.4s ease-out}
+@keyframes luz{from{background:#c9f0da}to{background:#f2fbf6}}
+.btn{border:0;border-radius:10px;padding:7px 11px;font-weight:700;font-size:12.5px;background:var(--marca);color:#fff;box-shadow:0 3px 0 #102766;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn.sec2{background:#fff;color:var(--marca);border:2px solid #d4ddf3;box-shadow:none}
+.giro{display:inline-block}.girando .giro{animation:g .8s linear infinite}@keyframes g{to{transform:rotate(360deg)}}
+.vivo{display:inline-flex;align-items:center;gap:6px;color:var(--rojo);font-weight:800;font-size:11px;background:#fff0f0;border-radius:20px;padding:4px 9px}
+.vivo::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--rojo);animation:lat 1.4s infinite}
+@keyframes lat{0%{box-shadow:0 0 0 0 rgba(224,56,62,.55)}70%{box-shadow:0 0 0 8px rgba(224,56,62,0)}}
+.hace{font-size:11.5px;color:var(--suave);font-weight:600;letter-spacing:0;text-transform:none}
+.barra{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--marca-claro);border-radius:12px;padding:8px 10px;margin-bottom:10px}
+.barra .izq{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--marca);font-weight:700}
+.barra .punto{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:lat 1.4s infinite}
+.redondo{width:44px;height:44px;border-radius:12px;border:2px solid #d4ddf3;background:#fff;color:var(--marca);font-size:20px;display:grid;place-items:center;flex:none;margin-bottom:10px}
+.fila-b{display:flex;gap:8px}
+.aviso-nuevo{display:inline-flex;align-items:center;gap:6px;background:var(--verde-claro);color:var(--ok);font-weight:800;font-size:12px;border-radius:20px;padding:5px 11px;margin-bottom:10px}
+.pc .lista2{display:grid;grid-template-columns:1fr 1fr;column-gap:24px}
+</style>
+</head>
+<body>
+<div class="hoja">
+<h1>Botón «Actualizar» en la lista de quiénes votaron y quiénes faltan</h1>
+<p>Las 3 opciones hacen las dos cosas: <b>se actualiza solo cada 15 segundos</b> y además con el botón cuando lo aprietas. Cambia dónde va el botón y cómo avisa. Al actualizar, quien acaba de votar se pinta verde un momento. Pulsa el botón de cada maqueta para ver el giro.</p>
+
+<!-- A -->
+<section class="opcion">
+<h3>Opción <b>A</b> · Igual que en Resultados</h3>
+<p>Botón azul «↻ Actualizar» en el título de la tarjeta, con «EN VIVO» y «hace 8 s». Mismo aspecto que ya tiene la pantalla de Resultados.</p>
+<div class="marcos">
+<div class="marco-caja"><span>Celular</span><div class="cel"><div class="cuerpo">
+ <div class="tit"><h1>Participantes</h1><small>12 en la lista · 7 votaron</small></div>
+ <div class="pest"><span>➕ Agregar</span><span class="on">📋 Lista (12)</span></div>
+ <div class="sec">
+  <div class="sec-tit" style="justify-content:space-between"><span style="display:flex;gap:8px;align-items:center"><span class="ic">≡</span>Votaron y faltan</span><span style="display:flex;gap:6px;align-items:center"><span class="vivo">EN VIVO</span><button class="btn act"><span class="giro">↻</span> Actualizar</button></span></div>
+  <div class="hace" style="margin:-6px 0 10px">Actualizado hace 8 s · +1 votó</div>
+  <div class="filtros"><span class="on"><b>12</b>Todos</span><span><b>7</b>✓ Votaron</span><span><b>5</b>⏳ Faltan</span></div>
+  <div class="buscar">🔍 Buscar nombre o teléfono</div>
+  <div class="fila voto nuevo"><span class="ini">AR</span><span class="n"><b>Ana Ríos</b><small>Tel. 987 654 321</small></span><span class="et">Votó</span></div>
+  <div class="fila voto"><span class="ini">LP</span><span class="n"><b>Luis Paredes</b><small>Tel. 912 345 678</small></span><span class="et">Votó</span></div>
+  <div class="fila"><span class="ini">MQ</span><span class="n"><b>María Quispe</b><small>Tel. 934 112 908</small></span><span class="et">Falta</span></div>
+  <div class="fila"><span class="ini">JC</span><span class="n"><b>Jorge Castro</b><small>Tel. 955 671 230</small></span><span class="et">Falta</span></div>
+ </div>
+</div></div></div>
+<div class="marco-caja"><span>PC</span><div class="pc"><div class="cuerpo">
+ <div class="tit"><h1>Participantes</h1><small>12 en la lista · 7 votaron</small></div>
+ <div class="sec">
+  <div class="sec-tit" style="justify-content:space-between"><span style="display:flex;gap:8px;align-items:center"><span class="ic">≡</span>Quiénes votaron y quiénes faltan</span><span style="display:flex;gap:10px;align-items:center"><span class="vivo">EN VIVO</span><span class="hace">hace 8 s · +1 votó</span><button class="btn act"><span class="giro">↻</span> Actualizar</button></span></div>
+  <div class="filtros"><span class="on"><b>12</b>Todos</span><span><b>7</b>✓ Votaron</span><span><b>5</b>⏳ Faltan</span></div>
+  <div class="buscar">🔍 Buscar nombre o teléfono</div>
+  <div class="lista2">
+  <div class="fila voto nuevo"><span class="ini">AR</span><span class="n"><b>Ana Ríos</b><small>Tel. 987 654 321</small></span><span class="et">Votó</span></div>
+  <div class="fila voto"><span class="ini">LP</span><span class="n"><b>Luis Paredes</b><small>Tel. 912 345 678</small></span><span class="et">Votó</span></div>
+  <div class="fila"><span class="ini">MQ</span><span class="n"><b>María Quispe</b><small>Tel. 934 112 908</small></span><span class="et">Falta</span></div>
+  <div class="fila"><span class="ini">JC</span><span class="n"><b>Jorge Castro</b><small>Tel. 955 671 230</small></span><span class="et">Falta</span></div>
+  </div>
+ </div>
+</div></div></div>
+</div>
+</section>
+
+<!-- B -->
+<section class="opcion">
+<h3>Opción <b>B</b> · Barra celeste arriba de los filtros</h3>
+<p>Una franja celeste con punto verde: «Se actualiza solo · hace 8 s», y a la derecha el botón blanco «↻ Actualizar». Se lee clarito que la lista está viva.</p>
+<div class="marcos">
+<div class="marco-caja"><span>Celular</span><div class="cel"><div class="cuerpo">
+ <div class="tit"><h1>Participantes</h1><small>12 en la lista · 7 votaron</small></div>
+ <div class="pest"><span>➕ Agregar</span><span class="on">📋 Lista (12)</span></div>
+ <div class="sec">
+  <div class="sec-tit"><span class="ic">≡</span>Quiénes votaron y quiénes faltan</div>
+  <div class="barra"><span class="izq"><span class="punto"></span>Se actualiza solo · hace 8 s</span><button class="btn sec2 act"><span class="giro">↻</span> Actualizar</button></div>
+  <div class="filtros"><span class="on"><b>12</b>Todos</span><span><b>7</b>✓ Votaron</span><span><b>5</b>⏳ Faltan</span></div>
+  <div class="buscar">🔍 Buscar nombre o teléfono</div>
+  <div class="fila voto nuevo"><span class="ini">AR</span><span class="n"><b>Ana Ríos</b><small>Tel. 987 654 321</small></span><span class="et">Votó</span></div>
+  <div class="fila voto"><span class="ini">LP</span><span class="n"><b>Luis Paredes</b><small>Tel. 912 345 678</small></span><span class="et">Votó</span></div>
+  <div class="fila"><span class="ini">MQ</span><span class="n"><b>María Quispe</b><small>Tel. 934 112 908</small></span><span class="et">Falta</span></div>
+ </div>
+</div></div></div>
+<div class="marco-caja"><span>PC</span><div class="pc"><div class="cuerpo">
+ <div class="tit"><h1>Participantes</h1><small>12 en la lista · 7 votaron</small></div>
+ <div class="sec">
+  <div class="sec-tit"><span class="ic">≡</span>Quiénes votaron y quiénes faltan</div>
+  <div class="barra"><span class="izq"><span class="punto"></span>Se actualiza solo cada 15 s · última vez hace 8 s · +1 votó</span><button class="btn sec2 act"><span class="giro">↻</span> Actualizar</button></div>
+  <div class="filtros"><span class="on"><b>12</b>Todos</span><span><b>7</b>✓ Votaron</span><span><b>5</b>⏳ Faltan</span></div>
+  <div class="buscar">🔍 Buscar nombre o teléfono</div>
+  <div class="lista2">
+  <div class="fila voto nuevo"><span class="ini">AR</span><span class="n"><b>Ana Ríos</b><small>Tel. 987 654 321</small></span><span class="et">Votó</span></div>
+  <div class="fila voto"><span class="ini">LP</span><span class="n"><b>Luis Paredes</b><small>Tel. 912 345 678</small></span><span class="et">Votó</span></div>
+  <div class="fila"><span class="ini">MQ</span><span class="n"><b>María Quispe</b><small>Tel. 934 112 908</small></span><span class="et">Falta</span></div>
+  <div class="fila"><span class="ini">JC</span><span class="n"><b>Jorge Castro</b><small>Tel. 955 671 230</small></span><span class="et">Falta</span></div>
+  </div>
+ </div>
+</div></div></div>
+</div>
+</section>
+
+<!-- C -->
+<section class="opcion">
+<h3>Opción <b>C</b> · Botón cuadrado al lado del buscador</h3>
+<p>Solo el ícono ↻ junto a la búsqueda (ocupa poco). Cuando entra un voto nuevo aparece un aviso verde «+1 votó ahora» encima de la lista.</p>
+<div class="marcos">
+<div class="marco-caja"><span>Celular</span><div class="cel"><div class="cuerpo">
+ <div class="tit"><h1>Participantes</h1><small>12 en la lista · 7 votaron</small></div>
+ <div class="pest"><span>➕ Agregar</span><span class="on">📋 Lista (12)</span></div>
+ <div class="sec">
+  <div class="sec-tit"><span class="ic">≡</span>Quiénes votaron y quiénes faltan</div>
+  <div class="filtros"><span class="on"><b>12</b>Todos</span><span><b>7</b>✓ Votaron</span><span><b>5</b>⏳ Faltan</span></div>
+  <div class="fila-b"><div class="buscar">🔍 Buscar nombre o teléfono</div><button class="redondo act" title="Actualizar" aria-label="Actualizar"><span class="giro">↻</span></button></div>
+  <span class="aviso-nuevo">✓ +1 votó ahora</span>
+  <div class="fila voto nuevo"><span class="ini">AR</span><span class="n"><b>Ana Ríos</b><small>Tel. 987 654 321</small></span><span class="et">Votó</span></div>
+  <div class="fila voto"><span class="ini">LP</span><span class="n"><b>Luis Paredes</b><small>Tel. 912 345 678</small></span><span class="et">Votó</span></div>
+  <div class="fila"><span class="ini">MQ</span><span class="n"><b>María Quispe</b><small>Tel. 934 112 908</small></span><span class="et">Falta</span></div>
+ </div>
+</div></div></div>
+<div class="marco-caja"><span>PC</span><div class="pc"><div class="cuerpo">
+ <div class="tit"><h1>Participantes</h1><small>12 en la lista · 7 votaron</small></div>
+ <div class="sec">
+  <div class="sec-tit"><span class="ic">≡</span>Quiénes votaron y quiénes faltan</div>
+  <div class="filtros"><span class="on"><b>12</b>Todos</span><span><b>7</b>✓ Votaron</span><span><b>5</b>⏳ Faltan</span></div>
+  <div class="fila-b"><div class="buscar">🔍 Buscar nombre o teléfono</div><button class="redondo act" title="Actualizar" aria-label="Actualizar"><span class="giro">↻</span></button></div>
+  <span class="aviso-nuevo">✓ +1 votó ahora</span>
+  <div class="lista2">
+  <div class="fila voto nuevo"><span class="ini">AR</span><span class="n"><b>Ana Ríos</b><small>Tel. 987 654 321</small></span><span class="et">Votó</span></div>
+  <div class="fila voto"><span class="ini">LP</span><span class="n"><b>Luis Paredes</b><small>Tel. 912 345 678</small></span><span class="et">Votó</span></div>
+  <div class="fila"><span class="ini">MQ</span><span class="n"><b>María Quispe</b><small>Tel. 934 112 908</small></span><span class="et">Falta</span></div>
+  <div class="fila"><span class="ini">JC</span><span class="n"><b>Jorge Castro</b><small>Tel. 955 671 230</small></span><span class="et">Falta</span></div>
+  </div>
+ </div>
+</div></div></div>
+</div>
+</section>
+</div>
+<script>
+document.querySelectorAll('.act').forEach(b => b.addEventListener('click', () => {
+  b.classList.add('girando');
+  setTimeout(() => b.classList.remove('girando'), 900);
+}));
+</script>
+</body>
+</html>

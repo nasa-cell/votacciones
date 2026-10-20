@@ -77,7 +77,14 @@ function irA(seccion) {
     b.setAttribute('aria-current', b.dataset.ir === seccion ? 'page' : 'false');
   });
   clearInterval(reloj);
-  if (seccion === 'participantes') cargarPadron();
+  // Participantes: la lista de quiénes votaron se actualiza sola cada 15 s y con su botón «Actualizar».
+  if (seccion === 'participantes') {
+    cargarPadron();
+    reloj = setInterval(() => {
+      if (!document.hidden && Date.now() - horaPadron >= 15000) actualizarPadron();
+      pintarHacePadron();
+    }, 1000);
+  }
   // Resultados: se actualizan solos cada minuto y con el botón «Actualizar» cuando quiera.
   if (seccion === 'resultados') {
     actualizarResultados();
@@ -689,7 +696,20 @@ let filtroPadron = 'todos';
 let esperaPadron = null;
 let editandoTelefono = null;
 // En celular entran tantas filas como quepan en la pantalla (entre 3 y 8) para no hacer scroll.
-const porPaginaPadron = () => (esCelular() ? Math.min(8, Math.max(2, Math.floor((window.innerHeight - 475) / 53) - recorte.padron)) : 10);
+// En PC son 10 por página; si la pantalla es baja, menos, para que los botones de página se vean sin bajar.
+const porPaginaPadron = () => (esCelular()
+  ? Math.min(12, Math.max(2, Math.floor((window.innerHeight - 475) / 53) - recorte.padron))
+  : Math.min(10, Math.max(4, 10 - recorte.padron)));
+// Cuántas filas sobran (positivo) o faltan para llenar la pantalla (negativo).
+function filasDeMasPadron() {
+  const fila = document.querySelector('#lista-padron .fila-padron');
+  if (!fila || !fila.offsetParent) return 0;
+  if (!esCelular()) ajustarPanel();
+  const alto = Math.max(20, fila.getBoundingClientRect().height + 5);
+  const sobra = $('padron-pagina').getBoundingClientRect().bottom + (esCelular() ? 34 : 24) - window.innerHeight;
+  if (sobra > 0) return Math.ceil(sobra / alto);
+  return esCelular() ? -Math.floor(-sobra / alto) : 0;
+}
 const camposPadron = { nombre: $('p-nombre'), apellido: $('p-apellido'), telefono: $('p-telefono') };
 const reglaTelPadron = campoTelefonoConPais(camposPadron.telefono);
 const contadoresPadron = [
@@ -709,6 +729,8 @@ function elegirPestana(nombre) {
     b.setAttribute('aria-selected', b.dataset.pestana === nombre ? 'true' : 'false');
   });
   document.querySelectorAll('.padron-panel').forEach(p => { p.hidden = p.dataset.panel !== nombre; });
+  // Al abrir la lista en el celular se trae al día y se acomodan las filas a la pantalla.
+  if (nombre === 'lista' && esCelular()) cargarPadron();
 }
 document.querySelector('.pestanas-padron').addEventListener('click', e => {
   const b = e.target.closest('button[data-pestana]');
@@ -717,15 +739,45 @@ document.querySelector('.pestanas-padron').addEventListener('click', e => {
 
 const inicialesPersona = p => ((p.nombre[0] || '') + (p.apellido[0] || '')).toUpperCase();
 
-async function cargarPadron() {
+let horaPadron = 0;
+let votaronAntes = null;
+let nuevosPadron = '';
+let vistos = new Map();
+
+function pintarHacePadron() {
+  const seg = Math.round((Date.now() - horaPadron) / 1000);
+  $('hace-padron').textContent = (seg < 3 ? 'Actualizado ahora' : `hace ${seg} s`) + (nuevosPadron && seg < 6 ? ` · ${nuevosPadron}` : '');
+}
+
+async function actualizarPadron(manual = false) {
+  const boton = $('btn-actualizar-padron');
+  boton.classList.add('girando');
+  const antes = votaronAntes;
+  await cargarPadron({ refresco: true });
+  setTimeout(() => boton.classList.remove('girando'), 500);
+  const n = antes === null || votaronAntes === null ? 0 : votaronAntes - antes;
+  nuevosPadron = n > 0 ? `+${n} ${n === 1 ? 'votó' : 'votaron'}` : (manual ? 'sin votos nuevos' : '');
+  pintarHacePadron();
+}
+$('btn-actualizar-padron').addEventListener('click', () => actualizarPadron(true));
+
+async function cargarPadron({ refresco = false, ajustes = 0 } = {}) {
   const q = $('buscar-padron').value.trim();
   let r;
   try {
     r = await pedir(`/api/admin/padron?pagina=${paginaPadron}&por=${porPaginaPadron()}&filtro=${filtroPadron}&buscar=${encodeURIComponent(q)}`);
   } catch (err) {
-    $('lista-padron').replaceChildren(el('p', { class: 'vacio-padron' }, err.message));
+    if (err.estado === 401) location.reload();
+    if (!refresco) $('lista-padron').replaceChildren(el('p', { class: 'vacio-padron' }, err.message));
     return;
   }
+  horaPadron = Date.now();
+  votaronAntes = r.conteo.votaron;
+  if (!refresco) nuevosPadron = '';
+  pintarHacePadron();
+  // Quien votó desde la última vez se pinta verde un momento.
+  const recien = new Set(refresco ? r.filas.filter(p => p.voto && vistos.get(p.telefono) === false).map(p => p.telefono) : []);
+  r.filas.forEach(p => vistos.set(p.telefono, p.voto));
   paginaPadron = r.pagina;
   $('n-todos').textContent = r.conteo.todos;
   $('n-votaron').textContent = r.conteo.votaron;
@@ -735,7 +787,7 @@ async function cargarPadron() {
   document.querySelectorAll('.filtros-padron button').forEach(b => b.classList.toggle('on', b.dataset.filtro === filtroPadron));
   const vacio = !r.conteo.todos ? 'Todavía no hay nadie en la lista. Agregue a los participantes que pueden votar.'
     : q ? 'No hay nadie con esa búsqueda.' : 'No hay nadie en este grupo.';
-  $('lista-padron').replaceChildren(...(r.filas.length ? r.filas.map(p => el('div', { class: 'fila-padron' + (p.voto ? ' voto' : '') },
+  $('lista-padron').replaceChildren(...(r.filas.length ? r.filas.map(p => el('div', { class: 'fila-padron' + (p.voto ? ' voto' : '') + (recien.has(p.telefono) ? ' recien' : '') },
     el('span', { class: 'ini', 'aria-hidden': 'true' }, inicialesPersona(p)),
     el('span', {}, el('b', { title: `${p.nombre} ${p.apellido}` }, `${p.nombre} ${p.apellido}`), el('small', {}, `Tel. ${telefonoBonito(p.telefono)}`)),
     el('span', { class: 'etiqueta-voto' }, p.voto ? 'Votó' : 'Falta'),
@@ -747,8 +799,14 @@ async function cargarPadron() {
   $('padron-pagina').textContent = `Página ${r.pagina} de ${r.paginas}`;
   $('padron-anterior').disabled = r.pagina <= 1;
   $('padron-siguiente').disabled = r.pagina >= r.paginas;
-  const deMas = !$('lista-padron').closest('[hidden]') && filasDeMas('#lista-padron .fila-padron');
-  if (deMas && r.filas.length > 2 && recorte.padron < 8) { recorte.padron += deMas; return cargarPadron(); }
+  // Se ajusta el número de filas a la pantalla (como máximo 3 veces seguidas).
+  const deMas = filasDeMasPadron();
+  const antes = porPaginaPadron();
+  const sePuede = deMas > 0 ? r.filas.length > 2 : r.filas.length >= antes && r.paginas > 1;
+  if (deMas && sePuede && ajustes < 3) {
+    recorte.padron += deMas;
+    if (porPaginaPadron() !== antes) return cargarPadron({ refresco, ajustes: ajustes + 1 });
+  }
 }
 
 function modoAgregar() {

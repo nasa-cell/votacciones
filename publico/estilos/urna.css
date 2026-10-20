@@ -356,3 +356,17 @@ tr.nuevo td{animation:filaNueva 3s ease}
 @media (max-width:640px) and (max-height:700px){
   .campo label .pista{display:none}
 }
+/* Lista de participantes en vivo */
+.tit-vivo-padron{flex-wrap:wrap}
+.tit-vivo-padron .acciones-vivo{margin-left:auto;display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0}
+.tit-vivo-padron .hace{font-size:12px;color:var(--suave);font-weight:600;white-space:nowrap}
+.fila-padron.recien{animation:recienVoto 2.4s ease-out}
+@keyframes recienVoto{from{background:#c9f0da}to{background:#f8faff}}
+@media (prefers-reduced-motion:reduce){.fila-padron.recien{animation:none}}
+@media (max-width:640px){
+  .padron-panel .sec-tit.tit-vivo-padron{display:flex;padding:6px 12px 0}
+  .tit-vivo-padron .btn-actualizar{padding:5px 10px;min-height:0}
+  .tit-vivo-padron .ic,.tit-vivo-padron .tit-texto{display:none}
+  .tit-vivo-padron .acciones-vivo{margin-left:0;width:100%;gap:6px}
+  .tit-vivo-padron .btn-actualizar{margin-left:auto}
+}
