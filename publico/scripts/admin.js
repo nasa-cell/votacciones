@@ -59,6 +59,15 @@ async function abrirPanel(nombre) {
   await cargarCandidatos();
 }
 
+// PC: la sección visible crece hasta llenar el alto; la entrada del administrador también.
+function ajustarPanel() {
+  const panel = $('vista-panel');
+  if (!panel.hidden) ajustarAPantalla(panel.querySelector('.contenido'), { min: 1, max: 1.4, centrar: false, ancho: () => 1 });
+  else ajustarAPantalla($('vista-acceso'), { ancho: v => (v.firstElementChild || v).getBoundingClientRect().width });
+}
+addEventListener('resize', ajustarPanel);
+setInterval(ajustarPanel, 700);
+
 function irA(seccion) {
   for (const s of ['inscribir', 'participantes', 'resultados', 'publicar']) $('sec-' + s).hidden = s !== seccion;
   document.querySelectorAll('.menu button[data-ir]').forEach(b => {

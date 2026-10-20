@@ -274,4 +274,13 @@ async function revisarEstado() {
   }
 }
 document.getElementById('btn-revisar').addEventListener('click', revisarEstado);
+
+// PC: la pantalla visible crece hasta llenar el alto (y se achica un poco si no cabe).
+function ajustarVista() {
+  const vista = document.querySelector('main > section.cuerpo:not([hidden])');
+  document.querySelectorAll('main > section.cuerpo[hidden]').forEach(s => { s.style.zoom = ''; });
+  ajustarAPantalla(vista, { min: 0.78, ancho: v => (v.firstElementChild || v).getBoundingClientRect().width });
+}
+addEventListener('resize', ajustarVista);
+setInterval(ajustarVista, 700);
 revisarEstado();

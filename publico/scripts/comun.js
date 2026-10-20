@@ -328,3 +328,25 @@ function campoTelefonoConPais(input) {
   };
   return regla;
 }
+
+/* ---------- PC: cada pantalla llena el espacio, sin huecos ni scroll ---------- */
+// En pantallas de más de 640 px la vista visible se agranda (o se achica un poco) para ocupar
+// el alto disponible. Se mide sin el ajuste y luego se pone, todo en el mismo cuadro: no parpadea.
+function ajustarAPantalla(nodo, { min = 0.82, max = 1.9, anchoUtil = 0.94, ancho = null, centrar = true } = {}) {
+  if (!nodo) return;
+  if (window.innerWidth <= 640 || nodo.offsetParent === null) { nodo.style.zoom = ''; nodo.style.paddingTop = ''; return; }
+  const antes = nodo.style.zoom + '|' + nodo.style.paddingTop;
+  nodo.style.zoom = ''; nodo.style.paddingTop = '';
+  const caja = nodo.getBoundingClientRect();
+  const disponible = window.innerHeight - (caja.top + window.scrollY) - 8;
+  const anchoContenido = ancho ? ancho(nodo) : caja.width;
+  const alto = Math.max(1, nodo.scrollHeight);
+  let z = Math.min(max, disponible / alto, (window.innerWidth * anchoUtil) / Math.max(1, anchoContenido));
+  z = Math.max(min, z);
+  if (Math.abs(z - 1) < 0.03) z = 1;
+  nodo.style.zoom = z === 1 ? '' : z.toFixed(3);
+  // Si aún sobra alto (pantalla muy grande y poco contenido), queda centrado de arriba a abajo.
+  const sobra = disponible - alto * z;
+  if (centrar && sobra > 24) nodo.style.paddingTop = `calc(${parseFloat(getComputedStyle(nodo).paddingTop) || 0}px + ${(sobra / 2 / z).toFixed(1)}px)`;
+  if (antes !== nodo.style.zoom + '|' + nodo.style.paddingTop) window.dispatchEvent(new Event('ajuste-pantalla'));
+}
