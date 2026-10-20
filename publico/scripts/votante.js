@@ -104,7 +104,8 @@ form.addEventListener('submit', async e => {
   } catch (err) {
     if (err.codigo === 'cerrada') return revisarEstado();
     if (err.campos) {
-      avisoArriba(err.message);
+      // En el celular el aviso va solo debajo de la casilla que está mal, para que todo quepa.
+      if (!esCelular() || Object.values(err.campos).every(Boolean)) avisoArriba(err.message);
       marcarCampos(err.campos);
     } else if (err.campo && CAMPOS[err.campo]) {
       mostrarMensaje(CAMPOS[err.campo], err.message);

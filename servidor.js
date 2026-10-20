@@ -236,7 +236,8 @@ app.get('/api/admin/resultados', soloAdmin, envolver(async (req, res) => {
 }));
 
 app.get('/api/admin/votantes/:id', soloAdmin, envolver(async (req, res) => {
-  const porPagina = 25;
+  // 25 por página; el celular pide menos para que quepan en la pantalla.
+  const porPagina = Math.min(25, Math.max(2, Math.floor(Number(req.query.porPagina)) || 25));
   const pagina = Math.max(1, Math.floor(Number(req.query.pagina)) || 1);
   const buscar = limpiar(req.query.buscar).slice(0, 60);
   const id = idValido(req.params.id);
@@ -247,7 +248,7 @@ app.get('/api/admin/votantes/:id', soloAdmin, envolver(async (req, res) => {
 
 /* ---------- Lista de participantes (quiénes pueden votar) ---------- */
 app.get('/api/admin/padron', soloAdmin, envolver(async (req, res) => {
-  const porPagina = Math.min(25, Math.max(3, Math.floor(Number(req.query.por)) || 10));
+  const porPagina = Math.min(25, Math.max(2, Math.floor(Number(req.query.por)) || 10));
   const pagina = Math.max(1, Math.floor(Number(req.query.pagina)) || 1);
   const filtro = FILTROS_PADRON.includes(req.query.filtro) ? req.query.filtro : 'todos';
   const buscar = limpiar(req.query.buscar).slice(0, 80);

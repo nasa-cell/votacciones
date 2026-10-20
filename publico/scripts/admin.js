@@ -497,7 +497,7 @@ let nuevosTexto = '';
 let verTodos = false;
 let paginaVotantes = 1;
 let claveOpciones = '';
-const primeros = () => (esCelular() ? 5 : 10);
+const primeros = () => (esCelular() ? 4 : 10);
 
 function pintarHace() {
   const seg = Math.round((Date.now() - horaResultados) / 1000);
@@ -552,6 +552,7 @@ $('btn-volver-general').addEventListener('click', () => elegirVista('general'));
 function elegirVista(v) {
   vistaResultados = v;
   paginaVotantes = 1;
+  tamPagina = null;
   $('buscar').value = '';
   actualizarResultados();
   window.scrollTo({ top: 0 });
@@ -596,13 +597,39 @@ async function dibujarPartido(id) {
 }
 
 let pedidoVotantes = 0;
+// Si en el celular la página todavía se pasa de la pantalla, se quitan filas y se vuelve a pedir la lista.
+const recorte = { padron: 0 };
+// Filas por página de «Quiénes votaron» en el celular: se calcula una vez y queda igual al pasar de página.
+let tamPagina = null;
+addEventListener('resize', () => { recorte.padron = 0; tamPagina = null; });
+function sobraEnCelular() {
+  return esCelular() ? document.documentElement.scrollHeight - window.innerHeight : 0;
+}
+function filasDeMas(selFila) {
+  const sobra = sobraEnCelular();
+  const fila = document.querySelector(selFila);
+  if (sobra <= 0 || !fila) return 0;
+  return Math.ceil(sobra / Math.max(20, fila.getBoundingClientRect().height));
+}
+// En el celular la lista trae solo las filas que caben en la pantalla, para no tener que bajar.
+function filasQueCaben() {
+  if (!esCelular()) return 25;
+  if (tamPagina) return tamPagina;
+  const caja = document.querySelector('#res-partido .tabla-caja');
+  if (!caja || !caja.offsetParent) return 8;
+  const arriba = caja.getBoundingClientRect().top + window.scrollY;
+  const filaAlto = document.querySelector('#tabla-votantes tr td')?.parentElement.getBoundingClientRect().height || 37;
+  const titulo = caja.querySelector('thead')?.getBoundingClientRect().height || 34;
+  tamPagina = Math.max(2, Math.min(25, Math.floor((window.innerHeight - arriba - titulo - 24) / filaAlto)));
+  return tamPagina;
+}
 const vistoHasta = {};
 const horaDe = fecha => new Date(fecha).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false });
 async function cargarVotantes() {
   const id = vistaResultados;
   const numero = ++pedidoVotantes;
   const q = $('buscar').value.trim();
-  const r = await pedir(`/api/admin/votantes/${id}?pagina=${paginaVotantes}&buscar=${encodeURIComponent(q)}`);
+  const r = await pedir(`/api/admin/votantes/${id}?pagina=${paginaVotantes}&buscar=${encodeURIComponent(q)}&porPagina=${filasQueCaben()}`);
   if (numero !== pedidoVotantes) return;
   if (paginaVotantes > r.paginas) {
     paginaVotantes = r.paginas;
@@ -629,6 +656,8 @@ async function cargarVotantes() {
   $('pag-texto').textContent = `${desdeN}–${hastaN} de ${r.total}`;
   $('pag-anterior').disabled = r.pagina <= 1;
   $('pag-siguiente').disabled = r.pagina >= r.paginas;
+  const deMas = filasDeMas('#tabla-votantes tr');
+  if (deMas && r.filas.length > 2 && tamPagina > 2) { tamPagina = Math.max(2, tamPagina - deMas); return cargarVotantes(); }
 }
 
 let esperaBuscar = null;
@@ -645,7 +674,7 @@ let filtroPadron = 'todos';
 let esperaPadron = null;
 let editandoTelefono = null;
 // En celular entran tantas filas como quepan en la pantalla (entre 3 y 8) para no hacer scroll.
-const porPaginaPadron = () => (esCelular() ? Math.min(8, Math.max(3, Math.floor((window.innerHeight - 475) / 53))) : 10);
+const porPaginaPadron = () => (esCelular() ? Math.min(8, Math.max(2, Math.floor((window.innerHeight - 475) / 53) - recorte.padron)) : 10);
 const camposPadron = { nombre: $('p-nombre'), apellido: $('p-apellido'), telefono: $('p-telefono') };
 const reglaTelPadron = campoTelefonoConPais(camposPadron.telefono);
 const contadoresPadron = [
@@ -703,6 +732,8 @@ async function cargarPadron() {
   $('padron-pagina').textContent = `Página ${r.pagina} de ${r.paginas}`;
   $('padron-anterior').disabled = r.pagina <= 1;
   $('padron-siguiente').disabled = r.pagina >= r.paginas;
+  const deMas = !$('lista-padron').closest('[hidden]') && filasDeMas('#lista-padron .fila-padron');
+  if (deMas && r.filas.length > 2 && recorte.padron < 8) { recorte.padron += deMas; return cargarPadron(); }
 }
 
 function modoAgregar() {

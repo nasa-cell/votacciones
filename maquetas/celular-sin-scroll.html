@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celular sin scroll</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--tinta:#0e1b3d;--suave:#6a7594;--marca:#1d3fa0;--marca-claro:#eaf0ff;--sombra:0 10px 30px rgba(14,27,61,.10)}
+*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
+body{font-family:Sora,system-ui,sans-serif;background:#dfe6f5;color:var(--tinta);padding:24px 16px 60px}
+button{font:inherit;cursor:pointer}
+.hoja{max-width:1500px;margin:0 auto}.hoja>h1{font-size:26px}.hoja>p{color:var(--suave);margin:8px 0 16px;max-width:900px;line-height:1.5}
+.barra{position:sticky;top:0;z-index:5;background:#dfe6f5;padding:8px 0 12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grupo{display:flex;gap:4px;background:#fff;border-radius:14px;padding:5px;box-shadow:var(--sombra);flex-wrap:wrap}
+.grupo button{border:0;background:none;border-radius:10px;padding:9px 13px;font-weight:700;font-size:13.5px;color:var(--suave)}
+.grupo button[aria-pressed=true]{background:var(--marca);color:#fff}
+.explica{background:#fff;border-radius:16px;padding:14px 16px;box-shadow:var(--sombra);margin-bottom:14px;line-height:1.5;max-width:900px}
+.explica b{color:var(--marca)}
+.resumen{font-weight:700;margin-top:6px}
+.fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.foto{background:#fff;border-radius:16px;padding:10px;box-shadow:var(--sombra);display:flex;flex-direction:column;gap:8px}
+.foto b{font-size:13px}
+.foto img{width:100%;border-radius:10px;border:1px solid #e3e8f4;cursor:zoom-in;background:#f5f7fc}
+.medida{font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;align-self:flex-start}
+.ok{background:#e5f7ee;color:#0b7a44}.mal{background:#fde8eb;color:#b4232a}
+.antes{font-size:11.5px;color:var(--suave)}
+dialog{border:0;border-radius:18px;padding:12px;max-width:96vw;max-height:96vh;background:#fff}
+dialog img{max-height:86vh;max-width:90vw;display:block;border-radius:10px}
+dialog::backdrop{background:rgba(14,27,61,.6)}
+dialog button{margin-top:8px;width:100%;border:0;border-radius:10px;padding:10px;background:var(--marca);color:#fff;font-weight:700}
+</style>
+</head>
+<body>
+<div class="hoja">
+  <h1>Celular sin scroll — todas las pantallas</h1>
+  <p>Fotos de la página real de Votaciones en tres celulares, con cada forma de achicarla. Elige una opción y un celular: debajo de cada pantalla sale cuánto hay que bajar (verde = cabe sin scroll). Toca una foto para verla grande. En la PC no cambia nada.</p>
+  <div class="barra">
+    <div class="grupo" id="ops"></div>
+    <div class="grupo" id="tams"></div>
+  </div>
+  <div class="explica" id="explica"></div>
+  <div class="fotos" id="fotos"></div>
+</div>
+<dialog id="grande"><img alt=""><button type="button">Cerrar</button></dialog>
+<script>
+const DATOS = {"hoy": {"Ingrese a votar": {"320x568": 67, "360x640": 0, "390x844": 0}, "Resultados (pestaña)": {"320x568": 281, "360x640": 167, "390x844": 0}, "Ingreso con error": {"320x568": 208, "360x640": 136, "390x844": 0}, "Elija un partido": {"320x568": 170, "360x640": 58, "390x844": 0}, "¿Estás seguro?": {"320x568": 193, "360x640": 58, "390x844": 0}, "Gracias + barras": {"320x568": 417, "360x640": 303, "390x844": 66}, "Admin: entrar": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: inscribir": {"320x568": 115, "360x640": 43, "390x844": 0}, "Admin: participantes": {"320x568": 14, "360x640": 0, "390x844": 0}, "Admin: participantes lista": {"320x568": 62, "360x640": 0, "390x844": 0}, "Admin: resultados": {"320x568": 467, "360x640": 353, "390x844": 149}, "Admin: quiénes votaron": {"320x568": 787, "360x640": 715, "390x844": 306}, "Admin: publicar": {"320x568": 0, "360x640": 0, "390x844": 0}, "Final: ganador": {"320x568": 36, "360x640": 0, "390x844": 0}, "Despedida": {"320x568": 0, "360x640": 0, "390x844": 0}, "Votación cerrada": {"320x568": 0, "360x640": 0, "390x844": 0}}, "a": {"Ingrese a votar": {"320x568": 0, "360x640": 0, "390x844": 0}, "Resultados (pestaña)": {"320x568": 0, "360x640": 0, "390x844": 0}, "Ingreso con error": {"320x568": 108, "360x640": 17, "390x844": 0}, "Elija un partido": {"320x568": 88, "360x640": 0, "390x844": 0}, "¿Estás seguro?": {"320x568": 88, "360x640": 0, "390x844": 0}, "Gracias + barras": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: entrar": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: inscribir": {"320x568": 23, "360x640": 0, "390x844": 0}, "Admin: participantes": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: participantes lista": {"320x568": 25, "360x640": 0, "390x844": 0}, "Admin: resultados": {"320x568": 195, "360x640": 109, "390x844": 0}, "Admin: quiénes votaron": {"320x568": 195, "360x640": 69, "390x844": 0}, "Admin: publicar": {"320x568": 0, "360x640": 0, "390x844": 0}, "Final: ganador": {"320x568": 0, "360x640": 0, "390x844": 0}, "Despedida": {"320x568": 0, "360x640": 0, "390x844": 0}, "Votación cerrada": {"320x568": 0, "360x640": 0, "390x844": 0}}, "b": {"Ingrese a votar": {"320x568": 0, "360x640": 0, "390x844": 0}, "Resultados (pestaña)": {"320x568": 0, "360x640": 0, "390x844": 0}, "Ingreso con error": {"320x568": 4, "360x640": 0, "390x844": 0}, "Elija un partido": {"320x568": 0, "360x640": 0, "390x844": 0}, "¿Estás seguro?": {"320x568": 0, "360x640": 0, "390x844": 0}, "Gracias + barras": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: entrar": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: inscribir": {"320x568": 115, "360x640": 43, "390x844": 0}, "Admin: participantes": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: participantes lista": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: resultados": {"320x568": 188, "360x640": 74, "390x844": 0}, "Admin: quiénes votaron": {"320x568": 91, "360x640": 19, "390x844": 0}, "Admin: publicar": {"320x568": 0, "360x640": 0, "390x844": 0}, "Final: ganador": {"320x568": 0, "360x640": 0, "390x844": 0}, "Despedida": {"320x568": 0, "360x640": 0, "390x844": 0}, "Votación cerrada": {"320x568": 0, "360x640": 0, "390x844": 0}}, "c": {"Ingrese a votar": {"320x568": 0, "360x640": 0, "390x844": 0}, "Resultados (pestaña)": {"320x568": 0, "360x640": 0, "390x844": 0}, "Ingreso con error": {"320x568": 0, "360x640": 0, "390x844": 0}, "Elija un partido": {"320x568": 63, "360x640": 0, "390x844": 0}, "¿Estás seguro?": {"320x568": 63, "360x640": 0, "390x844": 0}, "Gracias + barras": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: entrar": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: inscribir": {"320x568": 23, "360x640": 0, "390x844": 0}, "Admin: participantes": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: participantes lista": {"320x568": 25, "360x640": 0, "390x844": 0}, "Admin: resultados": {"320x568": 0, "360x640": 0, "390x844": 0}, "Admin: quiénes votaron": {"320x568": 160, "360x640": 34, "390x844": 0}, "Admin: publicar": {"320x568": 0, "360x640": 0, "390x844": 0}, "Final: ganador": {"320x568": 0, "360x640": 0, "390x844": 0}, "Despedida": {"320x568": 0, "360x640": 0, "390x844": 0}, "Votación cerrada": {"320x568": 0, "360x640": 0, "390x844": 0}}};
+const OPS = {
+  hoy: ['Como está hoy', 'Así se ve ahora, sin cambios.'],
+  a: ['A · Todo más apretado', 'Mismo orden y mismas partes, pero <b>más apretado</b>: títulos y cuadros más chicos, menos espacio entre cosas, barras en una línea con barra fina, «¡Gracias por votar!» en una franja y las listas muestran solo las filas que caben (se pasa con ‹ Atrás / Siguiente ›).'],
+  b: ['B · Cajas con su propio scroll', 'Tamaños de hoy, pero <b>lo largo va en una caja que se desliza sola</b> (la lista de partidos, las barras, la tabla o el formulario). La página no se mueve y los botones de abajo quedan siempre a la vista.'],
+  c: ['C · Lo justo y «Ver más»', 'Como A, y además <b>se esconde lo que se repite</b>: sin textos de ayuda bajo el título, sin «Quién va ganando» (ya lo dice la barra con 👑), solo los 4 primeros partidos con «Ver los 6 partidos» y los avisos solo en la casilla que está mal.'],
+};
+const TAMS = ['320x568', '360x640', '390x844'];
+const NOMBRE_TAM = { '320x568': 'Celular chico 320', '360x640': 'Android 360', '390x844': 'iPhone 390' };
+const PANTALLAS = [
+  ['Ingrese a votar', '1-ingreso'], ['Resultados (pestaña)', '2-resultados'], ['Ingreso con error', '3-error'], ['Elija un partido', '4-votar'],
+  ['¿Estás seguro?', '5-confirmar'], ['Gracias + barras', '6-gracias'], ['Admin: entrar', '7-admin-entrar'], ['Admin: inscribir', '8-inscribir'],
+  ['Admin: participantes', '9-participantes'], ['Admin: participantes lista', '10-participantes-lista'], ['Admin: resultados', '11-resultados'],
+  ['Admin: quiénes votaron', '12-quienes'], ['Admin: publicar', '13-publicar'], ['Final: ganador', '14-final'], ['Despedida', '15-despedida'], ['Votación cerrada', '16-cerrada']];
+let op = 'a', tam = '360x640';
+const $ = id => document.getElementById(id);
+function botones(caja, lista, actual, nombre, poner) {
+  caja.innerHTML = lista.map(k => `<button aria-pressed="${k === actual}" data-k="${k}">${nombre(k)}</button>`).join('');
+  caja.onclick = e => { const b = e.target.closest('button'); if (b) { poner(b.dataset.k); pintar(); } };
+}
+function pintar() {
+  botones($('ops'), Object.keys(OPS), op, k => OPS[k][0], k => (op = k));
+  botones($('tams'), TAMS, tam, k => NOMBRE_TAM[k], k => (tam = k));
+  const d = DATOS[op] || {}, hoy = DATOS.hoy || {};
+  const conScroll = PANTALLAS.filter(([p]) => (d[p] || {})[tam] > 0).length;
+  const conScrollHoy = PANTALLAS.filter(([p]) => (hoy[p] || {})[tam] > 0).length;
+  $('explica').innerHTML = OPS[op][1] + `<div class="resumen">${NOMBRE_TAM[tam]}: ${conScroll ? `${conScroll} de ${PANTALLAS.length} pantallas necesitan scroll` : `las ${PANTALLAS.length} pantallas caben sin scroll`}${op === 'hoy' ? '' : ` (hoy: ${conScrollHoy})`}.</div>`;
+  $('fotos').innerHTML = PANTALLAS.map(([p, f]) => {
+    const s = (d[p] || {})[tam], sh = (hoy[p] || {})[tam];
+    const med = s === undefined ? '' : `<span class="medida ${s > 0 ? 'mal' : 'ok'}">${s > 0 ? `Hay que bajar ${s} px` : 'Cabe sin scroll'}</span>`;
+    return `<div class="foto"><b>${p}</b><img loading="lazy" src="sin-scroll/fotos/${op}-${tam}-${f}.png" alt="${p}">${med}${op !== 'hoy' && sh !== undefined ? `<span class="antes">Hoy: ${sh > 0 ? sh + ' px' : 'sin scroll'}</span>` : ''}</div>`;
+  }).join('');
+}
+$('fotos').addEventListener('click', e => { const i = e.target.closest('img'); if (!i) return; $('grande').querySelector('img').src = i.src; $('grande').showModal(); });
+$('grande').querySelector('button').onclick = () => $('grande').close();
+pintar();
+</script>
+</body>
+</html>

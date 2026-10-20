@@ -74,7 +74,7 @@ function montarEnVivo(contenedor) {
     el('div', { class: 'sec-cuerpo' }, aviso, barras, verTodos, pie)));
 
   let ultimos = [], todos = false, quedan = SEGUNDOS, reloj = null, pidiendo = false;
-  const primeros = () => (esCelular() ? 6 : 10);
+  const primeros = () => (esCelular() ? 4 : 10);
   function dibujar(antes = null) {
     pintarBarrasVivo(barras, todos ? ultimos : ultimos.slice(0, primeros()), antes);
     verTodos.hidden = ultimos.length <= primeros();
