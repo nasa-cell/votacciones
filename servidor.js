@@ -113,9 +113,10 @@ app.post('/api/admin/ingresar', (req, res) => {
     return res.status(429).json({ error: `Demasiados intentos. Espere ${seg} segundos.` });
   }
   const nombre = limpiar(req.body?.nombre);
-  if (nombre.length < 3) return res.status(400).json({ error: 'Escriba su nombre y apellido.' });
+  if (nombre.length < 3 || nombre.length > 60) return res.status(400).json({ error: 'El nombre y apellido debe tener de 3 a 60 letras.' });
   const clave = req.body?.clave;
-  if (typeof clave !== 'string' || !claveCorrecta(clave)) {
+  if (typeof clave !== 'string' || clave.length > 200) return res.status(400).json({ error: 'La contraseña debe tener de 4 a 64 caracteres.' });
+  if (!claveCorrecta(clave)) {
     reg.fallos += 1;
     if (reg.fallos >= 5) reg.hasta = Date.now() + Math.min(60, 10 * (reg.fallos - 4)) * 1000;
     intentos.set(ip, reg);

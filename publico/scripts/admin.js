@@ -13,9 +13,11 @@ function errorEn(id, texto) {
 }
 
 /* ---------- Acceso ---------- */
+conectarContador($('a-nombre'), 3, 60);
+conectarContador($('a-clave'), 4, 64);
 const revisarAcceso = conectarValidacion([
   { input: $('a-nombre'), min: 3, max: 60, tipo: 'letras' },
-  { input: $('a-clave'), min: 1, max: 200, tipo: 'texto' },
+  { input: $('a-clave'), min: 4, max: 64, tipo: 'texto' },
 ]);
 
 $('form-acceso').addEventListener('submit', async e => {
@@ -460,6 +462,10 @@ async function recibirArchivo(archivo) {
   errorEn('inscribir-error');
   if (!/^image\/(png|jpeg|webp)$/.test(archivo.type)) {
     errorEn('inscribir-error', 'El logo debe ser una imagen PNG, JPG o WEBP.');
+    return;
+  }
+  if (archivo.size > 8 * 1024 * 1024) {
+    errorEn('inscribir-error', 'La imagen pesa más de 8 MB. Elija una más liviana.');
     return;
   }
   const src = URL.createObjectURL(archivo);

@@ -25,21 +25,22 @@
       <p class="bajada">Escriba su nombre, apellido y teléfono como están en la lista de votantes.</p>
       <div id="registro-error" class="caja-error" hidden role="alert"></div>
       <form id="form-registro" novalidate>
+        <p class="leyenda-campos"><span class="et ob">OBLIGATORIO</span> hay que llenarlo <span class="et op">OPCIONAL</span> puedes dejarlo vacío</p>
         <section class="seccion">
           <h2 class="sec-tit"><span class="ic">1</span>Sus datos</h2>
           <div class="sec-cuerpo">
             <div class="campo">
-              <label for="r-nombre">Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>3 a 80</small></label>
+              <label for="r-nombre">Nombre <span class="et ob">OBLIGATORIO</span><span class="pista letras">Aa Solo letras</span><small>3 a 80 letras</small></label>
               <input class="input" id="r-nombre" name="nombre" maxlength="80" autocomplete="given-name" required>
               <span class="contador"></span>
             </div>
             <div class="campo">
-              <label for="r-apellido">Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>3 a 80</small></label>
+              <label for="r-apellido">Apellido <span class="et ob">OBLIGATORIO</span><span class="pista letras">Aa Solo letras</span><small>3 a 80 letras</small></label>
               <input class="input" id="r-apellido" name="apellido" maxlength="80" autocomplete="family-name" required>
               <span class="contador"></span>
             </div>
             <div class="campo">
-              <label for="r-telefono">Teléfono <span class="req">*</span><span class="pista numeros">123 Solo números</span><small>9</small></label>
+              <label for="r-telefono">Teléfono <span class="et ob">OBLIGATORIO</span><span class="pista numeros">123 Solo números</span><small>9 números</small></label>
               <input class="input" id="r-telefono" name="telefono" inputmode="numeric" maxlength="9" placeholder="Ej.: 987654321" autocomplete="off" required>
             </div>
           </div>
@@ -62,7 +63,7 @@
         <section class="seccion">
           <h2 class="sec-tit"><span class="ic">✓</span>Partidos</h2>
           <div class="sec-cuerpo">
-            <div class="campo" id="campo-buscar-partido" hidden><input class="input" id="buscar-partido" placeholder="🔍 Buscar partido o candidato" aria-label="Buscar partido"><span class="contador" id="cuenta-partidos"></span></div>
+            <div class="campo" id="campo-buscar-partido" hidden><input class="input" id="buscar-partido" maxlength="60" placeholder="🔍 Buscar partido o candidato" aria-label="Buscar partido"><span class="contador" id="cuenta-partidos"></span></div>
             <div class="partidos" id="lista-partidos" role="radiogroup" aria-label="Partidos"></div>
           </div>
         </section>

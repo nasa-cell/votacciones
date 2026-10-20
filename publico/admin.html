@@ -20,11 +20,12 @@
       <h1 class="titulo-pant" style="margin-bottom:16px">Acceso del administrador</h1>
       <div id="acceso-error" class="caja-error" hidden role="alert"></div>
       <form id="form-acceso" novalidate>
+        <p class="leyenda-campos"><span class="et ob">OBLIGATORIO</span> hay que llenarlo <span class="et op">OPCIONAL</span> puedes dejarlo vacío</p>
         <section class="seccion">
           <h2 class="sec-tit"><span class="ic">🔒</span>Datos de acceso</h2>
           <div class="sec-cuerpo">
-            <div class="campo"><label for="a-nombre">Nombre y apellido <span class="pista letras">Aa Solo letras</span></label><input class="input" id="a-nombre" autocomplete="name" maxlength="60" required></div>
-            <div class="campo"><label for="a-clave">Contraseña</label><input class="input" id="a-clave" type="password" autocomplete="current-password" required></div>
+            <div class="campo"><label for="a-nombre">Nombre y apellido <span class="et ob">OBLIGATORIO</span><span class="pista letras">Aa Solo letras</span><small>3 a 60 letras</small></label><input class="input" id="a-nombre" autocomplete="name" maxlength="60" required></div>
+            <div class="campo"><label for="a-clave">Contraseña <span class="et ob">OBLIGATORIO</span><small>4 a 64 caracteres</small></label><input class="input" id="a-clave" type="password" autocomplete="current-password" maxlength="64" required></div>
           </div>
         </section>
         <button class="btn btn-oscuro" type="submit" id="btn-acceso">Ingresar al panel</button>
@@ -55,24 +56,25 @@
         <div id="inscribir-error" class="caja-error" hidden role="alert"></div>
         <div id="inscribir-ok" class="caja-ok" hidden role="status"></div>
         <form id="form-candidato" novalidate>
+          <p class="leyenda-campos"><span class="et ob">OBLIGATORIO</span> hay que llenarlo <span class="et op">OPCIONAL</span> puedes dejarlo vacío</p>
           <div class="dos" style="margin-bottom:16px">
             <section class="seccion">
               <h2 class="sec-tit"><span class="ic">*</span>Obligatorio</h2>
               <div class="sec-cuerpo">
-                <div class="campo"><label for="c-nombre">Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10–30</small></label><input class="input" id="c-nombre" maxlength="30" required><span class="contador"></span></div>
-                <div class="campo"><label for="c-apellido">Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>10–30</small></label><input class="input" id="c-apellido" maxlength="30" required><span class="contador"></span></div>
+                <div class="campo"><label for="c-nombre">Nombre <span class="et ob">OBLIGATORIO</span><span class="pista letras">Aa Solo letras</span><small>10 a 30 letras</small></label><input class="input" id="c-nombre" maxlength="30" required><span class="contador"></span></div>
+                <div class="campo"><label for="c-apellido">Apellido <span class="et ob">OBLIGATORIO</span><span class="pista letras">Aa Solo letras</span><small>10 a 30 letras</small></label><input class="input" id="c-apellido" maxlength="30" required><span class="contador"></span></div>
               </div>
             </section>
             <details class="seccion s-opc desplegable" id="det-opcional" open>
               <summary class="sec-tit"><span class="ic">+</span>Opcional: partido, foto y descripción<span class="flecha-desp" aria-hidden="true">▾</span></summary>
               <div class="sec-cuerpo">
-                <div class="campo"><label for="c-partido">Nombre del partido <span class="pista texto">Aa 1 Letras y números</span><small>10–40</small></label><input class="input" id="c-partido" maxlength="40"><span class="contador"></span></div>
+                <div class="campo"><label for="c-partido">Nombre del partido <span class="et op">OPCIONAL</span><span class="pista texto">Aa 1 Letras y números</span><small>10 a 40 caracteres</small></label><input class="input" id="c-partido" maxlength="40"><span class="contador"></span></div>
                 <div class="campo">
-                  <label>Foto o logo</label>
+                  <label>Foto o logo <span class="et op">OPCIONAL</span><small class="nota-logo">PNG, JPG o WEBP · hasta 8 MB</small></label>
                   <div class="soltar" id="zona-logo"><b aria-hidden="true">⬆</b>Suelte la imagen aquí<br>o toque para elegirla<input type="file" id="c-logo" accept="image/png,image/jpeg,image/webp" aria-label="Elegir logo"></div>
                   <div class="vista-logo" id="vista-logo" hidden><img id="img-logo" alt="Logo elegido"><span>Logo listo</span><button type="button" class="btn btn-sec btn-chico" id="btn-acomodar-logo">✋ Acomodar</button><button type="button" class="btn btn-rojo btn-chico" id="btn-quitar-logo">Quitar</button></div>
                 </div>
-                <div class="campo"><label for="c-descripcion">Descripción <span class="pista texto">Aa 1 Letras y números</span><small>10–50</small></label><textarea class="input" id="c-descripcion" maxlength="50" rows="2"></textarea><span class="contador"></span></div>
+                <div class="campo"><label for="c-descripcion">Descripción <span class="et op">OPCIONAL</span><span class="pista texto">Aa 1 Letras y números</span><small>10 a 50 caracteres</small></label><textarea class="input" id="c-descripcion" maxlength="50" rows="2"></textarea><span class="contador"></span></div>
               </div>
             </details>
           </div>
@@ -84,7 +86,7 @@
         <details class="seccion s-lista desplegable" id="det-inscritos" open>
           <summary class="sec-tit"><span class="ic">≡</span><span id="tit-inscritos">Inscritos (0)</span><span class="flecha-desp" aria-hidden="true">▾</span></summary>
           <div class="sec-cuerpo">
-            <div class="campo" id="campo-buscar-inscrito" hidden><input class="input" id="buscar-inscrito" placeholder="🔍 Buscar inscrito por partido o nombre" aria-label="Buscar inscrito"></div>
+            <div class="campo" id="campo-buscar-inscrito" hidden><input class="input" id="buscar-inscrito" maxlength="60" placeholder="🔍 Buscar inscrito por partido o nombre" aria-label="Buscar inscrito"></div>
             <div class="lista-cand caja-larga" id="lista-inscritos"></div>
           </div>
         </details>
@@ -119,7 +121,7 @@
           <section class="seccion s-lista">
             <h2 class="sec-tit"><span class="ic">≡</span><span id="tit-votantes">Quiénes votaron</span></h2>
             <div class="sec-cuerpo">
-              <div class="campo campo-lupa"><span class="lupa" aria-hidden="true">🔍</span><input class="input" id="buscar" placeholder="Buscar por nombre o teléfono" aria-label="Buscar votante"></div>
+              <div class="campo campo-lupa"><span class="lupa" aria-hidden="true">🔍</span><input class="input" id="buscar" maxlength="60" placeholder="Buscar por nombre o teléfono" aria-label="Buscar votante"></div>
               <div class="paginas paginas-arriba" id="paginas">
                 <span id="pag-texto"></span>
                 <span class="pag-botones">
@@ -152,9 +154,10 @@
               <div id="padron-ok" class="caja-ok" hidden role="status"></div>
               <div id="padron-error" class="caja-error" hidden role="alert"></div>
               <form id="form-padron" novalidate>
-                <div class="campo"><label for="p-nombre">Nombre <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>3 a 80</small></label><input class="input" id="p-nombre" maxlength="80" autocomplete="off" required></div>
-                <div class="campo"><label for="p-apellido">Apellido <span class="req">*</span><span class="pista letras">Aa Solo letras</span><small>3 a 80</small></label><input class="input" id="p-apellido" maxlength="80" autocomplete="off" required></div>
-                <div class="campo"><label for="p-telefono">Teléfono <span class="req">*</span><span class="pista numeros">123 Solo números</span><small>9</small></label><input class="input" id="p-telefono" inputmode="numeric" maxlength="9" placeholder="Ej.: 987654321" autocomplete="off" required></div>
+                <p class="leyenda-campos"><span class="et ob">OBLIGATORIO</span> hay que llenarlo <span class="et op">OPCIONAL</span> puedes dejarlo vacío</p>
+                <div class="campo"><label for="p-nombre">Nombre <span class="et ob">OBLIGATORIO</span><span class="pista letras">Aa Solo letras</span><small>3 a 80 letras</small></label><input class="input" id="p-nombre" maxlength="80" autocomplete="off" required></div>
+                <div class="campo"><label for="p-apellido">Apellido <span class="et ob">OBLIGATORIO</span><span class="pista letras">Aa Solo letras</span><small>3 a 80 letras</small></label><input class="input" id="p-apellido" maxlength="80" autocomplete="off" required></div>
+                <div class="campo"><label for="p-telefono">Teléfono <span class="et ob">OBLIGATORIO</span><span class="pista numeros">123 Solo números</span><small>9 números</small></label><input class="input" id="p-telefono" inputmode="numeric" maxlength="9" placeholder="Ej.: 987654321" autocomplete="off" required></div>
                 <div class="fila-botones">
                   <button class="btn btn-pri" type="submit" id="btn-agregar-participante">➕ Agregar a la lista</button>
                   <button class="btn btn-sec" type="button" id="btn-cancelar-participante" hidden>Cancelar edición</button>
@@ -171,7 +174,7 @@
                 <button type="button" data-filtro="votaron"><b id="n-votaron">0</b>✓ Votaron</button>
                 <button type="button" data-filtro="faltan"><b id="n-faltan">0</b>⏳ Faltan</button>
               </div>
-              <input class="input buscar-padron" id="buscar-padron" placeholder="🔍 Buscar nombre o teléfono" aria-label="Buscar participante" maxlength="80">
+              <input class="input buscar-padron" id="buscar-padron" placeholder="🔍 Buscar nombre o teléfono" aria-label="Buscar participante" maxlength="60">
               <div class="lista-padron" id="lista-padron"></div>
               <div class="paginas">
                 <button type="button" class="btn btn-sec btn-chico" id="padron-anterior">← Anterior</button>

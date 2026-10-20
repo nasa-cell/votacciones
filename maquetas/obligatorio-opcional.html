@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Obligatorio y opcional</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../publico/estilos/estilos.css">
+<link rel="stylesheet" href="../publico/estilos/urna.css">
+<style>
+body{display:block;padding:24px 16px 60px;background:#dfe6f5}
+.hoja{max-width:1400px;margin:0 auto}
+.hoja>h1{font-size:26px}.hoja>p{color:var(--suave);margin:8px 0 20px;max-width:900px;line-height:1.5}
+.opcion{background:#fff;border-radius:22px;padding:20px;margin-bottom:24px;box-shadow:var(--sombra)}
+.opcion h2{font-size:20px}.opcion h2 b{color:var(--marca)}.opcion>p{color:var(--suave);margin:6px 0 16px;line-height:1.5;max-width:900px}
+.marcos{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+.marco{width:400px;max-width:100%;background:var(--fondo);border:8px solid #1b2440;border-radius:30px;padding:16px}
+.marco h3{font-size:18px;margin:0 0 4px}
+.marco .sub{color:var(--suave);font-size:13px;margin:0 0 10px}
+/* Etiquetas */
+.et{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:7px;letter-spacing:.02em;white-space:nowrap}
+.et.ob{background:#fde8eb;color:#b4232a}.et.op{background:#eef1f6;color:#5b6680}
+.et.lim{background:var(--marca-claro);color:var(--marca)}
+.leyenda{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#fff;border:1.5px solid var(--linea);border-radius:12px;padding:8px 10px;font-size:12.5px;margin-bottom:10px}
+.bajo{display:block;font-size:11.5px;color:var(--suave);margin-top:3px}
+.bajo b.ob{color:#b4232a}.bajo b.op{color:#5b6680}
+.campo label{flex-wrap:wrap}
+.grupo-tit{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 6px}
+.grupo-tit.ob{color:#b4232a}.grupo-tit.op{color:#5b6680}
+.grupo-tit::after{content:"";flex:1;height:2px;background:currentColor;opacity:.25}
+.marco .btn{margin-top:6px}
+.vista-hoy .req{color:var(--acento)}
+</style>
+</head>
+<body>
+<div class="hoja">
+  <h1>Formularios — obligatorio, opcional, mínimo y máximo</h1>
+  <p>Cada opción en tres formularios del administrador: inscribir partido, agregar participante y entrar. En todas, cada casilla dice su mínimo y su máximo, y además se añaden los límites que faltaban: contraseña de 4 a 64, foto hasta 300 KB y buscadores hasta 60. Escribe en las casillas: el contador avisa cuando falta o sobra.</p>
+  <div id="opciones"></div>
+</div>
+<script>
+const CAMPOS = {
+  inscribir: { titulo: 'Inscribir participante', sub: 'Partido o candidato que aparece en la votación.', boton: '＋ Inscribir participante', campos: [
+    { id: 'n', nombre: 'Nombre', ob: true, min: 10, max: 30, tipo: 'Aa Solo letras', med: 'letras' },
+    { id: 'a', nombre: 'Apellido', ob: true, min: 10, max: 30, tipo: 'Aa Solo letras', med: 'letras' },
+    { id: 'p', nombre: 'Nombre del partido', ob: false, min: 10, max: 40, tipo: 'Aa 1 Letras y números', med: 'caracteres' },
+    { id: 'f', nombre: 'Foto o logo', ob: false, archivo: true, nota: 'PNG, JPG o WEBP · hasta 300 KB' },
+    { id: 'd', nombre: 'Descripción', ob: false, min: 10, max: 50, tipo: 'Aa 1 Letras y números', med: 'caracteres' },
+  ] },
+  padron: { titulo: 'Agregar participante', sub: 'Persona que puede votar.', boton: '＋ Agregar a la lista', campos: [
+    { id: 'n', nombre: 'Nombre', ob: true, min: 3, max: 80, tipo: 'Aa Solo letras', med: 'letras' },
+    { id: 'a', nombre: 'Apellido', ob: true, min: 3, max: 80, tipo: 'Aa Solo letras', med: 'letras' },
+    { id: 't', nombre: 'Teléfono', ob: true, min: 9, max: 9, tipo: '123 Solo números', med: 'números', tel: true },
+  ] },
+  entrar: { titulo: 'Entrar como administrador', sub: 'Solo para quien organiza la votación.', boton: 'Entrar →', campos: [
+    { id: 'n', nombre: 'Nombre y apellido', ob: true, min: 3, max: 60, tipo: 'Aa Solo letras', med: 'letras' },
+    { id: 'c', nombre: 'Contraseña', ob: true, min: 4, max: 64, med: 'caracteres', clave: true },
+  ] },
+};
+const lim = c => c.min === c.max ? `${c.min} ${c.med}` : `${c.min} a ${c.max} ${c.med}`;
+const OPS = [
+  ['hoy', 'Como está hoy', 'Solo una estrellita roja * en lo obligatorio; lo opcional no dice nada en la casilla y algunas casillas no tienen límite.'],
+  ['a', 'A · <b>Etiqueta al lado del nombre</b>', 'Junto a cada nombre de casilla, una etiqueta roja «OBLIGATORIO» o gris «OPCIONAL», y el límite a la derecha («10 a 30 letras»). Arriba del formulario, una línea que explica las dos etiquetas.'],
+  ['b', 'B · <b>Línea debajo de cada casilla</b>', 'El nombre queda limpio y debajo de cada casilla una línea corta: «<b>Obligatorio</b> · de 10 a 30 letras» o «<b>Opcional</b> · puedes dejarlo vacío · de 10 a 40».'],
+  ['c', 'C · <b>Grupos «Obligatorio» y «Opcional»</b>', 'Las casillas van juntas en dos grupos con su título de color: primero «Obligatorio — hay que llenarlo» y después «Opcional — puedes dejarlo vacío». Cada casilla muestra su límite.'],
+];
+function casilla(op, c) {
+  const entrada = c.archivo ? `<div class="soltar"><b aria-hidden="true">⬆</b>Suelte la imagen aquí o toque para elegirla</div>`
+    : c.tel ? `<div style="display:flex;gap:6px"><span class="input" style="width:auto;display:flex;align-items:center;gap:6px;font-weight:700"><img src="../publico/banderas/pe.png" width="22" height="15" alt=""> +51</span><input class="input" data-min="${c.min}" data-max="${c.max}" maxlength="${c.max}" inputmode="numeric" placeholder="Ej.: 987654321"></div>`
+    : c.clave ? `<input class="input" type="password" data-min="${c.min}" data-max="${c.max}" maxlength="${c.max}">`
+    : `<input class="input" data-min="${c.min}" data-max="${c.max}" maxlength="${c.max}">`;
+  const tipo = c.tipo ? `<span class="pista ${c.tipo.startsWith('123') ? 'numeros' : 'letras'}">${c.tipo}</span>` : '';
+  const limite = c.archivo ? c.nota : lim(c);
+  const contador = c.archivo ? '' : `<span class="contador" data-cuenta>0/${c.max}</span>`;
+  if (op === 'hoy') return `<div class="campo vista-hoy"><label>${c.nombre} ${c.ob ? '<span class="req">*</span>' : ''}${tipo}${c.archivo || c.clave ? '' : `<small>${c.min === c.max ? c.min : c.min + '–' + c.max}</small>`}</label>${entrada}${c.clave || c.archivo ? '' : contador}</div>`;
+  if (op === 'a') return `<div class="campo"><label>${c.nombre} <span class="et ${c.ob ? 'ob' : 'op'}">${c.ob ? 'OBLIGATORIO' : 'OPCIONAL'}</span>${tipo}<small>${limite}</small></label>${entrada}${contador}</div>`;
+  if (op === 'b') return `<div class="campo"><label>${c.nombre} ${tipo}</label>${entrada}<span class="bajo">${c.ob ? '<b class="ob">Obligatorio</b>' : '<b class="op">Opcional</b> · puedes dejarlo vacío'} · ${c.archivo ? limite : 'de ' + limite}</span>${contador}</div>`;
+  return `<div class="campo"><label>${c.nombre} ${tipo}<small>${limite}</small></label>${entrada}${contador}</div>`;
+}
+function formulario(op, f) {
+  let cuerpo;
+  if (op === 'c') {
+    const ob = f.campos.filter(c => c.ob), opc = f.campos.filter(c => !c.ob);
+    cuerpo = `<div class="grupo-tit ob">● Obligatorio — hay que llenarlo</div>${ob.map(c => casilla(op, c)).join('')}` + (opc.length ? `<div class="grupo-tit op">○ Opcional — puedes dejarlo vacío</div>${opc.map(c => casilla(op, c)).join('')}` : '');
+  } else cuerpo = f.campos.map(c => casilla(op, c)).join('');
+  const leyenda = op === 'a' ? `<div class="leyenda"><span class="et ob">OBLIGATORIO</span> hay que llenarlo <span class="et op">OPCIONAL</span> puedes dejarlo vacío</div>` : '';
+  return `<div class="marco"><h3>${f.titulo}</h3><p class="sub">${f.sub}</p>${leyenda}<section class="seccion"><div class="sec-cuerpo">${cuerpo}</div></section><button class="btn btn-pri" type="button">${f.boton}</button></div>`;
+}
+document.getElementById('opciones').innerHTML = OPS.map(([k, t, p]) => `<section class="opcion" data-op="${k}"><h2>${t}</h2><p>${p}</p><div class="marcos">${['inscribir', 'padron', 'entrar'].map(f => formulario(k, CAMPOS[f])).join('')}</div></section>`).join('');
+document.addEventListener('input', e => {
+  const i = e.target.closest('input[data-min]'); if (!i) return;
+  const n = [...i.value].length, min = +i.dataset.min, max = +i.dataset.max, c = i.closest('.campo').querySelector('[data-cuenta]');
+  if (c) { c.textContent = n ? (n < min ? `Faltan ${min - n} · ${n}/${max}` : `${n}/${max} ✓`) : `0/${max}`; c.className = 'contador ' + (n && n < min ? 'mal' : n ? 'ok' : ''); }
+});
+</script>
+</body>
+</html>
